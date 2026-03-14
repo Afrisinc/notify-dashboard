@@ -10,7 +10,7 @@ import type { SignupPayload } from "@/components/auth/signup/schemas";
 export const loginService = async (params: { code: string }) => {
   const config = getRuntimeConfig();
   try {
-    const gatewayUrl = config.apiGatewayUrl ? `${config.apiGatewayUrl}/oauth/exchange` : `${import.meta.env.VITE_API_GATEWAY_URL}/oauth/exchange`;
+    const gatewayUrl = `${config.serverUrl}/oauth/exchange`;
     const response = await axios.post(gatewayUrl, { code: params.code });
     return response.data;
   } catch (error) {

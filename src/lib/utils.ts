@@ -13,18 +13,6 @@ export function cn(...inputs: ClassValue[]) {
  * Falls back to local routes if authUiUrl is not configured.
  */
 export function getAuthUrls() {
-  try {
-    const { authUiUrl } = getRuntimeConfig();
-    if (authUiUrl) {
-      const callbackUrl = encodeURIComponent(`${window.location.origin}/dashboard`);
-      return {
-        loginUrl: `${authUiUrl}/login`,
-        signupUrl: `${authUiUrl}/register`,
-      };
-    }
-  } catch {
-    // config not ready — fallback to local routes
-  }
   return { loginUrl: "/login", signupUrl: "/signup" };
 }
 
