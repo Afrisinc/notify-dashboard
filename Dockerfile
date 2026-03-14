@@ -13,10 +13,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 ARG VITE_API_URL
-ARG VITE_AUTH_UI_URL
 
 ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_AUTH_UI_URL=$VITE_AUTH_UI_URL
 
 # Build the Vite app with API URL
 RUN VITE_API_URL=${VITE_API_URL} pnpm build
