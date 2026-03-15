@@ -26,23 +26,27 @@ export const createAppService = async (payload: CreateAppPayload) => {
       },
     }
   );
-  return data;
+  return data.data;
 };
 
 /**
  * Get all apps (filtered by organization)
+ * Includes x-account-id header if provided
  */
-export const getAppsService = async () => {
-  const { data } = await getApiClient().get("/api/apps");
-  return data;
+export const getAppsService = async (accountId?: string) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get("/api/apps", config);
+  return data.data;
 };
 
 /**
  * Get single app by ID
+ * Includes x-account-id header if provided
  */
-export const getAppService = async (appId: string) => {
-  const { data } = await getApiClient().get(`/api/apps/${appId}`);
-  return data;
+export const getAppService = async (appId: string, accountId?: string) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get(`/api/apps/${appId}`, config);
+  return data.data;
 };
 
 /**
@@ -50,7 +54,7 @@ export const getAppService = async (appId: string) => {
  */
 export const updateAppService = async (appId: string, payload: Partial<CreateAppPayload>) => {
   const { data } = await getApiClient().put(`/api/apps/${appId}`, payload);
-  return data;
+  return data.data;
 };
 
 /**
@@ -58,5 +62,5 @@ export const updateAppService = async (appId: string, payload: Partial<CreateApp
  */
 export const deleteAppService = async (appId: string) => {
   const { data } = await getApiClient().delete(`/api/apps/${appId}`);
-  return data;
+  return data.data;
 };

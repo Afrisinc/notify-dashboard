@@ -8,6 +8,7 @@ import {
   type CreateAppPayload,
 } from "@/services/apps";
 import { useUser } from "@/contexts/UserContext";
+import { useCurrentAccountId } from "@/hooks/useAuth";
 
 /**
  * Create a new app
@@ -42,22 +43,28 @@ export function useCreateApp() {
 
 /**
  * Get all apps
+ * Automatically includes x-account-id header from current organization
  */
 export function useApps(options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
   return useQuery({
-    queryKey: ["apps"],
-    queryFn: () => getAppsService(),
-    enabled: options?.enabled ?? true,
+    queryKey: ["apps", accountId],
+    queryFn: () => getAppsService(accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!accountId,
   });
 }
 
 /**
  * Get single app by ID
+ * Automatically includes x-account-id header from current organization
  */
 export function useApp(appId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
   return useQuery({
-    queryKey: ["app", appId],
-    queryFn: () => getAppService(appId),
+    queryKey: ["app", appId, accountId],
+    queryFn: () => getAppService(appId, accountId ?? undefined),
     enabled: (options?.enabled ?? true) && !!appId,
   });
 }
