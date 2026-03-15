@@ -1,6 +1,8 @@
 import { useParams, useNavigate, Outlet, useLocation } from "react-router-dom";
-import { apps, organizations } from "@/data/mockData";
+import { organizations } from "@/data/mockData";
 import { useOrg } from "@/contexts/OrgContext";
+import { useAppContext } from "@/contexts/AppContext";
+import { useAppData } from "@/hooks/useAppData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -43,7 +45,7 @@ export default function AppDashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentOrg, loading: orgLoading } = useOrg();
-  const app = apps.find((a) => a.id === appId);
+  const { app, isLoading: appLoading, error } = useAppData(appId);
 
   // Wait for organization to load
   if (orgLoading || !currentOrg) {
@@ -57,10 +59,22 @@ export default function AppDashboardLayout() {
     );
   }
 
-  if (!app) {
+  // Wait for app to load
+  if (appLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4" />
+        <p className="text-muted-foreground">Loading app...</p>
+      </div>
+    );
+  }
+
+  if (error || !app) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <h2 className="text-lg font-medium text-foreground">App not found</h2>
+        <h2 className="text-lg font-medium text-foreground">
+          {error instanceof Error ? error.message : "App not found"}
+        </h2>
         <Button variant="outline" className="mt-4" onClick={() => navigate("/dashboard/apps")}>
           Back to Apps
         </Button>

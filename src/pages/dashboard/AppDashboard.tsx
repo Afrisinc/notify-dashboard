@@ -1,20 +1,32 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { apps, appTemplates } from "@/data/mockData";
+import { appTemplates } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, FileText, Key, Activity, Settings, Send, Plus, Copy, Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAppData } from "@/hooks/useAppData";
 
 export default function AppDashboard() {
   const { appId } = useParams();
   const navigate = useNavigate();
-  const app = apps.find((a) => a.id === appId);
+  const { app, isLoading, error } = useAppData(appId);
 
-  if (!app) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <h2 className="text-lg font-medium text-foreground">App not found</h2>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4" />
+        <p className="text-muted-foreground">Loading app...</p>
+      </div>
+    );
+  }
+
+  if (error || !app) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <h2 className="text-lg font-medium text-foreground">
+          {error instanceof Error ? error.message : "App not found"}
+        </h2>
         <Button variant="outline" className="mt-4" onClick={() => navigate("/dashboard/apps")}>Back to Apps</Button>
       </div>
     );
