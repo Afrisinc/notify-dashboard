@@ -8,6 +8,47 @@ export interface CreateAppPayload {
   description?: string;
 }
 
+export interface CreateAppTemplatePayload {
+  channel: "EMAIL" | "SMS" | "PUSH" | "IN_APP";
+  code: string;
+  content: string;
+  subject?: string;
+  description?: string;
+  is_public?: boolean;
+  language?: string;
+  visibility?: "private" | "public";
+}
+
+export interface AppTemplateResponse {
+  installationId: string;
+  appId: string;
+  status: "active" | "inactive" | "archived";
+  customizations: Record<string, any>;
+  installationDate: string;
+  updatedAt?: string;
+  template: {
+    id: string;
+    code: string;
+    channel: string;
+    category: string;
+    subject?: string;
+    content: string;
+    language: string;
+    version: number;
+    active: boolean;
+    requiredVariables: string[];
+    description?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface AppTemplatesResponse {
+  appId: string;
+  templates: AppTemplateResponse[];
+  total: number;
+}
+
 /**
  * Create a new app
  */
@@ -62,5 +103,93 @@ export const updateAppService = async (appId: string, payload: Partial<CreateApp
  */
 export const deleteAppService = async (appId: string) => {
   const { data } = await getApiClient().delete(`/api/apps/${appId}`);
+  return data.data;
+};
+
+// ──────────────────────────────────────────
+// APP TEMPLATE ENDPOINTS
+// ──────────────────────────────────────────
+
+/**
+ * Create app template
+ * POST /api/apps/:appId/templates
+ */
+export const createAppTemplateService = async (
+  appId: string,
+  payload: CreateAppTemplatePayload,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post(
+    `/api/apps/${appId}/templates`,
+    payload,
+    config
+  );
+  return data.data;
+};
+
+/**
+ * Get all app templates
+ * GET /api/apps/:appId/templates
+ */
+export const getAppTemplatesService = async (appId: string, accountId?: string) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(
+    `/api/apps/${appId}/templates`,
+    config
+  );
+  return data.data as AppTemplatesResponse;
+};
+
+/**
+ * Get app template by ID
+ * GET /api/apps/:appId/templates/:templateId
+ */
+export const getAppTemplateService = async (
+  appId: string,
+  templateId: string,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(
+    `/api/apps/${appId}/templates/${templateId}`,
+    config
+  );
+  return data.data as AppTemplateResponse;
+};
+
+/**
+ * Update app template
+ * PUT /api/apps/:appId/templates/:templateId
+ */
+export const updateAppTemplateService = async (
+  appId: string,
+  templateId: string,
+  payload: Partial<CreateAppTemplatePayload>,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().put<any>(
+    `/api/apps/${appId}/templates/${templateId}`,
+    payload,
+    config
+  );
+  return data.data as AppTemplateResponse;
+};
+
+/**
+ * Delete app template
+ * DELETE /api/apps/:appId/templates/:templateId
+ */
+export const deleteAppTemplateService = async (
+  appId: string,
+  templateId: string,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().delete<any>(
+    `/api/apps/${appId}/templates/${templateId}`,
+    config
+  );
   return data.data;
 };

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { OrgProvider } from "@/contexts/OrgContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { getThemeFromCookie } from "@/lib/theme";
 
@@ -49,6 +50,10 @@ import AppApiKeys from "./pages/dashboard/app/AppApiKeys";
 import AppLogs from "./pages/dashboard/app/AppLogs";
 import AppSettings from "./pages/dashboard/app/AppSettings";
 
+// Email Editor
+import EditorPage from "./pages/editor/[id]";
+import EditorPageLegacy from "./pages/editor/legacy";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, refetchOnWindowFocus: false },
@@ -72,9 +77,10 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             <UserProvider>
-              <ProjectProvider>
-                <AppProvider>
-                  <Routes>
+              <OrgProvider>
+                <ProjectProvider>
+                  <AppProvider>
+                    <Routes>
                   {/* ── Public ── */}
                   <Route element={<PublicLayout />}>
                     <Route path="/" element={<Landing />} />
@@ -112,6 +118,25 @@ const App = () => {
                     }
                   />
 
+                  {/* ── Email Editor (dedicated route) ── */}
+                  <Route
+                    path="/editor/:appId/:templateId"
+                    element={
+                      <ProtectedRoute>
+                        <EditorPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* Legacy route support - redirect old format to new */}
+                  <Route
+                    path="/editor/:templateId"
+                    element={
+                      <ProtectedRoute>
+                        <EditorPageLegacy />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   {/* ── Dashboard ── */}
                   <Route
                     path="/dashboard"
@@ -140,9 +165,10 @@ const App = () => {
                   </Route>
 
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-                </AppProvider>
-              </ProjectProvider>
+                    </Routes>
+                  </AppProvider>
+                </ProjectProvider>
+              </OrgProvider>
             </UserProvider>
           </AuthProvider>
         </BrowserRouter>

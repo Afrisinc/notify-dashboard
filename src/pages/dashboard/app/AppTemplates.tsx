@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { appTemplates } from "@/data/mockData";
-import { useOrganizationTemplates } from "@/hooks/useOrganization";
-import { useOrg } from "@/contexts/OrgContext";
+import { useAppTemplates } from "@/hooks/useApps";
 import { extractVariableNames } from "@/lib/templateUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,25 +36,24 @@ const statusColor: Record<string, string> = {
 export default function AppTemplates() {
   const { appId } = useParams();
   const navigate = useNavigate();
-  const { currentOrg } = useOrg();
 
-  // Fetch templates from organization endpoint
-  const { data: apiResponse, isLoading } = useOrganizationTemplates(
-    currentOrg?.id || "",
-    undefined,
-    { enabled: !!currentOrg?.id }
-  );
+  // Fetch templates from app endpoint
+  const { data: appTemplatesResponse, isLoading } = useAppTemplates(appId || "", {
+    enabled: !!appId,
+  });
 
-  // Use API data first, fallback to mock data for development
-  const templates = apiResponse?.data || appTemplates.filter((t) => t.appId === appId);
+  // Extract templates from response or use mock data
+  const templates = appTemplatesResponse?.templates || appTemplates.filter((t) => t.appId === appId);
 
   const [search, setSearch] = useState("");
   const [channelFilter, setChannelFilter] = useState("all");
 
   const filtered = templates.filter((t) => {
-    const name = typeof t.name === "string" ? t.name : (t as any).code || "";
+    // Handle both API response format (nested template) and mock format
+    const template = (t as any).template || t;
+    const name = typeof template.name === "string" ? template.name : template.code || "";
     const matchSearch = name.toLowerCase().includes(search.toLowerCase());
-    const channel = (t.channel || "").toLowerCase();
+    const channel = (template.channel || "").toLowerCase();
     const filterChannel = channelFilter.toLowerCase();
     const matchChannel = channelFilter === "all" || channel === filterChannel;
     return matchSearch && matchChannel;
@@ -85,7 +83,7 @@ export default function AppTemplates() {
           <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/marketplace")}>
             <Store className="h-3.5 w-3.5 mr-1.5" /> Marketplace
           </Button>
-          <Button size="sm" onClick={() => navigate(`/dashboard/apps/${appId}/templates/new`)}>
+          <Button size="sm" onClick={() => navigate(`/editor/${appId}/new`)}>
             <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Template
           </Button>
         </div>
@@ -111,16 +109,21 @@ export default function AppTemplates() {
         </Card>
       ) : !isLoading ? (
         <div className="space-y-2">
-          {filtered.map((tpl: any) => {
+          {filtered.map((item: any) => {
+            // Extract template from API response or use direct template (mock)
+            const tpl = item.template || item;
+            const templateId = tpl.id || item.id;
+
             // Use utility to extract variable names from API or mock data
-            const templateName = tpl.name || tpl.code || "Untitled";
+            const templateName = tpl.name || tpl.code || tpl.description || "Untitled";
             const variables = extractVariableNames(tpl);
             const createdBy = tpl.createdBy || "System";
             const updatedAt = tpl.updatedAt ? new Date(tpl.updatedAt).toLocaleDateString() : "Unknown";
             const version = tpl.version || 1;
+            const isActive = tpl.active !== false;
 
             return (
-              <Card key={tpl.id} className="border-border/60 hover:border-border transition-colors">
+              <Card key={templateId} className="border-border/60 hover:border-border transition-colors">
                 <CardContent className="flex items-center justify-between py-3 px-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="flex flex-col min-w-0">
@@ -167,15 +170,22 @@ export default function AppTemplates() {
                     <Badge variant="secondary" className={`text-[10px] ${channelColor[tpl.channel]}`}>
                       {tpl.channel || "N/A"}
                     </Badge>
-                    <Badge variant="secondary" className={`text-[10px] ${statusColor[tpl.active ? "active" : "draft"]}`}>
-                      {tpl.active ? "active" : "draft"}
+                    <Badge variant="secondary" className={`text-[10px] ${statusColor[isActive ? "active" : "draft"]}`}>
+                      {isActive ? "active" : "draft"}
                     </Badge>
                   <div className="flex gap-0.5 ml-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => navigate(`/dashboard/apps/${appId}/templates/${tpl.id}`)}
+                      onClick={() => {
+                        // Email templates use dedicated editor, others use dashboard editor
+                        if ((tpl.channel || "").toLowerCase() === 'email') {
+                          navigate(`/editor/${appId}/${templateId}`);
+                        } else {
+                          navigate(`/dashboard/apps/${appId}/templates/${templateId}`);
+                        }
+                      }}
                       title="View/Edit template"
                     >
                       <Eye className="h-3 w-3" />
@@ -184,7 +194,14 @@ export default function AppTemplates() {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => navigate(`/dashboard/apps/${appId}/templates/${tpl.id}`)}
+                      onClick={() => {
+                        // Email templates use dedicated editor, others use dashboard editor
+                        if ((tpl.channel || "").toLowerCase() === 'email') {
+                          navigate(`/editor/${appId}/${templateId}`);
+                        } else {
+                          navigate(`/dashboard/apps/${appId}/templates/${templateId}`);
+                        }
+                      }}
                       title="Edit template"
                     >
                       <Pencil className="h-3 w-3" />

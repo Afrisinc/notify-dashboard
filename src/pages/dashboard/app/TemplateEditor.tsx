@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Eye, Check, ChevronRight } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import { useCurrentAccountId } from "@/hooks/useAuth";
 import { installTemplate } from "@/services/templatesService";
 import { useAuth } from "@/contexts/AuthContext";
 import { extractVariableNames } from "@/lib/templateUtils";
+import EmailEditor from "@/components/EmailEditor/EmailEditor";
 
 const defaultHtml = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
   <h1 style="font-size: 28px; margin: 0 0 16px 0; font-weight: bold;">Welcome, {{name}}!</h1>
@@ -37,6 +38,7 @@ const defaultHtml = `<div style="font-family: sans-serif; max-width: 600px; marg
 const TemplateEditor = () => {
   const { id: templateId, appId } = useParams();
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   // Determine back URL based on context
   const getBackUrl = () => {
@@ -298,111 +300,119 @@ const TemplateEditor = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Editor */}
-      <div className="h-[calc(100vh-5rem)] flex flex-col animate-fade-in">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4 px-6 pt-6">
-          <div className="flex items-center gap-3">
-            <Link
-              to={backUrl}
-              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div className="flex flex-col gap-0.5">
-              <label className="text-xs font-medium text-muted-foreground">Template Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Welcome Email, Password Reset"
-                className="text-lg font-bold bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/50"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {saveError && (
-              <div className="text-xs text-destructive bg-destructive/10 px-3 py-1 rounded-lg">
-                {saveError}
+      {/* ── Render EmailEditor for email channel, raw HTML editor for other channels ── */}
+      {template?.channel === 'email' && templateId && appId ? (
+        <EmailEditor
+          appId={appId}
+          templateId={templateId}
+          onCancel={() => navigate(backUrl)}
+        />
+      ) : (
+        <div className="h-[calc(100vh-5rem)] flex flex-col animate-fade-in">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 px-6 pt-6">
+            <div className="flex items-center gap-3">
+              <Link
+                to={backUrl}
+                className="h-8 w-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <div className="flex flex-col gap-0.5">
+                <label className="text-xs font-medium text-muted-foreground">Template Name</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g., Welcome Email, Password Reset"
+                  className="text-lg font-bold bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/50"
+                />
               </div>
-            )}
-            <button
-              onClick={handleSave}
-              disabled={createMutation.isPending || updateMutation.isPending}
-              className="inline-flex items-center gap-2 bg-muted text-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {createMutation.isPending || updateMutation.isPending ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" /> Save
-                </>
+            </div>
+            <div className="flex gap-2">
+              {saveError && (
+                <div className="text-xs text-destructive bg-destructive/10 px-3 py-1 rounded-lg">
+                  {saveError}
+                </div>
               )}
-            </button>
-            <button
-              onClick={() => setShowInstall(true)}
-              className="inline-flex items-center gap-2 bg-primary-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary-400 transition-colors"
-            >
-              <Check className="h-4 w-4" /> Install
-            </button>
+              <button
+                onClick={handleSave}
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="inline-flex items-center gap-2 bg-muted text-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-muted/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {createMutation.isPending || updateMutation.isPending ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" /> Save
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowInstall(true)}
+                className="inline-flex items-center gap-2 bg-primary-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary-400 transition-colors"
+              >
+                <Check className="h-4 w-4" /> Install
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Subject */}
-        <div className="px-6 mb-4">
-          <label className="block text-xs font-medium text-secondary mb-1">Subject line</label>
-          <input
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full h-9 rounded-lg border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-        </div>
-
-        {/* Available Variables */}
-        {template && (() => {
-          const variables = extractVariableNames(template);
-          return variables.length > 0 ? (
-            <div className="px-6 mb-4">
-              <label className="block text-xs font-medium text-secondary mb-2">Available Variables</label>
-              <div className="flex flex-wrap gap-2">
-                {variables.map((v, idx) => (
-                  <Badge key={idx} variant="outline" className="font-mono text-xs">
-                    {`{{${v}}}`}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          ) : null;
-        })()}
-
-        {/* Split editor + preview */}
-        <div className="flex-1 grid grid-cols-2 gap-4 min-h-0 px-6 pb-6">
-          <div className="flex flex-col rounded-xl border border-border overflow-hidden bg-card">
-            <div className="px-4 py-2 border-b border-border bg-muted/30 text-xs font-medium text-secondary">
-              HTML Editor
-            </div>
-            <textarea
-              value={html}
-              onChange={(e) => setHtml(e.target.value)}
-              className="flex-1 p-4 bg-card font-mono text-xs resize-none focus:outline-none focus:ring-1 focus:ring-primary-500"
-              spellCheck={false}
+          {/* Subject */}
+          <div className="px-6 mb-4">
+            <label className="block text-xs font-medium text-secondary mb-1">Subject line</label>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full h-9 rounded-lg border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
-          <div className="flex flex-col rounded-xl border border-border overflow-hidden bg-card">
-            <div className="px-4 py-2 border-b border-border bg-muted/30 text-xs font-medium text-secondary flex items-center gap-1.5">
-              <Eye className="h-3.5 w-3.5" /> Live Preview
-            </div>
-            <div className="flex-1 bg-card p-4 overflow-auto">
-              <div
-                className="bg-white dark:bg-slate-950 rounded-lg border border-border p-4"
-                dangerouslySetInnerHTML={{ __html: html }}
+
+          {/* Available Variables */}
+          {template && (() => {
+            const variables = extractVariableNames(template);
+            return variables.length > 0 ? (
+              <div className="px-6 mb-4">
+                <label className="block text-xs font-medium text-secondary mb-2">Available Variables</label>
+                <div className="flex flex-wrap gap-2">
+                  {variables.map((v, idx) => (
+                    <Badge key={idx} variant="outline" className="font-mono text-xs">
+                      {`{{${v}}}`}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Split editor + preview */}
+          <div className="flex-1 grid grid-cols-2 gap-4 min-h-0 px-6 pb-6">
+            <div className="flex flex-col rounded-xl border border-border overflow-hidden bg-card">
+              <div className="px-4 py-2 border-b border-border bg-muted/30 text-xs font-medium text-secondary">
+                HTML Editor
+              </div>
+              <textarea
+                value={html}
+                onChange={(e) => setHtml(e.target.value)}
+                className="flex-1 p-4 bg-card font-mono text-xs resize-none focus:outline-none focus:ring-1 focus:ring-primary-500"
+                spellCheck={false}
               />
+            </div>
+            <div className="flex flex-col rounded-xl border border-border overflow-hidden bg-card">
+              <div className="px-4 py-2 border-b border-border bg-muted/30 text-xs font-medium text-secondary flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5" /> Live Preview
+              </div>
+              <div className="flex-1 bg-card p-4 overflow-auto">
+                <div
+                  className="bg-white dark:bg-slate-950 rounded-lg border border-border p-4"
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
