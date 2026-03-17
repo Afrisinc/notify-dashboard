@@ -602,10 +602,11 @@ export async function duplicateTemplateService(
  * Get app templates
  * GET /api/apps/{appId}/templates
  */
-export async function getAppTemplatesService(appId: string) {
+export async function getAppTemplatesService(appId: string, accountId?: string) {
   try {
     const client = getApiClient();
-    const response = await client.get<any>(`/api/apps/${appId}/templates`);
+    const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+    const response = await client.get<any>(`/api/apps/${appId}/templates`, config);
 
     return response.data.data || response.data;
   } catch (error) {
@@ -618,11 +619,13 @@ export async function getAppTemplatesService(appId: string) {
  * Get app template by ID
  * GET /api/apps/{appId}/templates/{id}
  */
-export async function getAppTemplateService(appId: string, templateId: string) {
+export async function getAppTemplateService(appId: string, templateId: string, accountId?: string) {
   try {
     const client = getApiClient();
+    const config = accountId ? { headers: { "x-account-id": accountId } } : {};
     const response = await client.get<any>(
-      `/api/apps/${appId}/templates/${templateId}`
+      `/api/apps/${appId}/templates/${templateId}`,
+      config
     );
 
     return response.data.data || response.data;
@@ -639,13 +642,16 @@ export async function getAppTemplateService(appId: string, templateId: string) {
 export async function updateAppTemplateService(
   appId: string,
   templateId: string,
-  payload: Partial<CreateTemplatePayload>
+  payload: Partial<CreateTemplatePayload>,
+  accountId?: string
 ) {
   try {
     const client = getApiClient();
+    const config = accountId ? { headers: { "x-account-id": accountId } } : {};
     const response = await client.put<any>(
       `/api/apps/${appId}/templates/${templateId}`,
-      payload
+      payload,
+      config
     );
 
     return response.data.data || response.data;
@@ -659,11 +665,13 @@ export async function updateAppTemplateService(
  * Delete app template
  * DELETE /api/apps/{appId}/templates/{id}
  */
-export async function deleteAppTemplateService(appId: string, templateId: string) {
+export async function deleteAppTemplateService(appId: string, templateId: string, accountId?: string) {
   try {
     const client = getApiClient();
+    const config = accountId ? { headers: { "x-account-id": accountId } } : {};
     const response = await client.delete<any>(
-      `/api/apps/${appId}/templates/${templateId}`
+      `/api/apps/${appId}/templates/${templateId}`,
+      config
     );
 
     return response.data.data || response.data;

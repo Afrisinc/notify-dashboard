@@ -54,3 +54,19 @@ export interface TemplateVariable {
 }
 
 export type TemplateFilter = "all" | Channel;
+
+/**
+ * Email-specific template interface for the visual editor
+ * Used in /editor/:id route and EmailEditor component
+ */
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  html: string;
+  json: any; // EmailBuilder document structure
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+  app_id?: string;
+  is_public?: boolean; // for marketplace visibility
+}

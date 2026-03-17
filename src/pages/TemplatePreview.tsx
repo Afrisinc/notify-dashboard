@@ -3,6 +3,7 @@ import { ArrowLeft, Copy, Code2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { useState } from "react";
 import { useTemplate, useTemplateById } from "@/hooks/useTemplates";
 import { SkeletonCard } from "@/components/SkeletonCard";
@@ -12,6 +13,7 @@ export default function TemplatePreview() {
   const { channel, slug, id } = useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { selectedApp } = useAppContext();
   const [showCodeCopied, setShowCodeCopied] = useState(false);
 
   // Support both slug and ID-based routing
@@ -91,9 +93,12 @@ export default function TemplatePreview() {
     if (!user) {
       // Redirect to signup with template info
       window.location.href = `/signup?template=${template.slug}`;
+    } else if (!selectedApp) {
+      // User is logged in but no app selected - redirect to select app first
+      navigate('/dashboard/apps');
     } else {
-      // Navigate to template editor with install modal
-      navigate(`/dashboard/templates/${template.slug}`);
+      // Navigate to dedicated email editor with appId and templateId
+      navigate(`/editor/${selectedApp.id}/${template.id}`);
     }
   };
 
