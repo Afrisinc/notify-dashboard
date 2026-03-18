@@ -10,6 +10,7 @@ import {
   getAppTemplateService,
   updateAppTemplateService,
   deleteAppTemplateService,
+  getAppNotificationsService,
   type CreateAppPayload,
   type CreateAppTemplatePayload,
 } from "@/services/apps";
@@ -193,5 +194,40 @@ export function useDeleteAppTemplate() {
         queryKey: ["appTemplates", appId],
       });
     },
+  });
+}
+
+// ──────────────────────────────────────────
+// APP NOTIFICATIONS HOOKS
+// ──────────────────────────────────────────
+
+/**
+ * Get app notification logs
+ * Automatically includes x-account-id header from current organization
+ */
+export function useAppNotifications(
+  appId: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    status?: "SENT" | "FAILED" | "PENDING" | "BOUNCED";
+    channel?: "EMAIL" | "SMS" | "PUSH" | "IN_APP" | "WHATSAPP";
+  },
+  options?: { enabled?: boolean }
+) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: [
+      "appNotifications",
+      appId,
+      params?.page,
+      params?.limit,
+      params?.status,
+      params?.channel,
+      accountId,
+    ],
+    queryFn: () => getAppNotificationsService(appId, params, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
   });
 }

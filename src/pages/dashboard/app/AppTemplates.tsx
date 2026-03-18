@@ -1,13 +1,42 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { appTemplates } from "@/data/mockData";
-import { useAppTemplates } from "@/hooks/useApps";
+import { useAppTemplates, useDeleteAppTemplate } from "@/hooks/useApps";
+import { useSendNotification } from "@/hooks/useNotifications";
 import { extractVariableNames } from "@/lib/templateUtils";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Search, Pencil, Copy, Trash2, Send, Store, FileText, Eye, Variable, Loader2 } from "lucide-react";
 import {
   Tooltip,
@@ -33,9 +62,20 @@ const statusColor: Record<string, string> = {
   archived: "bg-destructive/15 text-destructive",
 };
 
+// Validation schema for send notification
+const sendNotificationSchema = z.object({
+  recipient: z.string().email("Invalid email address"),
+  channel: z.enum(["EMAIL", "SMS", "PUSH", "IN_APP", "WHATSAPP"]),
+});
+
+type SendNotificationFormData = z.infer<typeof sendNotificationSchema>;
+
 export default function AppTemplates() {
   const { appId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const deleteTemplateMutation = useDeleteAppTemplate();
+  const sendNotificationMutation = useSendNotification();
 
   // Fetch templates from app endpoint
   const { data: appTemplatesResponse, isLoading } = useAppTemplates(appId || "", {
@@ -47,6 +87,64 @@ export default function AppTemplates() {
 
   const [search, setSearch] = useState("");
   const [channelFilter, setChannelFilter] = useState("all");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ appId: string; templateId: string } | null>(null);
+  const [sendNotifyDialog, setSendNotifyDialog] = useState<{ templateId: string; templateName: string } | null>(null);
+
+  // Form for sending notification
+  const form = useForm<SendNotificationFormData>({
+    resolver: zodResolver(sendNotificationSchema),
+    defaultValues: {
+      recipient: "",
+      channel: "EMAIL",
+    },
+  });
+
+  const handleDeleteTemplate = async () => {
+    if (!deleteConfirm) return;
+
+    try {
+      await deleteTemplateMutation.mutateAsync({
+        appId: deleteConfirm.appId,
+        templateId: deleteConfirm.templateId,
+      });
+      toast({
+        title: 'Success',
+        description: 'Template deleted successfully',
+      });
+      setDeleteConfirm(null);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete template',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSendNotification = async (data: SendNotificationFormData) => {
+    if (!sendNotifyDialog) return;
+
+    try {
+      await sendNotificationMutation.mutateAsync({
+        channel: data.channel,
+        recipient: data.recipient,
+        templateId: sendNotifyDialog.templateId,
+        appId,
+      });
+      toast({
+        title: 'Success',
+        description: `Notification sent to ${data.recipient}`,
+      });
+      setSendNotifyDialog(null);
+      form.reset();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to send notification',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const filtered = templates.filter((t) => {
     // Handle both API response format (nested template) and mock format
@@ -207,8 +305,25 @@ export default function AppTemplates() {
                       <Pencil className="h-3 w-3" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" title="Duplicate template"><Copy className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" title="Send notification"><Send className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" title="Delete template"><Trash2 className="h-3 w-3" /></Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 hover:text-primary"
+                      title="Send notification"
+                      onClick={() => setSendNotifyDialog({ templateId, templateName })}
+                    >
+                      <Send className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 hover:text-destructive"
+                      title="Delete template"
+                      onClick={() => setDeleteConfirm({ appId: appId || "", templateId })}
+                      disabled={deleteTemplateMutation.isPending}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -218,6 +333,112 @@ export default function AppTemplates() {
         </div>
       ) : null}
 
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Delete Template</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this template? This action cannot be undone.
+          </AlertDialogDescription>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel disabled={deleteTemplateMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTemplate}
+              disabled={deleteTemplateMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteTemplateMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Send Notification Dialog */}
+      <Dialog open={!!sendNotifyDialog} onOpenChange={(open) => !open && setSendNotifyDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Notification</DialogTitle>
+            <DialogDescription>
+              Send "{sendNotifyDialog?.templateName}" template to a recipient
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSendNotification)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="channel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Channel</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="EMAIL">Email</SelectItem>
+                        <SelectItem value="SMS">SMS</SelectItem>
+                        <SelectItem value="PUSH">Push</SelectItem>
+                        <SelectItem value="IN_APP">In-App</SelectItem>
+                        <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="recipient"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Recipient</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="user@example.com"
+                        disabled={sendNotificationMutation.isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSendNotifyDialog(null)}
+                  disabled={sendNotificationMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={sendNotificationMutation.isPending}
+                  className="gap-2"
+                >
+                  {sendNotificationMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Send Notification
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
