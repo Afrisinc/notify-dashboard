@@ -24,6 +24,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import Logo from "./Logo";
 
 const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -53,10 +54,7 @@ export function DashboardSidebar() {
       <SidebarHeader className="p-3">
         {!collapsed && (
           <div className="flex items-center gap-2 px-1 mb-3">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground text-xs font-bold">N</span>
-            </div>
-            <span className="font-semibold text-sm text-foreground">Notify</span>
+           <Logo/>
           </div>
         )}
         <OrgSwitcher />
