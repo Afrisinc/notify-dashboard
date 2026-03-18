@@ -193,3 +193,67 @@ export const deleteAppTemplateService = async (
   );
   return data.data;
 };
+
+// ──────────────────────────────────────────
+// APP NOTIFICATIONS LOGS
+// ──────────────────────────────────────────
+
+export interface NotificationLog {
+  id: string;
+  provider: string;
+  status: "SENT" | "FAILED" | "PENDING" | "BOUNCED" | "success" | "failed";
+  response: string;
+  timestamp: string;
+}
+
+export interface AppNotification {
+  id: string;
+  appId: string;
+  recipient: string;
+  channel: "EMAIL" | "SMS" | "PUSH" | "IN_APP" | "WHATSAPP";
+  status: "SENT" | "FAILED" | "PENDING" | "BOUNCED" | "QUEUED";
+  templateCode?: string; // Template code/name
+  templateId?: string; // Template ID (if available)
+  timestamp: string;
+  logs: NotificationLog[];
+}
+
+export interface AppNotificationsResponse {
+  appId: string;
+  notifications: AppNotification[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Get app notification logs
+ * GET /api/apps/:appId/notifications
+ */
+export const getAppNotificationsService = async (
+  appId: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    status?: "SENT" | "FAILED" | "PENDING" | "BOUNCED";
+    channel?: "EMAIL" | "SMS" | "PUSH" | "IN_APP" | "WHATSAPP";
+  },
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const queryParams = new URLSearchParams();
+
+  if (params?.page) queryParams.append("page", params.page.toString());
+  if (params?.limit) queryParams.append("limit", params.limit.toString());
+  if (params?.status) queryParams.append("status", params.status);
+  if (params?.channel) queryParams.append("channel", params.channel);
+
+  const query = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
+  const { data } = await getApiClient().get<any>(
+    `/api/apps/${appId}/notifications${query}`,
+    config
+  );
+  return data.data as AppNotificationsResponse;
+};
