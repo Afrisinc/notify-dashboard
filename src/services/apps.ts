@@ -257,3 +257,101 @@ export const getAppNotificationsService = async (
   );
   return data.data as AppNotificationsResponse;
 };
+
+// ──────────────────────────────────────────
+// API KEYS ENDPOINTS
+// ──────────────────────────────────────────
+
+export interface CreateApiKeyPayload {
+  name: string;
+  type?: "test" | "production";
+}
+
+export interface ApiKey {
+  id: string;
+  plainKey?: string; // Only returned on creation
+  name: string;
+  type: "test" | "production";
+  createdAt: string;
+  maskedKey?: string; // Partially masked key for display
+}
+
+export interface ApiKeysResponse {
+  appId: string;
+  apiKeys: ApiKey[];
+  total: number;
+}
+
+export interface CreateApiKeyResponse {
+  id: string;
+  plainKey: string;
+  name: string;
+  type: "test" | "production";
+  createdAt: string;
+  message: string;
+}
+
+/**
+ * Create new API key
+ * POST /api/apps/:appId/api-keys
+ */
+export const createApiKeyService = async (
+  appId: string,
+  payload: CreateApiKeyPayload,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(
+    `/api/apps/${appId}/api-keys`,
+    payload,
+    config
+  );
+  return data.data as CreateApiKeyResponse;
+};
+
+/**
+ * Get all API keys for an app
+ * GET /api/apps/:appId/api-keys
+ */
+export const getApiKeysService = async (appId: string, accountId?: string) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(
+    `/api/apps/${appId}/api-keys`,
+    config
+  );
+  return data.data as ApiKeysResponse;
+};
+
+/**
+ * Get API key details
+ * GET /api/apps/:appId/api-keys/:keyId
+ */
+export const getApiKeyService = async (
+  appId: string,
+  keyId: string,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(
+    `/api/apps/${appId}/api-keys/${keyId}`,
+    config
+  );
+  return data.data as ApiKey;
+};
+
+/**
+ * Delete/revoke API key
+ * DELETE /api/apps/:appId/api-keys/:keyId
+ */
+export const deleteApiKeyService = async (
+  appId: string,
+  keyId: string,
+  accountId?: string
+) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().delete<any>(
+    `/api/apps/${appId}/api-keys/${keyId}`,
+    config
+  );
+  return data.data;
+};

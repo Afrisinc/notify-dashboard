@@ -1,16 +1,15 @@
 import { useOrg } from "@/contexts/OrgContext";
-import { useOrganizationApps } from "@/hooks/useOrganization";
+import { useApps } from "@/hooks/useApps";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Boxes, Send, FileText, Key } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardHome() {
   const { currentOrg, loading: orgLoading } = useOrg();
-  const { data: appsData, isLoading: appsLoading } = useOrganizationApps(currentOrg?.id || "", {
-    enabled: !!currentOrg?.id && !orgLoading,
-  });
+  const { data: appsData, isLoading: appsLoading } = useApps();
 
-  const orgApps = appsData?.data?.apps || [];
+  // Handle different response formats - apps can be an array or object with apps property
+  const orgApps = Array.isArray(appsData) ? appsData : (appsData?.apps || []);
   const isLoading = orgLoading || appsLoading;
 
   if (isLoading || !currentOrg) {

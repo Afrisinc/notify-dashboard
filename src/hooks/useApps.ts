@@ -11,8 +11,13 @@ import {
   updateAppTemplateService,
   deleteAppTemplateService,
   getAppNotificationsService,
+  createApiKeyService,
+  getApiKeysService,
+  getApiKeyService,
+  deleteApiKeyService,
   type CreateAppPayload,
   type CreateAppTemplatePayload,
+  type CreateApiKeyPayload,
 } from "@/services/apps";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentAccountId } from "@/hooks/useAuth";
@@ -229,5 +234,75 @@ export function useAppNotifications(
     ],
     queryFn: () => getAppNotificationsService(appId, params, accountId ?? undefined),
     enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+// ──────────────────────────────────────────
+// API KEYS HOOKS
+// ──────────────────────────────────────────
+
+/**
+ * Create API key
+ */
+export function useCreateApiKey() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: CreateApiKeyPayload }) =>
+      createApiKeyService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      // Invalidate API keys query to refetch
+      queryClient.invalidateQueries({
+        queryKey: ["apiKeys", appId, accountId],
+      });
+    },
+  });
+}
+
+/**
+ * Get all API keys for an app
+ * Automatically includes x-account-id header from current organization
+ */
+export function useApiKeys(appId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["apiKeys", appId, accountId],
+    queryFn: () => getApiKeysService(appId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+/**
+ * Get single API key
+ * Automatically includes x-account-id header from current organization
+ */
+export function useApiKey(appId: string, keyId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["apiKey", appId, keyId, accountId],
+    queryFn: () => getApiKeyService(appId, keyId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!keyId && !!accountId,
+  });
+}
+
+/**
+ * Delete API key
+ */
+export function useDeleteApiKey() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, keyId }: { appId: string; keyId: string }) =>
+      deleteApiKeyService(appId, keyId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      // Invalidate API keys query to refetch
+      queryClient.invalidateQueries({
+        queryKey: ["apiKeys", appId, accountId],
+      });
+    },
   });
 }

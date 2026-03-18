@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrg } from "@/contexts/OrgContext";
-import { useCreateApp } from "@/hooks/useApps";
-import { useOrganizationApps } from "@/hooks/useOrganization";
+import { useCreateApp, useApps } from "@/hooks/useApps";
 import { type App } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +30,7 @@ export default function AppsList() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createApp, isPending } = useCreateApp();
-  const { data: appsData, isLoading: appsLoading } = useOrganizationApps(currentOrg?.id || "", {
-    enabled: !!currentOrg?.id && !orgLoading,
-  });
+  const { data: appsData, isLoading: appsLoading } = useApps();
 
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -41,9 +38,14 @@ export default function AppsList() {
   const [newEnv, setNewEnv] = useState<App["environment"]>("development");
   const [newDesc, setNewDesc] = useState("");
 
-  const allApps = appsData?.data?.apps || [];
-  const orgApps = allApps
-    .filter((a: any) => a.name.toLowerCase().includes(search.toLowerCase()));
+  // Handle different response formats - apps can be an array or object with apps property
+  console.log("Apps API Response:", appsData);
+  const allApps = Array.isArray(appsData)
+    ? appsData
+    : (appsData?.apps || appsData?.data?.apps || []);
+
+  const orgApps = (Array.isArray(allApps) ? allApps : [])
+    .filter((a: any) => a?.name?.toLowerCase?.().includes(search.toLowerCase()));
 
   const envColor = (env: string) => {
     switch (env) {
