@@ -41,6 +41,14 @@ export interface OrganizationMembersResponse {
 // ──────────────────────────────────────────
 
 /**
+ * Get organization details by ID
+ */
+export const getOrganizationService = async (orgId: string) => {
+  const { data } = await getApiClient().get(`/api/organizations/${orgId}`);
+  return data.data;
+};
+
+/**
  * Update organization details
  * Only the organization owner can update
  */

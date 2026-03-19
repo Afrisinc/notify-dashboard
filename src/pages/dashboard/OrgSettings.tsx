@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Trash2 } from "lucide-react";
-import { useUpdateOrganization, useDeleteOrganization } from "@/hooks/useOrganization";
+import { useGetOrganization, useUpdateOrganization, useDeleteOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -28,6 +28,9 @@ export default function OrgSettings() {
   const { currentOrg, loading: orgLoading } = useOrg();
   const { toast } = useToast();
 
+  // Fetch organization data from backend
+  const { data: orgFromBackend } = useGetOrganization(currentOrg?.id || "");
+
   // Initialize with current org data from context
   const [originalData, setOriginalData] = useState({
     name: currentOrg?.name || "",
@@ -43,19 +46,21 @@ export default function OrgSettings() {
   const updateMutation = useUpdateOrganization();
   const deleteMutation = useDeleteOrganization();
 
-  // Update form when org context changes
+  // Update form when org data from backend is received
   useEffect(() => {
-    const newData = {
-      name: currentOrg?.name || "",
-      legal_name: (currentOrg as any)?.legal_name || "",
-      country: (currentOrg as any)?.country || "",
-      org_email: (currentOrg as any)?.org_email || "",
-      org_phone: (currentOrg as any)?.org_phone || "",
-      location: (currentOrg as any)?.location || "",
-    };
-    setOriginalData(newData);
-    setFormData(newData);
-  }, [currentOrg?.id]);
+    if (orgFromBackend) {
+      const newData = {
+        name: orgFromBackend.name || "",
+        legal_name: (orgFromBackend as any).legalName || "",
+        country: orgFromBackend.country || "",
+        org_email: (orgFromBackend as any).orgEmail || "",
+        org_phone: (orgFromBackend as any).orgPhone || "",
+        location: orgFromBackend.location || "",
+      };
+      setOriginalData(newData);
+      setFormData(newData);
+    }
+  }, [orgFromBackend?.id]);
 
   // Handle missing organization - early return AFTER all hooks
   if (!currentOrg) {
@@ -244,7 +249,7 @@ export default function OrgSettings() {
 
           <Button
             onClick={handleSaveChanges}
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || !hasChanges}
             className="mt-4"
           >
             {updateMutation.isPending ? "Saving..." : "Save Changes"}

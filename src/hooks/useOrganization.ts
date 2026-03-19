@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  getOrganizationService,
   updateOrganizationService,
   deleteOrganizationService,
   createOrganizationInviteService,
@@ -8,6 +9,17 @@ import {
   type UpdateOrganizationPayload,
   type CreateInvitePayload,
 } from "@/services/organizationService";
+
+/**
+ * Get organization by ID
+ */
+export function useGetOrganization(orgId: string) {
+  return useQuery({
+    queryKey: ["organization", orgId],
+    queryFn: () => getOrganizationService(orgId),
+    enabled: !!orgId,
+  });
+}
 
 /**
  * Update organization details
