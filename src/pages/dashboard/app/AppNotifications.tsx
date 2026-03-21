@@ -4,6 +4,7 @@ import { useAppNotifications } from "@/hooks/useApps";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Send, Bell, Loader2, ChevronDown } from "lucide-react";
+import { Send, Bell, ChevronDown } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -106,12 +107,24 @@ export default function AppNotifications() {
 
       {/* Loading State */}
       {isLoading && (
-        <Card>
-          <CardContent className="py-8 flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading notifications...</span>
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i} className="border-border/60">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       {/* Error State */}

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createOrganizationService,
   getOrganizationService,
   updateOrganizationService,
   deleteOrganizationService,
@@ -8,10 +9,33 @@ import {
   removeOrganizationMemberService,
   getInviteDetailsService,
   acceptInviteService,
+  type CreateOrganizationPayload,
   type UpdateOrganizationPayload,
   type CreateInvitePayload,
   type InviteDetails,
 } from "@/services/organizationService";
+
+/**
+ * Create a new organization
+ * Automatically refetches organizations list after creation
+ */
+export function useCreateOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateOrganizationPayload) => createOrganizationService(payload),
+    onSuccess: () => {
+      // Invalidate and immediately refetch user organizations
+      queryClient.invalidateQueries({
+        queryKey: ["userOrganizations"],
+      });
+      // Also refetch to ensure we get fresh data
+      queryClient.refetchQueries({
+        queryKey: ["userOrganizations"],
+      });
+    },
+  });
+}
 
 /**
  * Get organization by ID

@@ -4,6 +4,11 @@ import getApiClient from "./apiClient";
 // ORGANIZATION TYPES
 // ──────────────────────────────────────────
 
+export interface CreateOrganizationPayload {
+  name: string;
+  description?: string;
+}
+
 export interface UpdateOrganizationPayload {
   name?: string;
   legal_name?: string;
@@ -51,6 +56,14 @@ export interface OrganizationMembersResponse {
 // ──────────────────────────────────────────
 // ORGANIZATION SERVICES
 // ──────────────────────────────────────────
+
+/**
+ * Create a new organization
+ */
+export const createOrganizationService = async (payload: CreateOrganizationPayload) => {
+  const { data } = await getApiClient().post(`/api/organizations`, payload);
+  return data.data;
+};
 
 /**
  * Get organization details by ID

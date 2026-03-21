@@ -43,8 +43,10 @@ export function OrgProvider({ children }: { children: ReactNode }) {
 
   // Update allOrgs and currentOrg when data is fetched
   useEffect(() => {
-    if (orgsData?.data?.organizations && initialized) {
-      const organizations = orgsData.data.organizations;
+    // Handle both response formats: direct organizations array or wrapped in data object
+    const organizations = orgsData?.data?.organizations || orgsData?.organizations;
+
+    if (organizations && initialized) {
       setAllOrgs(organizations);
 
       // Check if there's a pending organization ID from localStorage

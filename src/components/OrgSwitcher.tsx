@@ -23,17 +23,18 @@ import { useOrg } from "@/contexts/OrgContext";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateOrganization } from "@/hooks/useOrganization";
 
 export function OrgSwitcher() {
   const { currentOrg, setCurrentOrg, allOrgs, loading } = useOrg();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const createOrgMutation = useCreateOrganization();
   const collapsed = state === "collapsed";
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [orgName, setOrgName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateOrg = async () => {
     if (!orgName.trim()) {
@@ -46,9 +47,10 @@ export function OrgSwitcher() {
     }
 
     try {
-      setIsCreating(true);
-      // TODO: Call createOrganizationService when backend API is ready
-      // For now, show success message
+      await createOrgMutation.mutateAsync({
+        name: orgName.trim(),
+      });
+
       toast({
         title: "Success",
         description: `Organization "${orgName}" created successfully`,
@@ -59,11 +61,9 @@ export function OrgSwitcher() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create organization",
+        description: error instanceof Error ? error.message : "Failed to create organization",
         variant: "destructive",
       });
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -149,7 +149,7 @@ export function OrgSwitcher() {
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
                 className="mt-2"
-                disabled={isCreating}
+                disabled={createOrgMutation.isPending}
               />
             </div>
           </div>
@@ -157,15 +157,15 @@ export function OrgSwitcher() {
             <Button
               variant="outline"
               onClick={() => setShowCreateDialog(false)}
-              disabled={isCreating}
+              disabled={createOrgMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateOrg}
-              disabled={isCreating || !orgName.trim()}
+              disabled={createOrgMutation.isPending || !orgName.trim()}
             >
-              {isCreating ? "Creating..." : "Create"}
+              {createOrgMutation.isPending ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
