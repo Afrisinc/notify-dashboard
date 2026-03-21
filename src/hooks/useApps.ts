@@ -3,6 +3,7 @@ import {
   createAppService,
   getAppsService,
   getAppService,
+  getAppOverviewService,
   updateAppService,
   deleteAppService,
   createAppTemplateService,
@@ -77,7 +78,40 @@ export function useApp(appId: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["app", appId, accountId],
     queryFn: () => getAppService(appId, accountId ?? undefined),
-    enabled: (options?.enabled ?? true) && !!appId,
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+/**
+ * Get app overview with statistics and chart data
+ * Automatically includes x-account-id header from current organization
+ * Supports filtering by date range and channels
+ */
+export function useAppOverview(
+  appId: string,
+  params?: {
+    startDate?: string;
+    endDate?: string;
+    channels?: string[];
+  },
+  options?: { enabled?: boolean }
+) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["appOverview", appId, accountId, params],
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.startDate) queryParams.append("startDate", params.startDate);
+      if (params?.endDate) queryParams.append("endDate", params.endDate);
+      if (params?.channels?.length) queryParams.append("channels", params.channels.join(","));
+
+      const query = queryParams.toString();
+      const url = query ? `${appId}?${query}` : appId;
+
+      return getAppOverviewService(url, accountId ?? undefined);
+    },
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
   });
 }
 

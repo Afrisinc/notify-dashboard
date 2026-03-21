@@ -49,6 +49,32 @@ export interface AppTemplatesResponse {
   total: number;
 }
 
+export interface NotificationDataPoint {
+  date: string;
+  email: number;
+  sms: number;
+  push: number;
+  inApp: number;
+}
+
+export interface AppOverview {
+  appId: string;
+  name: string;
+  environment: string;
+  stats: {
+    totalNotificationsSent: number;
+    totalTemplates: number;
+    totalApiKeys: number;
+    activeApiKeys: number;
+  };
+  chartData: NotificationDataPoint[];
+  recentActivity: {
+    totalToday: number;
+    totalThisWeek: number;
+    totalThisMonth: number;
+  };
+}
+
 /**
  * Create a new app
  */
@@ -88,6 +114,16 @@ export const getAppService = async (appId: string, accountId?: string) => {
   const config = accountId ? { headers: { "x-account-id": accountId } } : {};
   const { data } = await getApiClient().get(`/api/apps/${appId}`, config);
   return data.data;
+};
+
+/**
+ * Get app overview with statistics and chart data
+ * Includes x-account-id header if provided
+ */
+export const getAppOverviewService = async (appId: string, accountId?: string) => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get(`/api/apps/${appId}/overview`, config);
+  return data.data as AppOverview;
 };
 
 /**

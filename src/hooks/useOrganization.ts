@@ -6,8 +6,11 @@ import {
   createOrganizationInviteService,
   getOrganizationMembersService,
   removeOrganizationMemberService,
+  getInviteDetailsService,
+  acceptInviteService,
   type UpdateOrganizationPayload,
   type CreateInvitePayload,
+  type InviteDetails,
 } from "@/services/organizationService";
 
 /**
@@ -105,6 +108,45 @@ export function useRemoveOrganizationMember() {
       // Invalidate members list
       queryClient.invalidateQueries({
         queryKey: ["organizationMembers", orgId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// INVITE HOOKS
+// ──────────────────────────────────────────
+
+/**
+ * Get invite details by inviteId and token
+ * No authentication required
+ */
+export function useInviteDetails(inviteId: string, token: string) {
+  return useQuery({
+    queryKey: ["inviteDetails", inviteId, token],
+    queryFn: () => getInviteDetailsService(inviteId, token),
+    enabled: !!inviteId && !!token,
+  });
+}
+
+/**
+ * Accept organization invite
+ * Authentication required - user email must match invite email
+ */
+export function useAcceptInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ inviteId, token }: { inviteId: string; token: string }) =>
+      acceptInviteService(inviteId, token),
+    onSuccess: (_data, { inviteId, token }) => {
+      // Invalidate invite details
+      queryClient.invalidateQueries({
+        queryKey: ["inviteDetails", inviteId, token],
+      });
+      // Invalidate organization queries to refresh member list
+      queryClient.invalidateQueries({
+        queryKey: ["organizations"],
       });
     },
   });

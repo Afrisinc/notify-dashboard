@@ -34,7 +34,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function OrgMembers() {
-  const { currentOrg } = useOrg();
+  const { currentOrg, loading: orgLoading } = useOrg();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [showInvite, setShowInvite] = useState(false);
@@ -42,12 +42,36 @@ export default function OrgMembers() {
   const [inviteRole, setInviteRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
-  const { data: membersData, isLoading, error } = useOrganizationMembers(currentOrg.id);
+  // Fetch members - all hooks must be called before any early returns
+  const { data: membersData, isLoading, error } = useOrganizationMembers(currentOrg?.id || "");
+  const inviteMutation = useCreateOrganizationInvite();
+  const removeMutation = useRemoveOrganizationMember();
+
+  // Handle missing organization - early return AFTER all hooks
+  if (!currentOrg) {
+    if (orgLoading) {
+      return (
+        <div className="space-y-6">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading organization...</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <Card className="border-destructive/30">
+          <CardContent className="py-8 text-center">
+            <p className="text-destructive mb-4">No organization selected</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Log API response for debugging
   console.log("Members API Response:", { membersData, error });
-  const inviteMutation = useCreateOrganizationInvite();
-  const removeMutation = useRemoveOrganizationMember();
 
   const members = membersData?.members || [];
   const filtered = members.filter(

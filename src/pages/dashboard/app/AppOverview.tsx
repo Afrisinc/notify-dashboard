@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { apps, notificationLogs, notificationsOverTime } from "@/data/mockData";
+import { useAppOverview } from "@/hooks/useApps";
+import AppOverviewFilters from "@/components/AppOverviewFilters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MessageSquare, Bell, Monitor, TrendingUp, AlertTriangle, Activity } from "lucide-react";
+import { Mail, Bell, TrendingUp, AlertTriangle, Activity } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -10,6 +12,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
   email: { label: "Email", color: "hsl(var(--primary))" },
@@ -18,39 +21,77 @@ const chartConfig = {
   inApp: { label: "In-App", color: "hsl(var(--accent-foreground))" },
 } satisfies ChartConfig;
 
-const statusColor: Record<string, string> = {
-  delivered: "text-success",
-  failed: "text-destructive",
-  pending: "text-warning",
-  bounced: "text-destructive",
-};
-
 export default function AppOverview() {
-  const { appId } = useParams();
-  const app = apps.find((a) => a.id === appId);
-  const logs = notificationLogs.filter((l) => l.appId === appId);
+  const { appId } = useParams<{ appId: string }>();
+  const [filters, setFilters] = useState<{
+    startDate?: string;
+    endDate?: string;
+    channels?: string[];
+  }>({});
 
-  if (!app) return null;
+  const { data: overview, isLoading } = useAppOverview(appId || "", filters);
 
-  const todayLogs = logs; // mock: treat all as today
-  const emailsSent = todayLogs.filter((l) => l.channel === "email").length;
-  const smsSent = todayLogs.filter((l) => l.channel === "sms").length;
-  const pushSent = todayLogs.filter((l) => l.channel === "push").length;
-  const delivered = todayLogs.filter((l) => l.status === "delivered").length;
-  const failed = todayLogs.filter((l) => l.status === "failed" || l.status === "bounced").length;
-  const deliveryRate = todayLogs.length > 0 ? Math.round((delivered / todayLogs.length) * 100) : 0;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="border-border/60">
+              <CardContent className="p-4">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-8 w-20" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <Skeleton className="h-4 w-32" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[280px] w-full" />
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <Skeleton className="h-4 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!overview) {
+    return (
+      <Card className="border-destructive/30">
+        <CardContent className="py-8 text-center">
+          <p className="text-destructive">Failed to load overview</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const metrics = [
-    { label: "Sent Today", value: todayLogs.length, icon: Activity, color: "text-primary" },
-    { label: "Emails", value: emailsSent, icon: Mail, color: "text-primary" },
-    { label: "SMS", value: smsSent, icon: MessageSquare, color: "text-success" },
-    { label: "Push", value: pushSent, icon: Bell, color: "text-warning" },
-    { label: "Delivery Rate", value: `${deliveryRate}%`, icon: TrendingUp, color: "text-success" },
-    { label: "Failures", value: failed, icon: AlertTriangle, color: "text-destructive" },
+    { label: "Sent Today", value: overview.recentActivity.totalToday, icon: Activity, color: "text-primary" },
+    { label: "Total Sent", value: overview.stats.totalNotificationsSent, icon: Mail, color: "text-primary" },
+    { label: "Templates", value: overview.stats.totalTemplates, icon: Bell, color: "text-success" },
+    { label: "Active Keys", value: overview.stats.activeApiKeys, icon: TrendingUp, color: "text-warning" },
+    { label: "This Week", value: overview.recentActivity.totalThisWeek, icon: Activity, color: "text-accent" },
+    { label: "This Month", value: overview.recentActivity.totalThisMonth, icon: AlertTriangle, color: "text-destructive" },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <AppOverviewFilters onFilterChange={setFilters} />
+
       {/* Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {metrics.map((m) => (
@@ -73,7 +114,7 @@ export default function AppOverview() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[280px] w-full">
-            <AreaChart data={notificationsOverTime} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart data={overview.chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="date" className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))" }} />
               <YAxis className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))" }} />
@@ -87,32 +128,25 @@ export default function AppOverview() {
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
+      {/* Summary Stats */}
       <Card className="border-border/60">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Recent Activity</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {logs.slice(0, 8).map((log) => (
-              <div key={log.id} className="flex items-center justify-between text-sm py-2 border-b border-border/40 last:border-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-medium text-foreground truncate">{log.templateName}</span>
-                    <span className="text-xs text-muted-foreground truncate">{log.recipient}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge variant="secondary" className="text-[10px]">{log.channel}</Badge>
-                  <span className={`text-xs font-medium capitalize ${statusColor[log.status]}`}>
-                    {log.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-              </div>
-            ))}
+            <div className="flex items-center justify-between text-sm py-2 border-b border-border/40">
+              <span className="text-muted-foreground">Environment</span>
+              <Badge variant="outline">{overview.environment}</Badge>
+            </div>
+            <div className="flex items-center justify-between text-sm py-2 border-b border-border/40">
+              <span className="text-muted-foreground">Total API Keys</span>
+              <span className="font-medium">{overview.stats.totalApiKeys}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm py-2">
+              <span className="text-muted-foreground">Last Updated</span>
+              <span className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</span>
+            </div>
           </div>
         </CardContent>
       </Card>

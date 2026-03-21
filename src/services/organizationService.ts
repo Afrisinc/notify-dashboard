@@ -18,6 +18,18 @@ export interface CreateInvitePayload {
   role: "OWNER" | "ADMIN" | "MEMBER";
 }
 
+export interface InviteDetails {
+  id: string;
+  email: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
+  organizationId: string;
+  organizationName: string;
+  invitedBy: string;
+  createdAt: string;
+  expiresAt: string;
+  accepted: boolean;
+}
+
 export interface OrganizationMember {
   userId: string;
   email: string;
@@ -95,5 +107,27 @@ export const getOrganizationMembersService = async (orgId: string, page: number 
  */
 export const removeOrganizationMemberService = async (orgId: string, memberId: string) => {
   const { data } = await getApiClient().delete(`/api/organizations/${orgId}/members/${memberId}`);
+  return data.data;
+};
+
+// ──────────────────────────────────────────
+// INVITE SERVICES
+// ──────────────────────────────────────────
+
+/**
+ * Get invite details by inviteId and token
+ * No authentication required
+ */
+export const getInviteDetailsService = async (inviteId: string, token: string) => {
+  const { data } = await getApiClient().get(`/api/invites/${inviteId}/${token}`);
+  return data.data as InviteDetails;
+};
+
+/**
+ * Accept organization invite
+ * Authentication required - user email must match invite email
+ */
+export const acceptInviteService = async (inviteId: string, token: string) => {
+  const { data } = await getApiClient().post(`/api/invites/${inviteId}/${token}/accept`);
   return data.data;
 };

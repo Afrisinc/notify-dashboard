@@ -29,6 +29,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmail from "./pages/auth/VerifyEmail";
 import OnboardingWelcome from "./pages/OnboardingWelcome";
 import OnboardingGettingStarted from "./pages/OnboardingGettingStarted";
+import InviteAccept from "./pages/InviteAccept";
 import NotFound from "./pages/NotFound";
 
 // Dashboard pages
@@ -99,6 +100,9 @@ const App = () => {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
                   </Route>
+
+                  {/* ── Invite Acceptance (public — no auth required) ── */}
+                  <Route path="/invite/:inviteId/:token" element={<InviteAccept />} />
 
                   {/* ── Onboarding (protected — after signup) ── */}
                   <Route
