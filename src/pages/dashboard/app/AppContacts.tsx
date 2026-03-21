@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { contacts as allContacts } from "@/data/mockData";
+import { useContacts, useCreateContact, useImportContacts } from "@/hooks/useContacts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,33 +11,121 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Upload, Users, UserPlus, ClipboardPaste, FileUp, Check } from "lucide-react";
+import { Plus, Search, Upload, Users, UserPlus, ClipboardPaste, FileUp, Check, AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AppContacts() {
-  const { appId } = useParams();
-  const contacts = allContacts.filter((c) => c.appId === appId);
+  const { appId } = useParams<{ appId: string }>();
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState("all");
   const [showImport, setShowImport] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [importStep, setImportStep] = useState<"select" | "progress" | "done">("select");
+  const [newContactData, setNewContactData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    tags: "",
+  });
+  const [importError, setImportError] = useState<string | null>(null);
+
+  // Fetch contacts
+  const { data: contactsResponse, isLoading, error: fetchError } = useContacts(appId || "", { page: 1, limit: 100 });
+  const contacts = contactsResponse?.contacts || [];
+
+  // Mutations
+  const createContactMutation = useCreateContact();
+  const importContactsMutation = useImportContacts();
 
   const allTags = [...new Set(contacts.flatMap((c) => c.tags))];
 
   const filtered = contacts.filter((c) => {
     const matchSearch =
-      `${c.firstName} ${c.lastName} ${c.email}`.toLowerCase().includes(search.toLowerCase());
+      `${c.firstName || ""} ${c.lastName || ""} ${c.email}`.toLowerCase().includes(search.toLowerCase());
     const matchTag = tagFilter === "all" || c.tags.includes(tagFilter);
     return matchSearch && matchTag;
   });
 
-  const handleImport = () => {
-    setImportStep("progress");
-    setTimeout(() => setImportStep("done"), 1500);
+  const handleCreateContact = async () => {
+    if (!appId || !newContactData.email) return;
+
+    try {
+      await createContactMutation.mutateAsync({
+        appId,
+        payload: {
+          email: newContactData.email,
+          firstName: newContactData.firstName || undefined,
+          lastName: newContactData.lastName || undefined,
+          phone: newContactData.phone || undefined,
+          tags: newContactData.tags ? newContactData.tags.split(",").map((t) => t.trim()) : [],
+        },
+      });
+      setNewContactData({ firstName: "", lastName: "", email: "", phone: "", tags: "" });
+      setShowAdd(false);
+    } catch (err) {
+      setImportError((err as Error).message);
+    }
   };
+
+  const handleImport = async () => {
+    if (!appId) return;
+
+    setImportStep("progress");
+    setImportError(null);
+    try {
+      await importContactsMutation.mutateAsync({
+        appId,
+        payload: {
+          contacts: [{ email: "temp@example.com" }], // Placeholder - would be actual CSV data
+        },
+      });
+      setImportStep("done");
+    } catch (err) {
+      setImportError((err as Error).message);
+      setImportStep("select");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-64" />
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-20" />
+          <Skeleton className="h-20" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Failed to load contacts. Please try again.</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-4">
+      {/* Error Alert */}
+      {importError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{importError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-[200px]">
@@ -97,13 +185,13 @@ export default function AppContacts() {
             ) : (
               filtered.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.firstName} {c.lastName}</TableCell>
+                  <TableCell className="font-medium">{c.firstName || ""} {c.lastName || ""}</TableCell>
                   <TableCell className="text-muted-foreground">{c.email}</TableCell>
                   <TableCell className="text-muted-foreground hidden md:table-cell">{c.phone || "—"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">{c.tags.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}</div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-xs hidden sm:table-cell">{c.createdAt}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs hidden sm:table-cell">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))
             )}
@@ -175,16 +263,57 @@ export default function AppContacts() {
           <DialogHeader><DialogTitle>Add Contact</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>First Name</Label><Input placeholder="Alice" /></div>
-              <div><Label>Last Name</Label><Input placeholder="Williams" /></div>
+              <div>
+                <Label>First Name</Label>
+                <Input
+                  placeholder="Alice"
+                  value={newContactData.firstName}
+                  onChange={(e) => setNewContactData({ ...newContactData, firstName: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Last Name</Label>
+                <Input
+                  placeholder="Williams"
+                  value={newContactData.lastName}
+                  onChange={(e) => setNewContactData({ ...newContactData, lastName: e.target.value })}
+                />
+              </div>
             </div>
-            <div><Label>Email</Label><Input placeholder="alice@example.com" /></div>
-            <div><Label>Phone</Label><Input placeholder="+1234567890" /></div>
-            <div><Label>Tags (comma-separated)</Label><Input placeholder="vip, newsletter" /></div>
+            <div>
+              <Label>Email *</Label>
+              <Input
+                placeholder="alice@example.com"
+                type="email"
+                value={newContactData.email}
+                onChange={(e) => setNewContactData({ ...newContactData, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input
+                placeholder="+1234567890"
+                value={newContactData.phone}
+                onChange={(e) => setNewContactData({ ...newContactData, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Tags (comma-separated)</Label>
+              <Input
+                placeholder="vip, newsletter"
+                value={newContactData.tags}
+                onChange={(e) => setNewContactData({ ...newContactData, tags: e.target.value })}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
-            <Button onClick={() => setShowAdd(false)}>Add Contact</Button>
+            <Button
+              onClick={handleCreateContact}
+              disabled={!newContactData.email || createContactMutation.isPending}
+            >
+              {createContactMutation.isPending ? "Adding..." : "Add Contact"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

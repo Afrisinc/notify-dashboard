@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/projects/_og/services/notification-service/src/services/api/src/routes/**)"
+    ]
+  }
+}

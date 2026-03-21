@@ -46,9 +46,12 @@ export function useCreateApp() {
       });
     },
     onSuccess: (_data, variables) => {
-      // Invalidate organization apps query to refetch
-      queryClient.invalidateQueries({
+      // Refetch organization apps and general apps list directly
+      queryClient.refetchQueries({
         queryKey: ["organizationApps", variables.orgId],
+      });
+      queryClient.refetchQueries({
+        queryKey: ["apps"],
       });
     },
   });
