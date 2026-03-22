@@ -35,6 +35,8 @@ import NotFound from "./pages/NotFound";
 // Dashboard pages
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import AppsList from "./pages/dashboard/AppsList";
+import MyTemplates from "./pages/dashboard/MyTemplates";
+import UserTemplateEditor from "./pages/dashboard/UserTemplateEditor";
 import Marketplace from "./pages/dashboard/Marketplace";
 import OrgMembers from "./pages/dashboard/OrgMembers";
 import OrgSettings from "./pages/dashboard/OrgSettings";
@@ -44,7 +46,6 @@ import AppOverview from "./pages/dashboard/app/AppOverview";
 import AppNotifications from "./pages/dashboard/app/AppNotifications";
 import AppSendNotification from "./pages/dashboard/app/AppSendNotification";
 import AppTemplates from "./pages/dashboard/app/AppTemplates";
-import AppTemplateEditor from "./pages/dashboard/app/TemplateEditor";
 import AppContacts from "./pages/dashboard/app/AppContacts";
 import AppCampaigns from "./pages/dashboard/app/AppCampaigns";
 import AppApiKeys from "./pages/dashboard/app/AppApiKeys";
@@ -148,6 +149,8 @@ const App = () => {
                   >
                     <Route index element={<DashboardHome />} />
                     <Route path="apps" element={<AppsList />} />
+                    <Route path="templates" element={<MyTemplates />} />
+                    <Route path="templates/:id" element={<UserTemplateEditor />} />
 
                     {/* App Dashboard with sub-navigation */}
                     <Route path="apps/:appId" element={<AppDashboardLayout />}>
@@ -155,7 +158,6 @@ const App = () => {
                       <Route path="notifications" element={<AppNotifications />} />
                       <Route path="notifications/send" element={<AppSendNotification />} />
                       <Route path="templates" element={<AppTemplates />} />
-                      <Route path="templates/:id" element={<AppTemplateEditor />} />
                       <Route path="contacts" element={<AppContacts />} />
                       <Route path="campaigns" element={<AppCampaigns />} />
                       <Route path="api-keys" element={<AppApiKeys />} />

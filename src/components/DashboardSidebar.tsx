@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Boxes,
+  FileText,
   Store,
   Settings,
   Users,
@@ -29,6 +30,7 @@ import Logo from "./Logo";
 const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Apps", url: "/dashboard/apps", icon: Boxes },
+  { title: "Templates", url: "/dashboard/templates", icon: FileText },
   { title: "Marketplace", url: "/dashboard/marketplace", icon: Store },
 ];
 

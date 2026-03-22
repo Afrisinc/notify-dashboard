@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { marketplaceTemplates, organizations, apps, type MarketplaceTemplate } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -19,49 +20,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Download, Star, Store } from "lucide-react";
+import { Search, Download, Star, Store, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMarketplaceTemplates } from "@/hooks/useMarketplace";
+import { useInstallMarketplaceTemplate } from "@/hooks/useMarketplace";
+import { useApps } from "@/hooks/useApps";
+import { useOrg } from "@/contexts/OrgContext";
+import { useCurrentAccountId } from "@/hooks/useAuth";
+import type { MarketplaceTemplate } from "@/services/marketplace";
 
 type ChannelFilter = "all" | "email" | "sms" | "push" | "in-app";
 type PriceFilter = "all" | "free" | "paid";
 
 export default function Marketplace() {
+  const { currentOrg } = useOrg();
+  const accountId = useCurrentAccountId();
+  const { toast } = useToast();
+
   const [search, setSearch] = useState("");
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [installTemplate, setInstallTemplate] = useState<MarketplaceTemplate | null>(null);
-  const [selectedOrgId, setSelectedOrgId] = useState(organizations[0].id);
   const [selectedAppId, setSelectedAppId] = useState("");
-  const { toast } = useToast();
+  const [page, setPage] = useState(1);
 
-  const filtered = marketplaceTemplates.filter((t) => {
-    if (channelFilter !== "all" && t.channel !== channelFilter) return false;
-    if (priceFilter === "free" && t.price > 0) return false;
-    if (priceFilter === "paid" && t.price === 0) return false;
-    if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.description.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
+  // Fetch marketplace templates
+  const { data: templatesResponse, isLoading, error } = useMarketplaceTemplates({
+    search: search || undefined,
+    channel: channelFilter !== "all" ? channelFilter : undefined,
+    price: priceFilter !== "all" ? priceFilter : undefined,
+    page,
+    limit: 12,
   });
 
-  const orgApps = apps.filter((a) => a.orgId === selectedOrgId);
+  // Fetch user's apps
+  const { data: appsResponse } = useApps({ enabled: !!accountId });
+  const userApps = appsResponse?.apps || [];
+
+  // Install mutation
+  const installMutation = useInstallMarketplaceTemplate();
+
+  const templates = templatesResponse?.templates || [];
+  const totalPages = templatesResponse?.pagination?.pages || 1;
 
   const channelColor = (ch: string) => {
-    switch (ch) {
-      case "email": return "bg-primary/15 text-primary";
-      case "sms": return "bg-success/15 text-success";
-      case "push": return "bg-warning/15 text-warning";
-      case "in-app": return "bg-accent text-accent-foreground";
-      default: return "bg-muted text-muted-foreground";
-    }
+    const channelMap: Record<string, string> = {
+      "email": "bg-primary/15 text-primary",
+      "sms": "bg-success/15 text-success",
+      "push": "bg-warning/15 text-warning",
+      "in-app": "bg-accent text-accent-foreground",
+    };
+    return channelMap[ch.toLowerCase()] || "bg-muted text-muted-foreground";
   };
 
-  const handleInstall = () => {
-    if (!selectedAppId) return;
-    toast({
-      title: "Template installed",
-      description: `"${installTemplate?.name}" has been copied to your app.`,
-    });
-    setInstallTemplate(null);
-    setSelectedAppId("");
+  const handleInstall = async () => {
+    if (!selectedAppId || !installTemplate) return;
+    try {
+      await installMutation.mutateAsync({
+        templateId: installTemplate.id,
+        payload: {
+          appId: selectedAppId,
+          templateName: installTemplate.name,
+        },
+      });
+      toast({
+        title: "Success",
+        description: `"${installTemplate.subject}" has been installed to your app.`,
+      });
+      setInstallTemplate(null);
+      setSelectedAppId("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to install template",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -92,7 +126,33 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Failed to load marketplace templates. Please try again.</AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="border-border/60">
+              <CardHeader className="pb-2">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : templates.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
             <Store className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
@@ -101,36 +161,74 @@ export default function Marketplace() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((tpl) => (
-            <Card key={tpl.id} className="border-border/60 hover:border-primary/30 transition-colors flex flex-col">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-sm font-medium leading-tight">{tpl.name}</CardTitle>
-                  <Badge variant="secondary" className={`text-[10px] shrink-0 ml-2 ${channelColor(tpl.channel)}`}>{tpl.channel}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{tpl.description}</p>
-              </CardHeader>
-              <CardContent className="mt-auto pt-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Star className="h-3 w-3 text-warning" /> {tpl.rating}</span>
-                    <span>{tpl.installs.toLocaleString()} installs</span>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {templates.map((tpl) => (
+              <Card key={tpl.id} className="border-border/60 hover:border-primary/30 transition-colors flex flex-col">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-sm font-medium leading-tight">{tpl.subject}</CardTitle>
+                    <Badge variant="secondary" className={`text-[10px] shrink-0 ml-2 ${channelColor(tpl.channel)}`}>
+                      {tpl.channel}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-semibold ${tpl.price === 0 ? "text-success" : "text-foreground"}`}>
-                      {tpl.price === 0 ? "Free" : `$${tpl.price}`}
-                    </span>
-                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setInstallTemplate(tpl)}>
-                      <Download className="h-3 w-3 mr-1" /> Install
-                    </Button>
+                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{tpl.description}</p>
+                </CardHeader>
+                <CardContent className="mt-auto pt-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3 text-warning" /> {tpl.rating?.toFixed(1) || "N/A"}
+                      </span>
+                      <span>{(tpl.installs || 0).toLocaleString()} installs</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-semibold ${tpl.price === 0 ? "text-success" : "text-foreground"}`}>
+                        {tpl.price === 0 ? "Free" : `$${tpl.price}`}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => setInstallTemplate(tpl)}
+                        disabled={!userApps.length}
+                      >
+                        <Download className="h-3 w-3 mr-1" /> Install
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2">by {tpl.creator}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <p className="text-[10px] text-muted-foreground mt-2">
+                    by {typeof tpl.creator === "string" ? tpl.creator : tpl.creator.name}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       <Dialog open={!!installTemplate} onOpenChange={(o) => !o && setInstallTemplate(null)}>
@@ -141,30 +239,38 @@ export default function Marketplace() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label className="text-xs font-medium mb-1 block">Organization</Label>
-              <Select value={selectedOrgId} onValueChange={(v) => { setSelectedOrgId(v); setSelectedAppId(""); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {organizations.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs font-medium mb-1 block">App</Label>
-              <Select value={selectedAppId} onValueChange={setSelectedAppId}>
-                <SelectTrigger><SelectValue placeholder="Select an app" /></SelectTrigger>
-                <SelectContent>
-                  {orgApps.map((app) => (
-                    <SelectItem key={app.id} value={app.id}>{app.name} ({app.environment})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-xs font-medium mb-1 block">Select App</Label>
+              {userApps.length === 0 ? (
+                <Alert variant="destructive" className="text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>You need to create an app first to install templates.</AlertDescription>
+                </Alert>
+              ) : (
+                <Select value={selectedAppId} onValueChange={setSelectedAppId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an app" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userApps.map((app) => (
+                      <SelectItem key={app.id} value={app.id}>
+                        {app.name} ({app.environment})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" onClick={() => setInstallTemplate(null)} className="flex-1">Cancel</Button>
-              <Button disabled={!selectedAppId} onClick={handleInstall} className="flex-1">Install Template</Button>
+              <Button variant="outline" onClick={() => setInstallTemplate(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleInstall}
+                disabled={!selectedAppId || installMutation.isPending || userApps.length === 0}
+                className="flex-1"
+              >
+                {installMutation.isPending ? "Installing..." : "Install Template"}
+              </Button>
             </div>
           </div>
         </DialogContent>

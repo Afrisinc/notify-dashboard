@@ -213,7 +213,7 @@ export default function AppTemplates() {
             const templateId = tpl.id || item.id;
 
             // Use utility to extract variable names from API or mock data
-            const templateName = tpl.name || tpl.code || tpl.description || "Untitled";
+            const templateName = tpl.subject || tpl.code || tpl.description || "Untitled";
             const variables = extractVariableNames(tpl);
             const createdBy = tpl.createdBy || "System";
             const updatedAt = tpl.updatedAt ? new Date(tpl.updatedAt).toLocaleDateString() : "Unknown";
