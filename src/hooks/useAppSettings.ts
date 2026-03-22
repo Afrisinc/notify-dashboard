@@ -1,0 +1,209 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getAppSettingsService,
+  updateAppSettingsService,
+  updateAllowedDomainsService,
+  listWebhooksService,
+  createWebhookService,
+  updateWebhookService,
+  deleteWebhookService,
+  testWebhookService,
+  getWebhookLogsService,
+  deleteAppService,
+  type UpdateAppSettingsPayload,
+  type UpdateAllowedDomainsPayload,
+  type CreateWebhookPayload,
+  type UpdateWebhookPayload,
+} from "@/services/appSettings";
+import { useCurrentAccountId } from "@/hooks/useAuth";
+
+// ──────────────────────────────────────────
+// GET APP SETTINGS
+// ──────────────────────────────────────────
+
+export function useAppSettings(appId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["appSettings", appId, accountId],
+    queryFn: () => getAppSettingsService(appId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+// ──────────────────────────────────────────
+// UPDATE APP SETTINGS
+// ──────────────────────────────────────────
+
+export function useUpdateAppSettings() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: UpdateAppSettingsPayload }) =>
+      updateAppSettingsService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["appSettings", appId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// UPDATE ALLOWED DOMAINS
+// ──────────────────────────────────────────
+
+export function useUpdateAllowedDomains() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      payload,
+    }: {
+      appId: string;
+      payload: UpdateAllowedDomainsPayload;
+    }) => updateAllowedDomainsService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["appSettings", appId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// LIST WEBHOOKS
+// ──────────────────────────────────────────
+
+export function useWebhooks(appId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["webhooks", appId, accountId],
+    queryFn: () => listWebhooksService(appId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+// ──────────────────────────────────────────
+// CREATE WEBHOOK
+// ──────────────────────────────────────────
+
+export function useCreateWebhook() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: CreateWebhookPayload }) =>
+      createWebhookService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["webhooks", appId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// UPDATE WEBHOOK
+// ──────────────────────────────────────────
+
+export function useUpdateWebhook() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      webhookId,
+      payload,
+    }: {
+      appId: string;
+      webhookId: string;
+      payload: UpdateWebhookPayload;
+    }) => updateWebhookService(appId, webhookId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["webhooks", appId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// DELETE WEBHOOK
+// ──────────────────────────────────────────
+
+export function useDeleteWebhook() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, webhookId }: { appId: string; webhookId: string }) =>
+      deleteWebhookService(appId, webhookId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["webhooks", appId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// TEST WEBHOOK
+// ──────────────────────────────────────────
+
+export function useTestWebhook() {
+  const accountId = useCurrentAccountId();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      webhookId,
+      event,
+    }: {
+      appId: string;
+      webhookId: string;
+      event: string;
+    }) => testWebhookService(appId, webhookId, event, accountId ?? undefined),
+  });
+}
+
+// ──────────────────────────────────────────
+// GET WEBHOOK LOGS
+// ──────────────────────────────────────────
+
+export function useWebhookLogs(
+  appId: string,
+  webhookId: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    status?: "success" | "failed" | "pending";
+  },
+  options?: { enabled?: boolean }
+) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["webhookLogs", appId, webhookId, accountId, params],
+    queryFn: () =>
+      getWebhookLogsService(appId, webhookId, params, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!webhookId && !!accountId,
+  });
+}
+
+// ──────────────────────────────────────────
+// DELETE APP
+// ──────────────────────────────────────────
+
+export function useDeleteApp() {
+  const accountId = useCurrentAccountId();
+
+  return useMutation({
+    mutationFn: (appId: string) => deleteAppService(appId, accountId ?? undefined),
+  });
+}

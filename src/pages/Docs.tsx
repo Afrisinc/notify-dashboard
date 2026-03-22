@@ -64,12 +64,12 @@ Authorization: Bearer ntfr_sk_live_abc123def456`}
   -H "Authorization: Bearer ntfr_sk_live_abc123" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "channel": "email",
-    "to": "user@example.com",
+    "channel": "EMAIL",
+    "recipient": "user@example.com",
     "template_id": "tpl_welcome",
-    "data": {
+    "payload": {
       "name": "Jane",
-      "company": "Acme"
+      "company": "Afrisinc"
     }
   }'`}
           />
@@ -78,8 +78,8 @@ Authorization: Bearer ntfr_sk_live_abc123def456`}
             language="json"
             code={`{
   "id": "ntf_01HX...",
-  "status": "queued",
-  "channel": "email",
+  "status": "QUEUED",
+  "channel": "EMAIL",
   "created_at": "2026-02-27T14:30:00Z"
 }`}
           />

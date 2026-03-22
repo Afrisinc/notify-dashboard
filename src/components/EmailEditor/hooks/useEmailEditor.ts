@@ -26,9 +26,11 @@ import { useDocument, resetDocument } from '../core/documents/editor/EditorConte
 import { renderToStaticMarkup } from '@usewaypoint/email-builder';
 import { useCurrentAccountId } from '@/hooks/useAuth';
 import { useCreateAppTemplate, useUpdateAppTemplate } from '@/hooks/useApps';
+import { getUserTemplateForEditingService } from '@/services/userTemplatePublishing';
+import { useCreateUserTemplate, useUpdateUserTemplate } from '@/hooks/useUserTemplatePublishing';
 
 interface UseEmailEditorOptions {
-  appId: string;
+  appId?: string;
   templateId: string;
 }
 
@@ -107,9 +109,13 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
   const currentDocument = useDocument();
   const accountId = useCurrentAccountId();
 
-  // React Query mutations for create and update
-  const createMutation = useCreateAppTemplate();
-  const updateMutation = useUpdateAppTemplate();
+  // React Query mutations for create and update (app templates)
+  const createAppMutation = useCreateAppTemplate();
+  const updateAppMutation = useUpdateAppTemplate();
+
+  // React Query mutations for creating and updating user templates
+  const createUserMutation = useCreateUserTemplate();
+  const updateUserMutation = useUpdateUserTemplate();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -119,6 +125,7 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
 
   /**
    * Load template on mount or when templateId changes
+   * Supports both app templates (with appId) and user templates (without appId)
    * Only loads when accountId is available (organization is set)
    * Skips loading for new templates (templateId === 'new')
    */
@@ -143,20 +150,37 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
           return;
         }
 
-        // Fetch template from API for existing templates
-        const response = await getAppTemplateService(appId, templateId, accountId);
-        const template = response.template || response;
+        let template: any;
+
+        // Load app template if appId is provided
+        if (appId) {
+          const response = await getAppTemplateService(appId, templateId, accountId);
+          template = response.template || response;
+        } else {
+          // Load user template using dedicated edit endpoint
+          template = await getUserTemplateForEditingService(templateId, accountId);
+        }
 
         // Extract template data
-        setTemplateName(template.description || template.code || '');
-        setSubject(template.subject || '');
+        setTemplateName(template.name || template.code || template.description || '');
+        setSubject(template.content?.email?.subject || template.subject || '');
 
-        // Priority 1: Use design_json if provided by backend
-        let designJson = template.design_json;
+        // Priority 1: Use designJson if provided by backend (new API response format)
+        let designJson = template.designJson;
 
-        // Priority 2: Extract JSON from HTML comment if design_json not available
-        if (!designJson && template.content) {
-          designJson = extractJsonFromHtml(template.content);
+        // Priority 2: Use design_json if provided by backend (old API response format)
+        if (!designJson) {
+          designJson = (template as any).design_json;
+        }
+
+        // Priority 3: Extract JSON from HTML comment if designJson not available
+        if (!designJson && template.content?.email?.html) {
+          designJson = extractJsonFromHtml(template.content.email.html);
+        }
+
+        // Priority 4: Extract JSON from old content field format
+        if (!designJson && (template.content as any)?.html) {
+          designJson = extractJsonFromHtml((template.content as any).html);
         }
 
         if (designJson && typeof designJson === 'object') {
@@ -164,7 +188,6 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
           resetDocument(designJson);
         } else {
           // Fallback: start with empty editor if no JSON found
-          // console.log('No design JSON found in template, starting with empty editor');
           resetDocument(createEmptyEmailDocument());
         }
       } catch (err) {
@@ -178,7 +201,7 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
       }
     };
 
-    if (appId && templateId) {
+    if (templateId) {
       loadTemplate();
     }
   }, [appId, templateId, accountId]);
@@ -186,12 +209,12 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
   /**
    * Save template with current editor state
    * Renders the document to HTML and embeds JSON in a comment
-   * Handles both creating new templates and updating existing ones
+   * Handles both app templates (with appId) and user templates (without appId)
    * Uses React Query mutations for automatic cache invalidation
    */
   const save = async (): Promise<void> => {
-    if (!appId || !templateId || !selectedApp) {
-      setError('Missing required app or template information');
+    if (!templateId || (appId && !selectedApp)) {
+      setError('Missing required template information');
       return;
     }
 
@@ -219,11 +242,39 @@ export function useEmailEditor({ appId, templateId }: UseEmailEditorOptions): Us
         description: templateName,
       };
 
-      // Create new template or update existing one using React Query mutations
-      if (templateId === 'new') {
-        await createMutation.mutateAsync({ appId, payload });
+      // Save app template if appId is provided
+      if (appId) {
+        if (templateId === 'new') {
+          await createAppMutation.mutateAsync({ appId, payload });
+        } else {
+          await updateAppMutation.mutateAsync({ appId, templateId, payload });
+        }
       } else {
-        await updateMutation.mutateAsync({ appId, templateId, payload });
+        // Save user template (without appId)
+        // Generate slug from template code (lowercase, hyphenated)
+        const slug = payload.code
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+
+        const userTemplatePayload = {
+          code: payload.code,
+          slug,
+          channel: payload.channel as "EMAIL" | "SMS" | "PUSH" | "IN_APP",
+          subject: payload.subject,
+          content: payload.content,
+          language: 'en',
+          description: payload.description,
+        };
+
+        if (templateId === 'new') {
+          await createUserMutation.mutateAsync(userTemplatePayload);
+        } else {
+          await updateUserMutation.mutateAsync({
+            templateId,
+            payload: userTemplatePayload,
+          });
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save template';

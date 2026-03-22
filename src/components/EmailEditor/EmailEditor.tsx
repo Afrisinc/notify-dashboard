@@ -52,7 +52,7 @@ const templateHeaderSchema = z.object({
 type TemplateHeaderFormData = z.infer<typeof templateHeaderSchema>;
 
 interface EmailEditorProps {
-  appId: string;
+  appId?: string;
   templateId: string;
   onCancel: () => void;
 }

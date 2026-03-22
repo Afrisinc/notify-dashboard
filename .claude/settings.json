@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/projects/_og/services/notification-service/src/services/api/src/routes/**)",
+      "Read(//e/projects/_og/services/notification-service/src/services/api/src/controllers/**)",
+      "Read(//e/projects/_og/services/notification-service/src/services/api/src/services/**)"
+    ]
+  }
+}

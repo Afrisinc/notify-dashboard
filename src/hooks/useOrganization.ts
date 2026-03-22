@@ -1,64 +1,177 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  getOrganizationAppsService,
-  getOrganizationTemplatesService,
+  createOrganizationService,
   getOrganizationService,
   updateOrganizationService,
   deleteOrganizationService,
-} from "@/services/organization";
+  createOrganizationInviteService,
+  getOrganizationMembersService,
+  removeOrganizationMemberService,
+  getInviteDetailsService,
+  acceptInviteService,
+  type CreateOrganizationPayload,
+  type UpdateOrganizationPayload,
+  type CreateInvitePayload,
+  type InviteDetails,
+} from "@/services/organizationService";
 
 /**
- * Get all apps for an organization
+ * Create a new organization
+ * Automatically refetches organizations list after creation
  */
-export function useOrganizationApps(orgId: string, options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: ["organizationApps", orgId],
-    queryFn: () => getOrganizationAppsService(orgId),
-    enabled: (options?.enabled ?? true) && !!orgId,
+export function useCreateOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateOrganizationPayload) => createOrganizationService(payload),
+    onSuccess: () => {
+      // Invalidate and immediately refetch user organizations
+      queryClient.invalidateQueries({
+        queryKey: ["userOrganizations"],
+      });
+      // Also refetch to ensure we get fresh data
+      queryClient.refetchQueries({
+        queryKey: ["userOrganizations"],
+      });
+    },
   });
 }
 
 /**
- * Get all templates for an organization
+ * Get organization by ID
  */
-export function useOrganizationTemplates(
-  orgId: string,
-  params?: { limit?: number; offset?: number; channel?: string; status?: string },
-  options?: { enabled?: boolean }
-) {
-  return useQuery({
-    queryKey: ["organizationTemplates", orgId, params],
-    queryFn: () => getOrganizationTemplatesService(orgId, params),
-    enabled: (options?.enabled ?? true) && !!orgId,
-  });
-}
-
-/**
- * Get organization details
- */
-export function useOrganization(orgId: string, options?: { enabled?: boolean }) {
+export function useGetOrganization(orgId: string) {
   return useQuery({
     queryKey: ["organization", orgId],
     queryFn: () => getOrganizationService(orgId),
-    enabled: (options?.enabled ?? true) && !!orgId,
+    enabled: !!orgId,
   });
 }
 
 /**
- * Update organization
+ * Update organization details
+ * Only owner can update
  */
 export function useUpdateOrganization() {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ orgId, payload }: { orgId: string; payload: Record<string, any> }) =>
+    mutationFn: ({ orgId, payload }: { orgId: string; payload: UpdateOrganizationPayload }) =>
       updateOrganizationService(orgId, payload),
+    onSuccess: (_data, { orgId }) => {
+      // Invalidate organization queries
+      queryClient.invalidateQueries({
+        queryKey: ["organization", orgId],
+      });
+    },
   });
 }
 
 /**
  * Delete organization
+ * Only owner can delete - WARNING: Irreversible action
  */
 export function useDeleteOrganization() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (orgId: string) => deleteOrganizationService(orgId),
+    onSuccess: () => {
+      // Invalidate all organization queries
+      queryClient.invalidateQueries({
+        queryKey: ["organizations"],
+      });
+    },
+  });
+}
+
+/**
+ * Create organization invite
+ * Send invite to join organization
+ * Only admins and owners can invite
+ */
+export function useCreateOrganizationInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orgId, payload }: { orgId: string; payload: CreateInvitePayload }) =>
+      createOrganizationInviteService(orgId, payload),
+    onSuccess: (_data, { orgId }) => {
+      // Invalidate organization invites
+      queryClient.invalidateQueries({
+        queryKey: ["organizationInvites", orgId],
+      });
+    },
+  });
+}
+
+/**
+ * Get organization members with pagination
+ * Any member can view member list
+ */
+export function useOrganizationMembers(orgId: string, page: number = 1, limit: number = 10) {
+  return useQuery({
+    queryKey: ["organizationMembers", orgId, page, limit],
+    queryFn: () => getOrganizationMembersService(orgId, page, limit),
+    enabled: !!orgId,
+  });
+}
+
+/**
+ * Remove organization member
+ * Only admins and owners can remove
+ * Cannot remove yourself
+ */
+export function useRemoveOrganizationMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orgId, memberId }: { orgId: string; memberId: string }) =>
+      removeOrganizationMemberService(orgId, memberId),
+    onSuccess: (_data, { orgId }) => {
+      // Invalidate members list
+      queryClient.invalidateQueries({
+        queryKey: ["organizationMembers", orgId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// INVITE HOOKS
+// ──────────────────────────────────────────
+
+/**
+ * Get invite details by inviteId and token
+ * No authentication required
+ */
+export function useInviteDetails(inviteId: string, token: string) {
+  return useQuery({
+    queryKey: ["inviteDetails", inviteId, token],
+    queryFn: () => getInviteDetailsService(inviteId, token),
+    enabled: !!inviteId && !!token,
+  });
+}
+
+/**
+ * Accept organization invite
+ * Authentication required - user email must match invite email
+ */
+export function useAcceptInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ inviteId, token }: { inviteId: string; token: string }) =>
+      acceptInviteService(inviteId, token),
+    onSuccess: (_data, { inviteId, token }) => {
+      // Invalidate invite details
+      queryClient.invalidateQueries({
+        queryKey: ["inviteDetails", inviteId, token],
+      });
+      // Invalidate organization queries to refresh member list
+      queryClient.invalidateQueries({
+        queryKey: ["organizations"],
+      });
+    },
   });
 }

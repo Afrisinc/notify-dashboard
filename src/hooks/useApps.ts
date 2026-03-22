@@ -3,6 +3,7 @@ import {
   createAppService,
   getAppsService,
   getAppService,
+  getAppOverviewService,
   updateAppService,
   deleteAppService,
   createAppTemplateService,
@@ -11,8 +12,13 @@ import {
   updateAppTemplateService,
   deleteAppTemplateService,
   getAppNotificationsService,
+  createApiKeyService,
+  getApiKeysService,
+  getApiKeyService,
+  deleteApiKeyService,
   type CreateAppPayload,
   type CreateAppTemplatePayload,
+  type CreateApiKeyPayload,
 } from "@/services/apps";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentAccountId } from "@/hooks/useAuth";
@@ -40,9 +46,12 @@ export function useCreateApp() {
       });
     },
     onSuccess: (_data, variables) => {
-      // Invalidate organization apps query to refetch
-      queryClient.invalidateQueries({
+      // Refetch organization apps and general apps list directly
+      queryClient.refetchQueries({
         queryKey: ["organizationApps", variables.orgId],
+      });
+      queryClient.refetchQueries({
+        queryKey: ["apps"],
       });
     },
   });
@@ -72,7 +81,40 @@ export function useApp(appId: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["app", appId, accountId],
     queryFn: () => getAppService(appId, accountId ?? undefined),
-    enabled: (options?.enabled ?? true) && !!appId,
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+/**
+ * Get app overview with statistics and chart data
+ * Automatically includes x-account-id header from current organization
+ * Supports filtering by date range and channels
+ */
+export function useAppOverview(
+  appId: string,
+  params?: {
+    startDate?: string;
+    endDate?: string;
+    channels?: string[];
+  },
+  options?: { enabled?: boolean }
+) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["appOverview", appId, accountId, params],
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.startDate) queryParams.append("startDate", params.startDate);
+      if (params?.endDate) queryParams.append("endDate", params.endDate);
+      if (params?.channels?.length) queryParams.append("channels", params.channels.join(","));
+
+      const query = queryParams.toString();
+      const url = query ? `${appId}?${query}` : appId;
+
+      return getAppOverviewService(url, accountId ?? undefined);
+    },
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
   });
 }
 
@@ -229,5 +271,75 @@ export function useAppNotifications(
     ],
     queryFn: () => getAppNotificationsService(appId, params, accountId ?? undefined),
     enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+// ──────────────────────────────────────────
+// API KEYS HOOKS
+// ──────────────────────────────────────────
+
+/**
+ * Create API key
+ */
+export function useCreateApiKey() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: CreateApiKeyPayload }) =>
+      createApiKeyService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      // Invalidate API keys query to refetch
+      queryClient.invalidateQueries({
+        queryKey: ["apiKeys", appId, accountId],
+      });
+    },
+  });
+}
+
+/**
+ * Get all API keys for an app
+ * Automatically includes x-account-id header from current organization
+ */
+export function useApiKeys(appId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["apiKeys", appId, accountId],
+    queryFn: () => getApiKeysService(appId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!accountId,
+  });
+}
+
+/**
+ * Get single API key
+ * Automatically includes x-account-id header from current organization
+ */
+export function useApiKey(appId: string, keyId: string, options?: { enabled?: boolean }) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["apiKey", appId, keyId, accountId],
+    queryFn: () => getApiKeyService(appId, keyId, accountId ?? undefined),
+    enabled: (options?.enabled ?? true) && !!appId && !!keyId && !!accountId,
+  });
+}
+
+/**
+ * Delete API key
+ */
+export function useDeleteApiKey() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, keyId }: { appId: string; keyId: string }) =>
+      deleteApiKeyService(appId, keyId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      // Invalidate API keys query to refetch
+      queryClient.invalidateQueries({
+        queryKey: ["apiKeys", appId, accountId],
+      });
+    },
   });
 }
