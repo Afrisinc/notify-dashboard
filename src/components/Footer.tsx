@@ -33,14 +33,14 @@ const Footer = () => (
         <div>
           <h4 className="heading-label">Legal</h4>
           <ul className="space-y-2">
-            <li><a href="#" className="heading-description hover:text-foreground">Privacy Policy</a></li>
-            <li><a href="#" className="heading-description hover:text-foreground">Terms of Service</a></li>
-            <li><a href="#" className="heading-description hover:text-foreground">DPA</a></li>
+            <li><Link to="/privacy" className="heading-description hover:text-foreground">Privacy Policy</Link></li>
+            <li><Link to="/terms" className="heading-description hover:text-foreground">Terms of Service</Link></li>
+            <li><Link to="/dpa" className="heading-description hover:text-foreground">DPA</Link></li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border/50 mt-10 pt-6 text-center text-sm text-muted-foreground">
-        © 2026 Notifyr. All rights reserved.
+        © 2026 AfriSinc Notify. All rights reserved.
       </div>
     </div>
   </footer>

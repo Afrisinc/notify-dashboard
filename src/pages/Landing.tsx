@@ -3,7 +3,10 @@ import { Zap, Mail, MessageSquare, Bell, ArrowRight, Shield, BarChart3, Code2 } 
 import { motion } from "framer-motion";
 import { getAuthUrls } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { Testimonials } from "@/components/public/landing/Testimonials";
+import { TrustBadges } from "@/components/public/landing/TrustBadges";
+import { HowItWorks } from "@/components/public/landing/HowItWorks";
+import { FAQ } from "@/components/public/landing/FAQ";
 
 const features = [
   { icon: Mail, title: "Email", description: "Transactional and marketing emails with rich templates." },
@@ -28,7 +31,6 @@ const stagger = {
 };
 
 const Landing = () => {
-  const { user } = useAuth();
   const { signupUrl } = getAuthUrls();
 
   return (
@@ -51,7 +53,7 @@ const Landing = () => {
             className="heading-hero mb-6 animate-fade-up"
           >
             Send notifications,{" "}
-            <span className="text-primary">not headaches</span>
+            <span className="text-gradient-primary">not headaches</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -69,15 +71,9 @@ const Landing = () => {
             className="flex items-center justify-center gap-4"
           >
             <Button asChild variant="default" size="md">
-              {user ? (
-                <Link to="/dashboard">
-                  Go to App <ArrowRight className="h-4 w-4" />
-                </Link>
-              ) : (
-                <a href={signupUrl}>
-                  Start for free <ArrowRight className="h-4 w-4" />
-                </a>
-              )}
+              <a href={signupUrl}>
+                Start for free <ArrowRight className="h-4 w-4" />
+              </a>
             </Button>
             <Button asChild variant="secondary-outline" size="md">
               <Link to="/pricing">
@@ -87,6 +83,9 @@ const Landing = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Trust Badges */}
+      <TrustBadges />
 
       {/* Features */}
       <section className="py-20 border-t border-border/50">
@@ -125,6 +124,15 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* How It Works */}
+      <HowItWorks />
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* FAQ */}
+      <FAQ />
+
       {/* CTA */}
       <section className="py-20 border-t border-border/50">
         <motion.div
@@ -141,15 +149,9 @@ const Landing = () => {
             Create your account and start sending notifications in under 5 minutes.
           </p>
           <Button asChild variant="primary-solid" size="md">
-            {user ? (
-              <Link to="/dashboard">
-                Go to App <ArrowRight className="h-4 w-4" />
-              </Link>
-            ) : (
-              <a href={signupUrl}>
-                Create free account <ArrowRight className="h-4 w-4" />
-              </a>
-            )}
+            <a href={signupUrl}>
+              Create free account <ArrowRight className="h-4 w-4" />
+            </a>
           </Button>
         </motion.div>
       </section>
