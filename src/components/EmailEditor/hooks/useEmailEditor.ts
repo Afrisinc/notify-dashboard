@@ -1,12 +1,12 @@
 /**
  * useEmailEditor Hook
  *
- * Manages email template editor state for AfriSinc Notify backend integration.
+ * Manages email template editor state for Notifyr backend integration.
  *
  * Features:
- * - Load templates from AfriSinc Notify API with design_json extraction
+ * - Load templates from Notifyr API with design_json extraction
  * - Manage editor state (template name, subject, HTML content, JSON document)
- * - Save to AfriSinc Notify backend with React Query mutations
+ * - Save to Notifyr backend with React Query mutations
  * - Automatic cache invalidation on create/update
  * - Round-trip editing support (JSON embedded in HTML comments)
  * - HTML export for email testing

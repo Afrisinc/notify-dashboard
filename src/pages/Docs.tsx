@@ -1,5 +1,8 @@
+import { useState, useCallback } from "react";
 import { Code2, Copy, CheckCheck } from "lucide-react";
-import { useState } from "react";
+import { DocsSidebar } from "@/components/public/docs/DocsSidebar";
+import { DocsSearch } from "@/components/public/docs/DocsSearch";
+import { APIBuilder } from "@/components/public/docs/APIBuilder";
 
 const CodeBlock = ({ code, language = "bash" }: { code: string; language?: string }) => {
   const [copied, setCopied] = useState(false);
@@ -21,141 +24,188 @@ const CodeBlock = ({ code, language = "bash" }: { code: string; language?: strin
   );
 };
 
+const NAV_ITEMS = [
+  {
+    id: "getting-started",
+    title: "Getting Started",
+    children: [
+      { id: "intro", title: "Introduction" },
+      { id: "auth", title: "Authentication" },
+      { id: "first-call", title: "Your First API Call" },
+    ],
+  },
+  {
+    id: "api-reference",
+    title: "API Reference",
+    children: [
+      { id: "send", title: "Send Notification" },
+      { id: "templates", title: "Templates" },
+      { id: "channels", title: "Channels" },
+      { id: "api-explorer", title: "API Explorer" },
+    ],
+  },
+  {
+    id: "guides",
+    title: "Guides",
+    children: [
+      { id: "variables", title: "Using Variables" },
+      { id: "rate-limits", title: "Rate Limiting" },
+    ],
+  },
+];
+
+const SEARCHABLE_SECTIONS = [
+  { id: "intro", title: "Introduction", content: "Notifyr is a multi-channel notification platform." },
+  { id: "auth", title: "Authentication", content: "All API requests require an API key passed in the Authorization header." },
+  { id: "send", title: "Send Notification", content: "Use the POST /api/v1/send endpoint to deliver email, SMS, or push notifications." },
+  { id: "templates", title: "Templates", content: "Templates let you define reusable message formats with variable placeholders." },
+  { id: "channels", title: "Channels", content: "We support Email, SMS, and Push notification channels." },
+  { id: "rate-limits", title: "Rate Limits", content: "Rate limits vary by plan from 60 to unlimited requests per minute." },
+  { id: "api-explorer", title: "API Explorer", content: "Interactive API endpoint tester for sending test requests." },
+];
+
 const Docs = () => {
+  const [activeId, setActiveId] = useState("intro");
+
+  const handleNavigate = useCallback((id: string) => {
+    setActiveId(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   return (
     <div className="min-h-screen">
-      <div className="container max-w-3xl py-16 space-y-12">
-        <div className="flex flex-col items-center">
-          <img src="/notify-logo.svg" alt="Notify Logo" style={{ width: 80, height: 80 }} />
-          <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-4 mt-4">
-            <Code2 className="h-3 w-3" /> Developer Documentation
+      <div className="container py-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+          <div className="flex items-center gap-3">
+            <img src="/notify-logo.svg" alt="Notify Logo" className="h-10 w-10" />
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-1">
+                <Code2 className="h-3 w-3" /> Developer Documentation
+              </div>
+              <h1 className="text-2xl font-bold">Notifyr API Docs</h1>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold mb-3">Getting Started with Notifyr API</h1>
-          <p className="text-muted-foreground">
-            Send notifications programmatically using our REST API. This guide covers authentication,
-            sending your first notification, and using templates.
-          </p>
+          <DocsSearch sections={SEARCHABLE_SECTIONS} onNavigate={handleNavigate} />
         </div>
 
-        {/* Auth */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Authentication</h2>
-          <p className="text-sm text-muted-foreground">
-            All API requests require an API key passed in the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">Authorization</code> header.
-            Generate keys from the <strong>API Keys</strong> page in your dashboard.
-          </p>
-          <CodeBlock
-            language="http"
-            code={`GET /api/v1/notifications
-Authorization: Bearer ntfr_sk_live_abc123def456`}
-          />
-        </section>
+        <div className="flex gap-8">
+          <DocsSidebar items={NAV_ITEMS} activeId={activeId} onNavigate={handleNavigate} />
 
-        {/* Send */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Send a Notification</h2>
-          <p className="text-sm text-muted-foreground">
-            Use the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">POST /api/v1/send</code> endpoint
-            to deliver email, SMS, or push notifications.
-          </p>
-          <CodeBlock
-            language="curl"
-            code={`curl -X POST https://api.notifyr.dev/v1/send \\
-  -H "Authorization: Bearer ntfr_sk_live_abc123" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "channel": "EMAIL",
-    "recipient": "user@example.com",
-    "template_id": "tpl_welcome",
-    "payload": {
-      "name": "Jane",
-      "company": "Afrisinc"
-    }
-  }'`}
-          />
-          <h3 className="text-sm font-semibold mt-4">Response</h3>
-          <CodeBlock
-            language="json"
-            code={`{
-  "id": "ntf_01HX...",
-  "status": "QUEUED",
-  "channel": "EMAIL",
-  "created_at": "2026-02-27T14:30:00Z"
-}`}
-          />
-        </section>
+          <div className="flex-1 max-w-3xl space-y-12">
+            {/* Intro */}
+            <section id="intro" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Introduction</h2>
+              <p className="text-sm text-muted-foreground">
+                Notifyr lets you send notifications programmatically using our REST API.
+                This guide covers authentication, sending your first notification, and using templates.
+              </p>
+            </section>
 
-        {/* Templates */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Using Templates</h2>
-          <p className="text-sm text-muted-foreground">
-            Templates let you define reusable message formats. Use <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">{"{{variable}}"}</code> placeholders
-            and pass data at send time.
-          </p>
-          <CodeBlock
-            language="javascript"
-            code={`import { Notifyr } from "@notifyr/node";
+            {/* Auth */}
+            <section id="auth" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Authentication</h2>
+              <p className="text-sm text-muted-foreground">
+                All API requests require an API key passed in the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">Authorization</code> header.
+                Generate keys from the <strong>API Keys</strong> page in your dashboard.
+              </p>
+              <CodeBlock
+                language="http"
+                code={`GET /api/v1/notifications\nAuthorization: Bearer ntfr_sk_live_abc123def456`}
+              />
+            </section>
 
-const notifyr = new Notifyr("ntfr_sk_live_abc123");
+            {/* Send */}
+            <section id="send" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Send a Notification</h2>
+              <p className="text-sm text-muted-foreground">
+                Use the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">POST /api/v1/send</code> endpoint
+                to deliver email, SMS, or push notifications.
+              </p>
+              <CodeBlock
+                language="curl"
+                code={`curl -X POST https://api.notifyr.dev/v1/send \\\n  -H "Authorization: Bearer ntfr_sk_live_abc123" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "channel": "email",\n    "to": "user@example.com",\n    "template_id": "tpl_welcome",\n    "data": {\n      "name": "Jane",\n      "company": "Acme"\n    }\n  }'`}
+              />
+              <h3 className="text-sm font-semibold mt-4">Response</h3>
+              <CodeBlock
+                language="json"
+                code={`{\n  "id": "ntf_01HX...",\n  "status": "queued",\n  "channel": "email",\n  "created_at": "2026-02-27T14:30:00Z"\n}`}
+              />
+            </section>
 
-await notifyr.send({
-  channel: "sms",
-  to: "+15550123",
-  template: "otp_code",
-  data: { code: "482901" },
-});`}
-          />
-        </section>
+            {/* Templates */}
+            <section id="templates" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Using Templates</h2>
+              <p className="text-sm text-muted-foreground">
+                Templates let you define reusable message formats. Use <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">{"{{variable}}"}</code> placeholders
+                and pass data at send time.
+              </p>
+              <CodeBlock
+                language="javascript"
+                code={`import { Notifyr } from "@notifyr/node";\n\nconst notifyr = new Notifyr("ntfr_sk_live_abc123");\n\nawait notifyr.send({\n  channel: "sms",\n  to: "+15550123",\n  template: "otp_code",\n  data: { code: "482901" },\n});`}
+              />
+            </section>
 
-        {/* Channels */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Channels</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { ch: "Email", desc: "HTML or plain-text transactional emails." },
-              { ch: "SMS", desc: "Short messages via global carrier network." },
-              { ch: "Push", desc: "Browser and mobile push notifications." },
-            ].map(({ ch, desc }) => (
-              <div key={ch} className="bg-card border border-border rounded-xl p-4">
-                <h3 className="font-semibold text-sm mb-1">{ch}</h3>
-                <p className="text-xs text-muted-foreground">{desc}</p>
+            {/* Channels */}
+            <section id="channels" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Channels</h2>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  { ch: "Email", desc: "HTML or plain-text transactional emails." },
+                  { ch: "SMS", desc: "Short messages via global carrier network." },
+                  { ch: "Push", desc: "Browser and mobile push notifications." },
+                ].map(({ ch, desc }) => (
+                  <div key={ch} className="bg-card border border-border rounded-xl p-4">
+                    <h3 className="font-semibold text-sm mb-1">{ch}</h3>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        {/* Rate Limits */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Rate Limits</h2>
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-muted-foreground">
-                  <th className="text-left font-medium px-4 py-3">Plan</th>
-                  <th className="text-left font-medium px-4 py-3">Requests/min</th>
-                  <th className="text-left font-medium px-4 py-3">Monthly limit</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-border/50">
-                  <td className="px-4 py-3">Free</td>
-                  <td className="px-4 py-3 font-mono text-xs">60</td>
-                  <td className="px-4 py-3 font-mono text-xs">1,000</td>
-                </tr>
-                <tr className="border-b border-border/50">
-                  <td className="px-4 py-3">Pro</td>
-                  <td className="px-4 py-3 font-mono text-xs">600</td>
-                  <td className="px-4 py-3 font-mono text-xs">50,000</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3">Enterprise</td>
-                  <td className="px-4 py-3 font-mono text-xs">Unlimited</td>
-                  <td className="px-4 py-3 font-mono text-xs">Custom</td>
-                </tr>
-              </tbody>
-            </table>
+            {/* API Explorer */}
+            <section id="api-explorer" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">API Explorer</h2>
+              <p className="text-sm text-muted-foreground">
+                Test API endpoints interactively. Select an endpoint, configure the request, and send.
+              </p>
+              <APIBuilder />
+            </section>
+
+            {/* Rate Limits */}
+            <section id="rate-limits" className="scroll-mt-24 space-y-4">
+              <h2 className="text-xl font-bold">Rate Limits</h2>
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-muted-foreground">
+                      <th className="text-left font-medium px-4 py-3">Plan</th>
+                      <th className="text-left font-medium px-4 py-3">Requests/min</th>
+                      <th className="text-left font-medium px-4 py-3">Monthly limit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-border/50">
+                      <td className="px-4 py-3">Free</td>
+                      <td className="px-4 py-3 font-mono text-xs">60</td>
+                      <td className="px-4 py-3 font-mono text-xs">1,000</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="px-4 py-3">Pro</td>
+                      <td className="px-4 py-3 font-mono text-xs">600</td>
+                      <td className="px-4 py-3 font-mono text-xs">50,000</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3">Enterprise</td>
+                      <td className="px-4 py-3 font-mono text-xs">Unlimited</td>
+                      <td className="px-4 py-3 font-mono text-xs">Custom</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   );

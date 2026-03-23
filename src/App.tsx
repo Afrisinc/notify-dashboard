@@ -32,6 +32,12 @@ import OnboardingGettingStarted from "./pages/OnboardingGettingStarted";
 import InviteAccept from "./pages/InviteAccept";
 import NotFound from "./pages/NotFound";
 
+// Legal pages
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import Terms from "./pages/legal/Terms";
+import DPA from "./pages/legal/DPA";
+
+
 // Dashboard pages
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import AppsList from "./pages/dashboard/AppsList";
@@ -90,6 +96,9 @@ const App = () => {
                     <Route path="/docs" element={<Docs />} />
                     <Route path="/templates" element={<TemplateGallery />} />
                     <Route path="/templates/:channel/:slug" element={<TemplatePreview />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/dpa" element={<DPA />} />
                   </Route>
 
                   {/* ── Auth ── */}
