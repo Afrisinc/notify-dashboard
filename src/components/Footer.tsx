@@ -39,8 +39,9 @@ const Footer = () => (
           </ul>
         </div>
       </div>
-      <div className="border-t border-border/50 mt-10 pt-6 text-center text-sm text-muted-foreground">
-        © 2026 Notifyr. All rights reserved.
+      <div className="border-t border-border/50 mt-10 pt-6 text-center">
+        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Notifyr. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground/70 mt-1">An Afrisinc Product</p>
       </div>
     </div>
   </footer>
