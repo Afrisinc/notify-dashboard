@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInviteDetails, useAcceptInvite } from "@/hooks/useOrganization";
+import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Mail, Building2, AlertCircle } from "lucide-react";
@@ -44,10 +45,11 @@ export default function InviteAccept() {
   // Loading state
   if (inviteLoading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero relative p-4">
+        <BackgroundDecorator />
+        <Card className="w-full max-w-md relative z-10">
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Loading invite details...</p>
+            <p className="text-foreground/70 dark:text-foreground/80">Loading invite details...</p>
           </CardContent>
         </Card>
       </div>
@@ -57,12 +59,13 @@ export default function InviteAccept() {
   // Error state
   if (inviteError || !invite) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md border-destructive/30">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero relative p-4">
+        <BackgroundDecorator />
+        <Card className="w-full max-w-md border-destructive/30 relative z-10">
           <CardContent className="py-8">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-center mb-2">Invalid or Expired Invite</h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">
+            <p className="text-sm text-foreground/70 dark:text-foreground/80 text-center mb-6">
               This invite link is invalid or has expired. Please ask the organization admin to send you a new invite.
             </p>
             <Button onClick={() => navigate("/signin")} className="w-full">
@@ -77,12 +80,13 @@ export default function InviteAccept() {
   // Already accepted
   if (invite.accepted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md border-success/30">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero relative p-4">
+        <BackgroundDecorator />
+        <Card className="w-full max-w-md border-success/30 relative z-10">
           <CardContent className="py-8">
             <CheckCircle className="h-12 w-12 text-success mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-center mb-2">Already Accepted</h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">
+            <p className="text-sm text-foreground/70 dark:text-foreground/80 text-center mb-6">
               This invite has already been accepted.
             </p>
             <Button onClick={() => navigate("/dashboard")} className="w-full">
@@ -98,8 +102,9 @@ export default function InviteAccept() {
   const emailMismatch = user && user.email !== invite.email;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero relative p-4">
+      <BackgroundDecorator />
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader>
           <CardTitle className="text-center">Join Organization</CardTitle>
         </CardHeader>
@@ -109,18 +114,18 @@ export default function InviteAccept() {
             <div className="flex items-center gap-3">
               <Building2 className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-xs text-muted-foreground">Organization</p>
+                <p className="text-xs text-foreground/70 dark:text-foreground/80">Organization</p>
                 <p className="font-semibold">{invite.organizationName}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-xs text-muted-foreground">Invite Email</p>
+                <p className="text-xs text-foreground/70 dark:text-foreground/80">Invite Email</p>
                 <p className="font-semibold">{invite.email}</p>
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-foreground/70 dark:text-foreground/80">
               <p className="capitalize">Role: <span className="font-medium text-foreground">{invite.role}</span></p>
               <p>Invited by: <span className="font-medium text-foreground">{invite.invitedBy}</span></p>
             </div>
@@ -141,7 +146,7 @@ export default function InviteAccept() {
           {/* Logged In - Accept Button */}
           {user && !emailMismatch ? (
             <>
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-sm text-foreground/70 dark:text-foreground/80 text-center">
                 Click below to accept this invite and join {invite.organizationName}
               </p>
               <Button
@@ -164,7 +169,7 @@ export default function InviteAccept() {
               {/* Not Logged In - Register */}
               {!user ? (
                 <>
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-sm text-foreground/70 dark:text-foreground/80 text-center">
                     Sign in or create an account to accept this invite
                   </p>
                   <Button onClick={() => navigate(`/signup?email=${invite.email}`)} className="w-full">
@@ -175,7 +180,7 @@ export default function InviteAccept() {
                       <span className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Or</span>
+                      <span className="bg-background px-2 text-foreground/70 dark:text-foreground/80">Or</span>
                     </div>
                   </div>
                   <Button

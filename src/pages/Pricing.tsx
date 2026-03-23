@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
+import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import { PricingToggle } from "@/components/pricing/PricingToggle";
 import { FeatureComparisonTable } from "@/components/pricing/FeatureComparisonTable";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
@@ -39,11 +40,12 @@ const Pricing = () => {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
   return (
-    <div className="py-20">
-      <div className="container max-w-5xl">
+    <div className="py-20 bg-gradient-hero relative">
+      <BackgroundDecorator />
+      <div className="container max-w-5xl relative z-10">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Simple, transparent pricing</h1>
-          <p className="text-muted-foreground text-lg mb-8">No hidden fees. Scale as you grow.</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 dark:text-white">Simple, transparent pricing</h1>
+          <p className="text-foreground/80 text-lg mb-8">No hidden fees. Scale as you grow.</p>
           <PricingToggle value={billing} onChange={setBilling} savingsPercent={20} />
         </div>
 
@@ -59,15 +61,15 @@ const Pricing = () => {
                     : "border-border bg-card"
                 }`}
               >
-                <h3 className="font-semibold text-lg">{tier.name}</h3>
+                <h3 className="font-semibold text-lg dark:text-white">{tier.name}</h3>
                 <div className="mt-2 mb-1">
-                  <span className="text-3xl font-bold">{price}</span>
-                  {price !== "Custom" && <span className="text-muted-foreground text-sm">/month</span>}
+                  <span className="text-3xl font-bold dark:text-white">{price}</span>
+                  {price !== "Custom" && <span className="text-foreground/70 text-sm">/month</span>}
                 </div>
-                <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
+                <p className="text-sm text-foreground/75 mb-6">{tier.description}</p>
                 <ul className="space-y-3 mb-8 flex-1">
                   {tier.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
+                    <li key={f} className="flex items-center gap-2 text-sm dark:text-white">
                       <Check className="h-4 w-4 text-primary shrink-0" />
                       {f}
                     </li>
@@ -78,7 +80,7 @@ const Pricing = () => {
                   className={`text-center text-sm font-medium py-2.5 rounded-lg transition-colors ${
                     tier.highlighted
                       ? "bg-primary text-primary-foreground hover:opacity-90"
-                      : "border border-border hover:bg-secondary"
+                      : "border border-border/80 text-foreground hover:bg-foreground/5 dark:hover:bg-foreground/10"
                   }`}
                 >
                   {tier.cta}

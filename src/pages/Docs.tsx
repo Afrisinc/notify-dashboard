@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Code2, Copy, CheckCheck } from "lucide-react";
+import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import { DocsSidebar } from "@/components/public/docs/DocsSidebar";
 import { DocsSearch } from "@/components/public/docs/DocsSearch";
 import { APIBuilder } from "@/components/public/docs/APIBuilder";
@@ -13,7 +14,7 @@ const CodeBlock = ({ code, language = "bash" }: { code: string; language?: strin
   };
   return (
     <div className="relative bg-card border border-border rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border text-xs text-muted-foreground">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border text-xs text-foreground/70 dark:text-foreground/80">
         <span>{language}</span>
         <button onClick={copy} className="hover:text-foreground transition-colors">
           {copied ? <CheckCheck className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
@@ -73,8 +74,9 @@ const Docs = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <div className="container py-10">
+    <div className="min-h-screen bg-gradient-hero relative">
+      <BackgroundDecorator />
+      <div className="container py-10 relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-3">
@@ -83,7 +85,7 @@ const Docs = () => {
               <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-1">
                 <Code2 className="h-3 w-3" /> Developer Documentation
               </div>
-              <h1 className="text-2xl font-bold">Notifyr API Docs</h1>
+              <h1 className="text-2xl font-bold dark:text-white">Notifyr API Docs</h1>
             </div>
           </div>
           <DocsSearch sections={SEARCHABLE_SECTIONS} onNavigate={handleNavigate} />
@@ -95,8 +97,8 @@ const Docs = () => {
           <div className="flex-1 max-w-3xl space-y-12">
             {/* Intro */}
             <section id="intro" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Introduction</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl font-bold dark:text-white">Introduction</h2>
+              <p className="text-sm text-foreground/70 dark:text-foreground/80">
                 Notifyr lets you send notifications programmatically using our REST API.
                 This guide covers authentication, sending your first notification, and using templates.
               </p>
@@ -104,8 +106,8 @@ const Docs = () => {
 
             {/* Auth */}
             <section id="auth" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Authentication</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl font-bold dark:text-white">Authentication</h2>
+              <p className="text-sm text-foreground/70 dark:text-foreground/80">
                 All API requests require an API key passed in the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">Authorization</code> header.
                 Generate keys from the <strong>API Keys</strong> page in your dashboard.
               </p>
@@ -117,8 +119,8 @@ const Docs = () => {
 
             {/* Send */}
             <section id="send" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Send a Notification</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl font-bold dark:text-white">Send a Notification</h2>
+              <p className="text-sm text-foreground/70 dark:text-foreground/80">
                 Use the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">POST /api/v1/send</code> endpoint
                 to deliver email, SMS, or push notifications.
               </p>
@@ -126,7 +128,7 @@ const Docs = () => {
                 language="curl"
                 code={`curl -X POST https://api.notifyr.dev/v1/send \\\n  -H "Authorization: Bearer ntfr_sk_live_abc123" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "channel": "email",\n    "to": "user@example.com",\n    "template_id": "tpl_welcome",\n    "data": {\n      "name": "Jane",\n      "company": "Acme"\n    }\n  }'`}
               />
-              <h3 className="text-sm font-semibold mt-4">Response</h3>
+              <h3 className="text-sm font-semibold mt-4 dark:text-white">Response</h3>
               <CodeBlock
                 language="json"
                 code={`{\n  "id": "ntf_01HX...",\n  "status": "queued",\n  "channel": "email",\n  "created_at": "2026-02-27T14:30:00Z"\n}`}
@@ -135,8 +137,8 @@ const Docs = () => {
 
             {/* Templates */}
             <section id="templates" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Using Templates</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl font-bold dark:text-white">Using Templates</h2>
+              <p className="text-sm text-foreground/70 dark:text-foreground/80">
                 Templates let you define reusable message formats. Use <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">{"{{variable}}"}</code> placeholders
                 and pass data at send time.
               </p>
@@ -148,7 +150,7 @@ const Docs = () => {
 
             {/* Channels */}
             <section id="channels" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Channels</h2>
+              <h2 className="text-xl font-bold dark:text-white">Channels</h2>
               <div className="grid gap-4 sm:grid-cols-3">
                 {[
                   { ch: "Email", desc: "HTML or plain-text transactional emails." },
@@ -156,8 +158,8 @@ const Docs = () => {
                   { ch: "Push", desc: "Browser and mobile push notifications." },
                 ].map(({ ch, desc }) => (
                   <div key={ch} className="bg-card border border-border rounded-xl p-4">
-                    <h3 className="font-semibold text-sm mb-1">{ch}</h3>
-                    <p className="text-xs text-muted-foreground">{desc}</p>
+                    <h3 className="font-semibold text-sm mb-1 text-foreground dark:text-white">{ch}</h3>
+                    <p className="text-xs text-foreground/70 dark:text-foreground/80">{desc}</p>
                   </div>
                 ))}
               </div>
@@ -165,8 +167,8 @@ const Docs = () => {
 
             {/* API Explorer */}
             <section id="api-explorer" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">API Explorer</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl font-bold dark:text-white">API Explorer</h2>
+              <p className="text-sm text-foreground/70 dark:text-foreground/80">
                 Test API endpoints interactively. Select an endpoint, configure the request, and send.
               </p>
               <APIBuilder />
@@ -174,11 +176,11 @@ const Docs = () => {
 
             {/* Rate Limits */}
             <section id="rate-limits" className="scroll-mt-24 space-y-4">
-              <h2 className="text-xl font-bold">Rate Limits</h2>
+              <h2 className="text-xl font-bold dark:text-white">Rate Limits</h2>
               <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border text-muted-foreground">
+                    <tr className="border-b border-border text-foreground/70 dark:text-foreground/80">
                       <th className="text-left font-medium px-4 py-3">Plan</th>
                       <th className="text-left font-medium px-4 py-3">Requests/min</th>
                       <th className="text-left font-medium px-4 py-3">Monthly limit</th>
@@ -186,19 +188,19 @@ const Docs = () => {
                   </thead>
                   <tbody>
                     <tr className="border-b border-border/50">
-                      <td className="px-4 py-3">Free</td>
-                      <td className="px-4 py-3 font-mono text-xs">60</td>
-                      <td className="px-4 py-3 font-mono text-xs">1,000</td>
+                      <td className="px-4 py-3 text-foreground dark:text-white">Free</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">60</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">1,000</td>
                     </tr>
                     <tr className="border-b border-border/50">
-                      <td className="px-4 py-3">Pro</td>
-                      <td className="px-4 py-3 font-mono text-xs">600</td>
-                      <td className="px-4 py-3 font-mono text-xs">50,000</td>
+                      <td className="px-4 py-3 text-foreground dark:text-white">Pro</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">600</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">50,000</td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-3">Enterprise</td>
-                      <td className="px-4 py-3 font-mono text-xs">Unlimited</td>
-                      <td className="px-4 py-3 font-mono text-xs">Custom</td>
+                      <td className="px-4 py-3 text-foreground dark:text-white">Enterprise</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">Unlimited</td>
+                      <td className="px-4 py-3 font-mono text-xs text-foreground dark:text-white">Custom</td>
                     </tr>
                   </tbody>
                 </table>

@@ -110,7 +110,7 @@ export default function TemplatePreview() {
         <div className="container px-4 py-4">
           <button
             onClick={() => navigate("/templates")}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            className="flex items-center gap-2 text-sm text-foreground/70 dark:text-foreground/80 hover:text-foreground dark:hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to gallery
@@ -170,7 +170,7 @@ export default function TemplatePreview() {
                       dangerouslySetInnerHTML={{ __html: template.content.email.html }}
                     />
                   ) : (
-                    <p className="text-muted-foreground">{template.content.email.body || "No content"}</p>
+                    <p className="text-foreground/70 dark:text-foreground/80">{template.content.email.body || "No content"}</p>
                   )}
                 </div>
               </div>

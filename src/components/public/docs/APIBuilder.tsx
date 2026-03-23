@@ -64,7 +64,7 @@ export function APIBuilder({ baseUrl = "https://api.notifyr.dev" }: { baseUrl?: 
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
         <span className="text-sm font-semibold text-foreground">API Explorer</span>
-        <button onClick={copyCode} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+        <button onClick={copyCode} className="text-xs text-foreground/70 dark:text-foreground/80 hover:text-foreground flex items-center gap-1">
           {copied ? <CheckCheck className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copied" : "Copy as cURL"}
         </button>
@@ -89,7 +89,7 @@ export function APIBuilder({ baseUrl = "https://api.notifyr.dev" }: { baseUrl?: 
 
         {(selected.method === "POST" || selected.method === "PUT") && (
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Request Body</label>
+            <label className="text-xs font-medium text-foreground/70 dark:text-foreground/80 mb-1 block">Request Body</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
@@ -105,7 +105,7 @@ export function APIBuilder({ baseUrl = "https://api.notifyr.dev" }: { baseUrl?: 
 
         {response && (
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Response</label>
+            <label className="text-xs font-medium text-foreground/70 dark:text-foreground/80 mb-1 block">Response</label>
             <pre className="bg-background border border-border rounded-lg p-3 font-mono text-xs text-foreground overflow-x-auto">
               {response}
             </pre>

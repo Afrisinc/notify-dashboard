@@ -9,7 +9,7 @@ interface PricingToggleProps {
 export function PricingToggle({ value, onChange, savingsPercent = 20 }: PricingToggleProps) {
   return (
     <div className="flex items-center justify-center gap-3">
-      <span className={`text-sm font-medium ${value === "monthly" ? "text-foreground" : "text-muted-foreground"}`}>
+      <span className={`text-sm font-medium ${value === "monthly" ? "text-foreground dark:text-white" : "text-muted-foreground dark:text-foreground/60"}`}>
         Monthly
       </span>
       <button
@@ -17,7 +17,7 @@ export function PricingToggle({ value, onChange, savingsPercent = 20 }: PricingT
         aria-checked={value === "annual"}
         onClick={() => onChange(value === "monthly" ? "annual" : "monthly")}
         className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-          value === "annual" ? "bg-primary" : "bg-muted"
+          value === "annual" ? "bg-primary" : "bg-muted dark:bg-muted/60"
         }`}
       >
         <span
@@ -26,7 +26,7 @@ export function PricingToggle({ value, onChange, savingsPercent = 20 }: PricingT
           }`}
         />
       </button>
-      <span className={`text-sm font-medium ${value === "annual" ? "text-foreground" : "text-muted-foreground"}`}>
+      <span className={`text-sm font-medium ${value === "annual" ? "text-foreground dark:text-white" : "text-muted-foreground dark:text-foreground/60"}`}>
         Annual
       </span>
       {value === "annual" && (

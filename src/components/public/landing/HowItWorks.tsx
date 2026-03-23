@@ -27,7 +27,7 @@ export function HowItWorks({ steps = DEFAULT_STEPS }: { steps?: Step[] }) {
           className="text-center mb-14"
         >
           <h2 className="heading-section">How it works</h2>
-          <p className="text-secondary mt-3">Get started in minutes with four simple steps</p>
+          <p className="text-foreground/75 dark:text-foreground/80 mt-3">Get started in minutes with four simple steps</p>
         </motion.div>
 
         {/* Desktop: horizontal */}
@@ -47,11 +47,11 @@ export function HowItWorks({ steps = DEFAULT_STEPS }: { steps?: Step[] }) {
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3">
                   {s.icon}
                 </div>
-                <h3 className="font-semibold text-foreground mb-1">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.description}</p>
+                <h3 className="font-semibold text-foreground dark:text-white mb-1">{s.title}</h3>
+                <p className="text-sm text-foreground/70 dark:text-foreground/75">{s.description}</p>
               </motion.div>
               {i < steps.length - 1 && (
-                <ArrowRight className="h-5 w-5 text-muted-foreground/40 mt-5 shrink-0" />
+                <ArrowRight className="h-5 w-5 text-muted-foreground/70 dark:text-muted-foreground/60 mt-5 shrink-0" />
               )}
             </div>
           ))}
@@ -75,8 +75,8 @@ export function HowItWorks({ steps = DEFAULT_STEPS }: { steps?: Step[] }) {
                 {i < steps.length - 1 && <div className="w-px flex-1 bg-border my-2" />}
               </div>
               <div className="pb-8">
-                <h3 className="font-semibold text-foreground">{s.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{s.description}</p>
+                <h3 className="font-semibold text-foreground dark:text-white">{s.title}</h3>
+                <p className="text-sm text-foreground/70 dark:text-foreground/75 mt-1">{s.description}</p>
               </div>
             </motion.div>
           ))}

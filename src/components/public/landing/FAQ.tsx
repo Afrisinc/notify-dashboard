@@ -50,12 +50,12 @@ export function FAQ({
           className="text-center mb-10"
         >
           <h2 className="heading-section">Frequently asked questions</h2>
-          <p className="text-secondary mt-3">Everything you need to know about Notifyr</p>
+          <p className="text-foreground/75 dark:text-foreground/80 mt-3">Everything you need to know about Notifyr</p>
         </motion.div>
 
         {searchable && (
           <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 dark:text-foreground/60" />
             <Input
               placeholder="Search questions..."
               value={query}
@@ -72,10 +72,10 @@ export function FAQ({
               value={item.id}
               className="bg-card border border-border rounded-lg px-4 data-[state=open]:border-primary/30"
             >
-              <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline">
+              <AccordionTrigger className="text-left font-semibold text-foreground dark:text-white hover:no-underline">
                 {item.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
+              <AccordionContent className="text-foreground/80 dark:text-foreground/90 leading-relaxed">
                 {item.answer}
               </AccordionContent>
             </AccordionItem>
@@ -83,7 +83,7 @@ export function FAQ({
         </Accordion>
 
         {filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">No matching questions found.</p>
+          <p className="text-center text-foreground/70 dark:text-foreground/80 py-8">No matching questions found.</p>
         )}
       </div>
     </section>
