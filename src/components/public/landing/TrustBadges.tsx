@@ -35,8 +35,8 @@ export function TrustBadges({ badges = DEFAULT_BADGES }: { badges?: TrustBadge[]
               className="flex flex-col items-center text-center gap-2 p-4"
             >
               <div className="text-primary">{b.icon}</div>
-              <span className="text-2xl font-bold text-foreground">{b.number}</span>
-              <span className="text-sm text-muted-foreground">{b.label}</span>
+              <span className="text-2xl font-bold text-foreground dark:text-white">{b.number}</span>
+              <span className="text-sm text-foreground/70 dark:text-foreground/75">{b.label}</span>
             </motion.div>
           ))}
         </motion.div>

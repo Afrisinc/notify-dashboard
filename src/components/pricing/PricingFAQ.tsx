@@ -27,10 +27,10 @@ export function PricingFAQ() {
             value={item.id}
             className="bg-card border border-border rounded-lg px-4 data-[state=open]:border-primary/30"
           >
-            <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline">
+            <AccordionTrigger className="text-left font-semibold text-foreground dark:text-white hover:no-underline">
               {item.q}
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground leading-relaxed">
+            <AccordionContent className="text-foreground/80 dark:text-foreground/90 leading-relaxed">
               {item.a}
             </AccordionContent>
           </AccordionItem>

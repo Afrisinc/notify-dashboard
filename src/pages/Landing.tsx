@@ -3,6 +3,7 @@ import { Zap, Mail, MessageSquare, Bell, ArrowRight, Shield, BarChart3, Code2 } 
 import { motion } from "framer-motion";
 import { getAuthUrls } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import { Testimonials } from "@/components/public/landing/Testimonials";
 import { TrustBadges } from "@/components/public/landing/TrustBadges";
 import { HowItWorks } from "@/components/public/landing/HowItWorks";
@@ -36,8 +37,9 @@ const Landing = () => {
   return (
     <div>
       {/* Hero */}
-      <section className="py-24 md:py-32 overflow-hidden">
-        <div className="container text-center max-w-3xl">
+      <section className="py-24 md:py-32 overflow-hidden bg-gradient-hero relative">
+        <BackgroundDecorator />
+        <div className="container text-center max-w-3xl relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -116,8 +118,8 @@ const Landing = () => {
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <f.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="heading-subsection">{f.title}</h3>
-                <p className="text-secondary text-sm">{f.description}</p>
+                <h3 className="heading-subsection dark:text-white">{f.title}</h3>
+                <p className="text-foreground/70 dark:text-foreground/80">{f.description}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -142,10 +144,10 @@ const Landing = () => {
           transition={{ duration: 0.6 }}
           className="container text-center max-w-xl"
         >
-          <h2 className="heading-section mb-6">
+          <h2 className="heading-section mb-6 dark:text-white">
             Ready to get started?
           </h2>
-          <p className="text-secondary mb-8">
+          <p className="text-foreground/75 dark:text-foreground/80 mb-8">
             Create your account and start sending notifications in under 5 minutes.
           </p>
           <Button asChild variant="primary-solid" size="md">

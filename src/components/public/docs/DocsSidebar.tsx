@@ -25,7 +25,7 @@ function NavList({ items, activeId, onNavigate, depth = 0 }: DocsSidebarProps & 
             className={`block w-full text-left text-sm rounded-md px-3 py-1.5 transition-colors ${
               activeId === item.id
                 ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                : "text-foreground/70 dark:text-foreground/80 hover:text-foreground hover:bg-muted/50"
             }`}
           >
             {item.title}
@@ -49,7 +49,7 @@ export function DocsSidebar({ items, activeId, onNavigate }: DocsSidebarProps) {
     <>
       {/* Desktop */}
       <aside className="hidden lg:block w-60 shrink-0 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-4">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-3">Documentation</p>
+        <p className="text-xs font-semibold text-foreground/70 dark:text-foreground/80 uppercase tracking-wider mb-3 px-3">Documentation</p>
         <NavList items={items} activeId={activeId} onNavigate={onNavigate} />
       </aside>
 
@@ -62,7 +62,7 @@ export function DocsSidebar({ items, activeId, onNavigate }: DocsSidebarProps) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 pt-10">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-3">Documentation</p>
+            <p className="text-xs font-semibold text-foreground/70 dark:text-foreground/80 uppercase tracking-wider mb-3 px-3">Documentation</p>
             <NavList items={items} activeId={activeId} onNavigate={handleNav} />
           </SheetContent>
         </Sheet>

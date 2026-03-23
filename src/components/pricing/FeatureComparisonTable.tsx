@@ -30,10 +30,10 @@ function CellValue({ value }: { value: boolean | string }) {
     return value ? (
       <Check className="h-4 w-4 text-success mx-auto" />
     ) : (
-      <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />
+      <X className="h-4 w-4 text-muted-foreground/60 dark:text-muted-foreground/50 mx-auto" />
     );
   }
-  return <span className="font-semibold text-sm text-foreground">{value}</span>;
+  return <span className="font-semibold text-sm text-foreground dark:text-white">{value}</span>;
 }
 
 export function FeatureComparisonTable({ features = DEFAULT_FEATURES }: { features?: Feature[] }) {
@@ -42,10 +42,10 @@ export function FeatureComparisonTable({ features = DEFAULT_FEATURES }: { featur
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th className="text-left font-medium text-muted-foreground px-4 py-3 min-w-[200px]">Feature</th>
-            <th className="text-center font-medium text-muted-foreground px-4 py-3 w-[120px]">Free</th>
+            <th className="text-left font-medium text-foreground/70 dark:text-foreground/80 px-4 py-3 min-w-[200px]">Feature</th>
+            <th className="text-center font-medium text-foreground/70 dark:text-foreground/80 px-4 py-3 w-[120px]">Free</th>
             <th className="text-center font-medium px-4 py-3 w-[120px] text-primary">Pro</th>
-            <th className="text-center font-medium text-muted-foreground px-4 py-3 w-[120px]">Enterprise</th>
+            <th className="text-center font-medium text-foreground/70 dark:text-foreground/80 px-4 py-3 w-[120px]">Enterprise</th>
           </tr>
         </thead>
         <tbody>
@@ -56,7 +56,7 @@ export function FeatureComparisonTable({ features = DEFAULT_FEATURES }: { featur
                 i % 2 === 0 ? "" : "bg-muted/10"
               }`}
             >
-              <td className="px-4 py-3 text-foreground">{f.name}</td>
+              <td className="px-4 py-3 text-foreground dark:text-white">{f.name}</td>
               <td className="px-4 py-3 text-center"><CellValue value={f.free} /></td>
               <td className="px-4 py-3 text-center"><CellValue value={f.pro} /></td>
               <td className="px-4 py-3 text-center"><CellValue value={f.enterprise} /></td>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { useVerifyEmail } from "@/hooks/useAuth";
@@ -41,8 +42,9 @@ const VerifyEmail = () => {
   }, [token, mutate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-6 relative">
+      <BackgroundDecorator />
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <Logo/>
           <h1 className="heading-subsection">Email Verification</h1>
@@ -52,7 +54,7 @@ const VerifyEmail = () => {
           {state === "idle" && (
             <>
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <Mail className="w-8 h-8 text-muted-foreground" />
+                <Mail className="w-8 h-8 text-foreground/60 dark:text-foreground/70" />
               </div>
               <h2 className="heading-label">Check your inbox</h2>
               <p className="text-secondary text-sm">

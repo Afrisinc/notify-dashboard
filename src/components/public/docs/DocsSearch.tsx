@@ -67,11 +67,11 @@ export function DocsSearch({ sections, onNavigate }: DocsSearchProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 text-sm text-muted-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors w-full md:w-auto"
+        className="flex items-center gap-2 text-sm text-foreground/70 dark:text-foreground/80 border border-border rounded-lg px-3 py-2 hover:bg-muted/50 transition-colors w-full md:w-auto"
       >
         <Search className="h-4 w-4" />
         <span>Search docs...</span>
-        <kbd className="hidden md:inline-flex ml-auto text-xs border border-border rounded px-1.5 py-0.5 text-muted-foreground">
+        <kbd className="hidden md:inline-flex ml-auto text-xs border border-border rounded px-1.5 py-0.5 text-foreground/70 dark:text-foreground/80">
           ⌘K
         </kbd>
       </button>
@@ -79,17 +79,17 @@ export function DocsSearch({ sections, onNavigate }: DocsSearchProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="p-0 gap-0 max-w-lg">
           <div className="flex items-center border-b border-border px-4">
-            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Search className="h-4 w-4 text-foreground/70 dark:text-foreground/80 shrink-0" />
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
               onKeyDown={handleKeyDown}
               placeholder="Search documentation..."
-              className="flex-1 bg-transparent border-0 py-3 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="flex-1 bg-transparent border-0 py-3 px-3 text-sm text-foreground placeholder:text-foreground/70 dark:text-foreground/80 focus:outline-none"
             />
             {query && (
-              <button onClick={() => setQuery("")} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setQuery("")} className="text-foreground/70 dark:text-foreground/80 hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -98,7 +98,7 @@ export function DocsSearch({ sections, onNavigate }: DocsSearchProps) {
           {query.length > 1 && (
             <div className="max-h-72 overflow-y-auto p-2">
               {results.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No results found</p>
+                <p className="text-sm text-foreground/70 dark:text-foreground/80 text-center py-6">No results found</p>
               ) : (
                 results.map((r, i) => (
                   <button
@@ -109,7 +109,7 @@ export function DocsSearch({ sections, onNavigate }: DocsSearchProps) {
                     }`}
                   >
                     <span className="font-medium">{r.title}</span>
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    <p className="text-xs text-foreground/70 dark:text-foreground/80 mt-0.5 truncate">
                       {r.content.substring(0, 80)}...
                     </p>
                   </button>

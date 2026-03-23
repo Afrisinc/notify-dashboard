@@ -82,15 +82,15 @@ export default function TemplateGallery() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="heading-hero mb-4">Explore Notification Templates</h1>
-            <p className="text-subtitle text-muted-foreground mb-8">
+            <h1 className="heading-hero mb-4 dark:text-white">Explore Notification Templates</h1>
+            <p className="text-subtitle text-foreground/75 dark:text-foreground/80 mb-8">
               Browse ready-to-use templates for Email, SMS, Push, and In-App notifications.
               Start with a template and customize it for your needs.
             </p>
 
             {/* Search Bar */}
             <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 dark:text-foreground/60" />
               <input
                 type="text"
                 placeholder="Search templates..."

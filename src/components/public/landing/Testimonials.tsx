@@ -95,7 +95,7 @@ export function Testimonials({
           className="text-center mb-12"
         >
           <h2 className="heading-section">Loved by developers & teams</h2>
-          <p className="text-secondary mt-3">See what our customers say about Notifyr</p>
+          <p className="text-foreground/75 dark:text-foreground/80 mt-3">See what our customers say about Notifyr</p>
         </motion.div>
 
         <div
@@ -119,11 +119,11 @@ export function Testimonials({
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-5 w-5 ${i < t.rating ? "text-warning fill-warning" : "text-muted-foreground/30"}`}
+                    className={`h-5 w-5 ${i < t.rating ? "text-warning fill-warning" : "text-muted-foreground/60 dark:text-muted-foreground/50"}`}
                   />
                 ))}
               </div>
-              <blockquote className="text-lg md:text-xl italic text-foreground leading-relaxed mb-8">
+              <blockquote className="text-lg md:text-xl italic text-foreground dark:text-white leading-relaxed mb-8">
                 "{t.quote}"
               </blockquote>
               <div className="flex items-center justify-center gap-3">
@@ -133,8 +133,8 @@ export function Testimonials({
                   className="h-12 w-12 rounded-full bg-muted"
                 />
                 <div className="text-left">
-                  <p className="font-semibold text-foreground">{t.author}</p>
-                  <p className="text-sm text-muted-foreground">{t.title} at {t.company}</p>
+                  <p className="font-semibold text-foreground dark:text-white">{t.author}</p>
+                  <p className="text-sm text-foreground/70 dark:text-foreground/75">{t.title} at {t.company}</p>
                 </div>
               </div>
             </motion.div>
@@ -150,7 +150,7 @@ export function Testimonials({
                   key={i}
                   onClick={() => setCurrent(i)}
                   aria-label={`Go to testimonial ${i + 1}`}
-                  className={`h-2 rounded-full transition-all ${i === current ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"}`}
+                  className={`h-2 rounded-full transition-all ${i === current ? "w-6 bg-primary" : "w-2 bg-muted-foreground/60 dark:bg-muted-foreground/50"}`}
                 />
               ))}
             </div>
