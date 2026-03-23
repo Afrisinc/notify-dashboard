@@ -40,7 +40,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-border/50 mt-10 pt-6 text-center text-sm text-muted-foreground">
-        © 2026 AfriSinc Notify. All rights reserved.
+        © 2026 Notifyr. All rights reserved.
       </div>
     </div>
   </footer>

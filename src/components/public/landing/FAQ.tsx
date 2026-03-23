@@ -16,7 +16,7 @@ interface FAQItem {
 }
 
 const DEFAULT_FAQS: FAQItem[] = [
-  { id: "1", question: "What is AfriSinc Notify?", answer: "AfriSinc Notify is a multi-channel notification platform that lets you send email, SMS, push, and in-app notifications through a single API. It's designed for developers and teams who need reliable, scalable notification delivery." },
+  { id: "1", question: "What is Notifyr?", answer: "Notifyr is a multi-channel notification platform that lets you send email, SMS, push, and in-app notifications through a single API. It's designed for developers and teams who need reliable, scalable notification delivery." },
   { id: "2", question: "Which channels are supported?", answer: "We support Email, SMS, Push Notifications, and In-App messaging. All channels are accessible through our unified REST API and dashboard." },
   { id: "3", question: "How is billing calculated?", answer: "Billing is based on the number of notifications sent per month. Each channel counts as one notification. You can view usage in real-time on your dashboard." },
   { id: "4", question: "What about security and compliance?", answer: "We're SOC 2 compliant with enterprise-grade encryption at rest and in transit. We support role-based access control, audit logs, and data processing agreements (DPA)." },
@@ -50,7 +50,7 @@ export function FAQ({
           className="text-center mb-10"
         >
           <h2 className="heading-section">Frequently asked questions</h2>
-          <p className="text-secondary mt-3">Everything you need to know about AfriSinc Notify</p>
+          <p className="text-secondary mt-3">Everything you need to know about Notifyr</p>
         </motion.div>
 
         {searchable && (

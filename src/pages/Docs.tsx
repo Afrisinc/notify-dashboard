@@ -55,7 +55,7 @@ const NAV_ITEMS = [
 ];
 
 const SEARCHABLE_SECTIONS = [
-  { id: "intro", title: "Introduction", content: "AfriSinc Notify is a multi-channel notification platform." },
+  { id: "intro", title: "Introduction", content: "Notifyr is a multi-channel notification platform." },
   { id: "auth", title: "Authentication", content: "All API requests require an API key passed in the Authorization header." },
   { id: "send", title: "Send Notification", content: "Use the POST /api/v1/send endpoint to deliver email, SMS, or push notifications." },
   { id: "templates", title: "Templates", content: "Templates let you define reusable message formats with variable placeholders." },
@@ -97,7 +97,7 @@ const Docs = () => {
             <section id="intro" className="scroll-mt-24 space-y-4">
               <h2 className="text-xl font-bold">Introduction</h2>
               <p className="text-sm text-muted-foreground">
-                AfriSinc Notify lets you send notifications programmatically using our REST API.
+                Notifyr lets you send notifications programmatically using our REST API.
                 This guide covers authentication, sending your first notification, and using templates.
               </p>
             </section>
