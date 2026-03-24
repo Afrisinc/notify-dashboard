@@ -2,22 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserTemplates, usePublishTemplate, useUnpublishTemplate } from "@/hooks/useUserTemplatePublishing";
 import { useCurrentAccountId } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDeleteTemplate, useDuplicateTemplate } from "@/hooks/useTemplates";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { ConfirmDialog, type ConfirmDialogVariant } from "@/components/ui/confirm-dialog";
 import { SelectFilter } from "@/components/ui/select-filter";
-import { Search, Plus, Upload, X, Edit, Eye, AlertCircle } from "lucide-react";
+import { Search, Plus, Upload, X, Edit, Eye, AlertCircle, Copy, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type VisibilityFilter = "all" | "published" | "private";
@@ -31,6 +25,8 @@ export default function MyTemplates() {
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>("all");
   const [publishDialog, setPublishDialog] = useState<string | null>(null);
   const [unpublishDialog, setUnpublishDialog] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<string | null>(null);
+  const [duplicateDialog, setDuplicateDialog] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   // Fetch user templates
@@ -42,6 +38,8 @@ export default function MyTemplates() {
   // Mutations
   const publishMutation = usePublishTemplate();
   const unpublishMutation = useUnpublishTemplate();
+  const deleteMutation = useDeleteTemplate();
+  const duplicateMutation = useDuplicateTemplate();
 
   const templates = templatesResponse?.data || [];
   const meta = templatesResponse?.meta;
@@ -95,6 +93,51 @@ export default function MyTemplates() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to unpublish template",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (templateId: string) => {
+    try {
+      await deleteMutation.mutateAsync(templateId);
+
+      toast({
+        title: "Success",
+        description: "Template deleted successfully",
+      });
+
+      setDeleteDialog(null);
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete template",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDuplicate = async (templateId: string) => {
+    try {
+      const result = await duplicateMutation.mutateAsync({ templateId });
+
+      toast({
+        title: "Success",
+        description: "Template duplicated successfully",
+      });
+
+      setDuplicateDialog(null);
+      refetch();
+
+      // Navigate to the duplicated template
+      if (result?.data?.id) {
+        navigate(`/dashboard/templates/${result.data.id}`);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to duplicate template",
         variant: "destructive",
       });
     }
@@ -224,7 +267,7 @@ export default function MyTemplates() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-2 flex-wrap">
                       <Button
                         size="sm"
                         variant="outline"
@@ -240,6 +283,24 @@ export default function MyTemplates() {
                         onClick={() => navigate(`/dashboard/templates/${template.id}`)}
                       >
                         <Eye className="h-3.5 w-3.5" /> View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs gap-1.5"
+                        onClick={() => setDuplicateDialog(template.id)}
+                        disabled={duplicateMutation.isPending}
+                      >
+                        <Copy className="h-3.5 w-3.5" /> Duplicate
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => setDeleteDialog(template.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
                       </Button>
 
                       {template.isPublic ? (
@@ -299,70 +360,70 @@ export default function MyTemplates() {
       )}
 
       {/* Publish Dialog */}
-      <Dialog open={!!publishDialog} onOpenChange={(open) => !open && setPublishDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Publish Template</DialogTitle>
-            <DialogDescription>
-              Make this template discoverable in the marketplace for other users to find and install
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-success/10 border border-success/30 rounded-lg p-3 text-sm text-success space-y-2">
-              <p className="font-medium">✓ Marketplace Benefits</p>
-              <ul className="text-xs space-y-1 ml-4">
-                <li>• Discover by other users</li>
-                <li>• Receive ratings & feedback</li>
-                <li>• Track installation count</li>
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPublishDialog(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => publishDialog && handlePublish(publishDialog)}
-              disabled={publishMutation.isPending}
-              className="bg-success hover:bg-success/90 text-white"
-            >
-              {publishMutation.isPending ? "Publishing..." : "Publish Template"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={!!publishDialog}
+        onOpenChange={(open) => !open && setPublishDialog(null)}
+        title="Publish Template"
+        description="Make this template discoverable in the marketplace for other users to find and install"
+        variant="success"
+        message="✓ Marketplace Benefits"
+        items={["Discover by other users", "Receive ratings & feedback", "Track installation count"]}
+        confirmText="Publish Template"
+        cancelText="Cancel"
+        isLoading={publishMutation.isPending}
+        onConfirm={() => publishDialog && handlePublish(publishDialog)}
+        onCancel={() => setPublishDialog(null)}
+      />
 
       {/* Unpublish Dialog */}
-      <Dialog open={!!unpublishDialog} onOpenChange={(open) => !open && setUnpublishDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Unpublish Template</DialogTitle>
-            <DialogDescription>Remove this template from the marketplace and make it private</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm text-warning space-y-2">
-              <p className="font-medium">⚠ What happens when you unpublish?</p>
-              <ul className="text-xs space-y-1 ml-4">
-                <li>• Removed from marketplace search</li>
-                <li>• Users can't install it anymore</li>
-                <li>• Ratings remain in history</li>
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUnpublishDialog(null)}>
-              Keep Published
-            </Button>
-            <Button
-              onClick={() => unpublishDialog && handleUnpublish(unpublishDialog)}
-              disabled={unpublishMutation.isPending}
-              variant="destructive"
-            >
-              {unpublishMutation.isPending ? "Unpublishing..." : "Unpublish"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={!!unpublishDialog}
+        onOpenChange={(open) => !open && setUnpublishDialog(null)}
+        title="Unpublish Template"
+        description="Remove this template from the marketplace and make it private"
+        variant="warning"
+        message="⚠ What happens when you unpublish?"
+        items={["Removed from marketplace search", "Users can't install it anymore", "Ratings remain in history"]}
+        confirmText="Unpublish"
+        cancelText="Keep Published"
+        isLoading={unpublishMutation.isPending}
+        onConfirm={() => unpublishDialog && handleUnpublish(unpublishDialog)}
+        onCancel={() => setUnpublishDialog(null)}
+        confirmVariant="destructive"
+      />
+
+      {/* Duplicate Dialog */}
+      <ConfirmDialog
+        open={!!duplicateDialog}
+        onOpenChange={(open) => !open && setDuplicateDialog(null)}
+        title="Duplicate Template"
+        description="Create a copy of this template to customize"
+        variant="info"
+        message="✓ Duplicate Benefits"
+        items={["All content and settings copied", "Created as a private template", "Ready to customize"]}
+        confirmText="Duplicate Template"
+        cancelText="Cancel"
+        isLoading={duplicateMutation.isPending}
+        onConfirm={() => duplicateDialog && handleDuplicate(duplicateDialog)}
+        onCancel={() => setDuplicateDialog(null)}
+      />
+
+      {/* Delete Dialog */}
+      <ConfirmDialog
+        open={!!deleteDialog}
+        onOpenChange={(open) => !open && setDeleteDialog(null)}
+        title="Delete Template"
+        description="This action cannot be undone"
+        variant="danger"
+        message="⚠ Are you sure?"
+        items={["Template will be permanently deleted", "All versions will be removed", "This cannot be recovered"]}
+        confirmText="Delete Template"
+        cancelText="Cancel"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteDialog && handleDelete(deleteDialog)}
+        onCancel={() => setDeleteDialog(null)}
+        confirmVariant="destructive"
+      />
     </div>
   );
 }
