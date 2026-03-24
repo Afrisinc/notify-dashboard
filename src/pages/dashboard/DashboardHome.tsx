@@ -49,19 +49,19 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">{currentOrg.name}</h1>
-        <p className="text-sm text-muted-foreground mt-1">Organization overview · {currentOrg.plan} plan</p>
+        <h1 className="text-2xl font-semibold text-content">{currentOrg.name}</h1>
+        <p className="text-sm text-content-secondary mt-1">Organization overview · {currentOrg.plan} plan</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
           <Card key={s.label} className="border-border/60">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+              <CardTitle className="text-sm font-medium text-content-secondary">{s.label}</CardTitle>
               <s.icon className={`h-4 w-4 ${s.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{s.value}</div>
+              <div className="text-2xl font-bold text-content">{s.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -74,13 +74,13 @@ export default function DashboardHome() {
         <CardContent>
           <div className="space-y-3">
             {orgApps.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-2">No apps yet</p>
+              <p className="text-xs text-content-secondary py-2">No apps yet</p>
             ) : (
               orgApps.slice(0, 3).map((app: any) => (
                 <div key={app.id} className="flex items-center justify-between py-2 border-b border-border/40 last:border-0">
                   <div>
-                    <p className="text-sm font-medium text-foreground">{app.name}</p>
-                    <p className="text-xs text-muted-foreground">{(app.notificationsSent || 0).toLocaleString()} sent</p>
+                    <p className="text-sm font-medium text-content">{app.name}</p>
+                    <p className="text-xs text-content-secondary">{(app.notificationsSent || 0).toLocaleString()} sent</p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     app.environment === "production" ? "bg-success/15 text-success" :

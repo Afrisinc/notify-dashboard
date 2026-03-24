@@ -38,7 +38,7 @@ export default function TemplatePreview() {
           <h1 className="heading-section mb-4">
             {error ? "Failed to load template" : "Template not found"}
           </h1>
-          <p className="text-secondary mb-6">
+          <p className="text-content-secondary mb-6">
             {error ? "Please try again or go back to the gallery." : "The template you're looking for doesn't exist."}
           </p>
           <Button asChild>
@@ -130,19 +130,19 @@ export default function TemplatePreview() {
             className="grid md:grid-cols-4 gap-4 mb-12"
           >
             <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-xs text-secondary mb-1">Channel</p>
+              <p className="text-xs text-content-secondary mb-1">Channel</p>
               <p className="heading-label">{channelLabels[template.channel]}</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-xs text-secondary mb-1">Category</p>
+              <p className="text-xs text-content-secondary mb-1">Category</p>
               <p className="heading-label">{categoryLabels[template.category]}</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-xs text-secondary mb-1">Author</p>
+              <p className="text-xs text-content-secondary mb-1">Author</p>
               <p className="heading-label">{template.author}</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-xs text-secondary mb-1">Price</p>
+              <p className="text-xs text-content-secondary mb-1">Price</p>
               <p className="heading-label text-success">{template.isFree ? "Free" : "Paid"}</p>
             </div>
           </motion.div>
@@ -159,7 +159,7 @@ export default function TemplatePreview() {
               <div className="bg-card border border-border rounded-lg overflow-hidden">
                 {template.subject && (
                   <div className="bg-muted/30 border-b border-border px-6 py-4">
-                    <p className="text-xs text-secondary mb-1">Subject:</p>
+                    <p className="text-xs text-content-secondary mb-1">Subject:</p>
                     <p className="font-mono text-sm">{template.subject}</p>
                   </div>
                 )}
@@ -186,7 +186,7 @@ export default function TemplatePreview() {
             >
               <h2 className="heading-section mb-6">SMS Preview</h2>
               <div className="bg-card border border-border rounded-lg p-6 max-w-md">
-                <div className="bg-primary-500 text-white rounded-lg p-4">
+                <div className="bg-primary text-white rounded-lg p-4">
                   <p className="text-sm">{template.content.sms.body}</p>
                 </div>
               </div>
@@ -206,14 +206,14 @@ export default function TemplatePreview() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left font-medium px-6 py-4 text-secondary">Variable</th>
+                      <th className="text-left font-medium px-6 py-4 text-content-secondary">Variable</th>
                       {template.variables.some((v) => v.type) && (
-                        <th className="text-left font-medium px-6 py-4 text-secondary">Type</th>
+                        <th className="text-left font-medium px-6 py-4 text-content-secondary">Type</th>
                       )}
                       {template.variables.some((v) => v.example) && (
-                        <th className="text-left font-medium px-6 py-4 text-secondary">Example</th>
+                        <th className="text-left font-medium px-6 py-4 text-content-secondary">Example</th>
                       )}
-                      <th className="text-left font-medium px-6 py-4 text-secondary">Required</th>
+                      <th className="text-left font-medium px-6 py-4 text-content-secondary">Required</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -221,7 +221,7 @@ export default function TemplatePreview() {
                       <tr key={variable.name} className="border-b border-border/50 last:border-0">
                         <td className="px-6 py-4 font-mono text-primary-500">{`{{${variable.name}}}`}</td>
                         {template.variables.some((v) => v.type) && (
-                          <td className="px-6 py-4 text-secondary">{variable.type || "string"}</td>
+                          <td className="px-6 py-4 text-content-secondary">{variable.type || "string"}</td>
                         )}
                         {template.variables.some((v) => v.example) && (
                           <td className="px-6 py-4 font-mono text-xs">{variable.example || "-"}</td>
@@ -231,7 +231,7 @@ export default function TemplatePreview() {
                             className={`px-2 py-1 rounded text-xs font-medium ${
                               variable.required
                                 ? "bg-destructive/10 text-destructive"
-                                : "bg-muted text-secondary"
+                                : "bg-muted text-content-secondary"
                             }`}
                           >
                             {variable.required ? "Yes" : "No"}
@@ -255,13 +255,13 @@ export default function TemplatePreview() {
             <h2 className="heading-section mb-6">API Usage</h2>
             <div className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="bg-muted/30 border-b border-border px-6 py-4 flex items-center justify-between">
-                <p className="text-xs text-secondary flex items-center gap-2">
+                <p className="text-xs text-content-secondary flex items-center gap-2">
                   <Code2 className="h-4 w-4" />
                   POST /notifications/send
                 </p>
                 <button
                   onClick={handleCopyCode}
-                  className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-primary-500 text-white hover:bg-primary-400 transition-colors"
+                  className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-primary text-white hover:opacity-90 transition-all"
                 >
                   <Copy className="h-3 w-3" />
                   {showCodeCopied ? "Copied!" : "Copy"}

@@ -135,7 +135,7 @@ export default function AppApiKeys() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-content-secondary">
           {keys.length} API key{keys.length !== 1 ? "s" : ""}
         </p>
         <Button size="sm" onClick={() => setShowCreate(true)}>
@@ -148,7 +148,7 @@ export default function AppApiKeys() {
           <CardContent className="pt-4">
             <div className="space-y-3">
               <p className="text-sm font-medium text-success">✓ API Key Created</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-content-secondary">
                 Save this key securely. You will not be able to see it again.
               </p>
               <div className="flex gap-2">
@@ -179,8 +179,8 @@ export default function AppApiKeys() {
       {keys.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
-            <Key className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">
+            <Key className="h-10 w-10 icon-muted mx-auto mb-3" />
+            <p className="text-sm text-content-secondary">
               No API keys. Create one to start sending notifications.
             </p>
           </CardContent>
@@ -192,7 +192,7 @@ export default function AppApiKeys() {
               <CardContent className="flex items-center justify-between py-3 px-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">{k.name}</span>
+                    <span className="text-sm font-medium text-content">{k.name}</span>
                     <Badge
                       variant="outline"
                       className={`text-[10px] ${
@@ -205,11 +205,11 @@ export default function AppApiKeys() {
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <code className="text-xs text-muted-foreground font-mono">
+                    <code className="text-xs text-content-secondary font-mono">
                       {showKey[k.id] ? k.id : maskKey(k.id)}
                     </code>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[10px] text-content-secondary">
                     Created {new Date(k.createdAt).toLocaleDateString()}
                   </span>
                 </div>

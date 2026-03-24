@@ -91,8 +91,8 @@ export default function AppSendNotification() {
         <div className="h-16 w-16 rounded-full bg-success/15 flex items-center justify-center mb-4">
           <Check className="h-8 w-8 text-success" />
         </div>
-        <h2 className="text-lg font-semibold text-foreground">Notification Sent!</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h2 className="text-lg font-semibold text-content">Notification Sent!</h2>
+        <p className="text-sm text-content-secondary mt-1">
           The notification has been queued for delivery.
         </p>
         <div className="flex gap-3 mt-6">
@@ -119,7 +119,7 @@ export default function AppSendNotification() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-lg font-semibold text-foreground">Send Notification</h2>
+        <h2 className="text-lg font-semibold text-content">Send Notification</h2>
       </div>
 
       {/* Form Card */}

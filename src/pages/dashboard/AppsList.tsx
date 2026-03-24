@@ -124,8 +124,8 @@ export default function AppsList() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Apps</h1>
-          <p className="text-sm text-muted-foreground mt-1">{currentOrg.name} · {orgApps.length} app{orgApps.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-2xl font-semibold text-content">Apps</h1>
+          <p className="text-sm text-content-secondary mt-1">{currentOrg.name} · {orgApps.length} app{orgApps.length !== 1 ? "s" : ""}</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4 mr-2" /> Create App
@@ -133,7 +133,7 @@ export default function AppsList() {
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
         <Input
           placeholder="Search apps..."
           value={search}
@@ -145,9 +145,9 @@ export default function AppsList() {
       {orgApps.length === 0 ? (
         <Card className="border-dashed border-2 border-border">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <Boxes className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-1">No apps yet</h3>
-            <p className="text-sm text-muted-foreground mb-4">Create your first app to start sending notifications.</p>
+            <Boxes className="h-12 w-12 icon-muted mb-4" />
+            <h3 className="text-lg font-medium text-content mb-1">No apps yet</h3>
+            <p className="text-sm text-content-secondary mb-4">Create your first app to start sending notifications.</p>
             <Button onClick={() => setShowCreate(true)}>
               <Plus className="h-4 w-4 mr-2" /> Create App
             </Button>
@@ -169,11 +169,11 @@ export default function AppsList() {
                   </span>
                 </div>
                 {app.description && (
-                  <p className="text-xs text-muted-foreground mt-1">{app.description}</p>
+                  <p className="text-xs text-content-secondary mt-1">{app.description}</p>
                 )}
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center justify-between text-xs text-content-secondary">
                   <div className="flex gap-4">
                     <span>{app.templateCount || 0} templates</span>
                     <span>{(app.notificationsSent || 0).toLocaleString()} sent</span>

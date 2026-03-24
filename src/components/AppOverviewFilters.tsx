@@ -87,7 +87,7 @@ export default function AppOverviewFilters({ onFilterChange }: AppOverviewFilter
             </Label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground">
+                <Label htmlFor="start-date" className="text-xs text-content-secondary">
                   Start Date
                 </Label>
                 <Input
@@ -99,7 +99,7 @@ export default function AppOverviewFilters({ onFilterChange }: AppOverviewFilter
                 />
               </div>
               <div>
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground">
+                <Label htmlFor="end-date" className="text-xs text-content-secondary">
                   End Date
                 </Label>
                 <Input
@@ -131,7 +131,7 @@ export default function AppOverviewFilters({ onFilterChange }: AppOverviewFilter
               ))}
             </div>
             {selectedChannels.length > 0 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-content-secondary">
                 {selectedChannels.length} channel{selectedChannels.length !== 1 ? "s" : ""} selected
               </p>
             )}

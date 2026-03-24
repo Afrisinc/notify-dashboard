@@ -133,7 +133,7 @@ export default function AppDashboardLayout() {
                 "flex items-center gap-1.5 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
                 isActive
                   ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  : "border-transparent text-muted-foreground dark:text-text-content-secondary hover:text-foreground dark:hover:text-foreground hover:border-border"
               )}
             >
               <item.icon className="h-3.5 w-3.5" />

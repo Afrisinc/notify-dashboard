@@ -60,8 +60,8 @@ export default function AppDashboard() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-foreground">{app.name}</h1>
-          <p className="text-sm text-muted-foreground">{app.description || app.environment}</p>
+          <h1 className="text-2xl font-semibold text-content">{app.name}</h1>
+          <p className="text-sm text-content-secondary">{app.description || app.environment}</p>
         </div>
         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
           app.environment === "production" ? "bg-success/15 text-success" :
@@ -90,11 +90,11 @@ export default function AppDashboard() {
             ].map((s) => (
               <Card key={s.label} className="border-border/60">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
-                  <s.icon className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-content-secondary">{s.label}</CardTitle>
+                  <s.icon className="h-4 w-4 icon-muted" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{s.value}</div>
+                  <div className="text-2xl font-bold text-content">{s.value}</div>
                 </CardContent>
               </Card>
             ))}
@@ -104,7 +104,7 @@ export default function AppDashboard() {
         <TabsContent value="templates">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{templates.length} template{templates.length !== 1 ? "s" : ""}</p>
+              <p className="text-sm text-content-secondary">{templates.length} template{templates.length !== 1 ? "s" : ""}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/marketplace")}>
                   <Store className="h-3.5 w-3.5 mr-1.5" /> Import from Marketplace
@@ -118,8 +118,8 @@ export default function AppDashboard() {
             {templates.length === 0 ? (
               <Card className="border-dashed border-2">
                 <CardContent className="py-12 text-center">
-                  <FileText className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No templates yet. Create one or import from the marketplace.</p>
+                  <FileText className="h-10 w-10 icon-muted mx-auto mb-3" />
+                  <p className="text-sm text-content-secondary">No templates yet. Create one or import from the marketplace.</p>
                 </CardContent>
               </Card>
             ) : (
@@ -129,8 +129,8 @@ export default function AppDashboard() {
                     <CardContent className="flex items-center justify-between py-3 px-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-medium text-foreground truncate">{tpl.name}</span>
-                          <span className="text-xs text-muted-foreground">v{tpl.version} · {tpl.updatedAt}</span>
+                          <span className="text-sm font-medium text-content truncate">{tpl.name}</span>
+                          <span className="text-xs text-content-secondary">v{tpl.version} · {tpl.updatedAt}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

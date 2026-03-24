@@ -98,10 +98,10 @@ export default function AppOverview() {
           <Card key={m.label} className="border-border/60">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground font-medium">{m.label}</span>
+                <span className="text-xs text-content-secondary font-medium">{m.label}</span>
                 <m.icon className={`h-3.5 w-3.5 ${m.color}`} />
               </div>
-              <div className="text-2xl font-bold text-foreground">{m.value}</div>
+              <div className="text-2xl font-bold text-content">{m.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -110,7 +110,7 @@ export default function AppOverview() {
       {/* Chart */}
       <Card className="border-border/60">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Notifications Over Time</CardTitle>
+          <CardTitle className="text-sm font-medium text-content-secondary">Notifications Over Time</CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[280px] w-full">
@@ -131,21 +131,21 @@ export default function AppOverview() {
       {/* Summary Stats */}
       <Card className="border-border/60">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Summary</CardTitle>
+          <CardTitle className="text-sm font-medium text-content-secondary">Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm py-2 border-b border-border/40">
-              <span className="text-muted-foreground">Environment</span>
+              <span className="text-content-secondary">Environment</span>
               <Badge variant="outline">{overview.environment}</Badge>
             </div>
             <div className="flex items-center justify-between text-sm py-2 border-b border-border/40">
-              <span className="text-muted-foreground">Total API Keys</span>
+              <span className="text-content-secondary">Total API Keys</span>
               <span className="font-medium">{overview.stats.totalApiKeys}</span>
             </div>
             <div className="flex items-center justify-between text-sm py-2">
-              <span className="text-muted-foreground">Last Updated</span>
-              <span className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</span>
+              <span className="text-content-secondary">Last Updated</span>
+              <span className="text-xs text-content-secondary">{new Date().toLocaleDateString()}</span>
             </div>
           </div>
         </CardContent>

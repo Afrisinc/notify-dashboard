@@ -90,7 +90,7 @@ export default function TemplateGallery() {
 
             {/* Search Bar */}
             <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 dark:text-foreground/60" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 icon-secondary" />
               <input
                 type="text"
                 placeholder="Search templates..."
@@ -104,7 +104,7 @@ export default function TemplateGallery() {
       </section>
 
       {/* Filter Tabs */}
-      <section className="sticky top-16 z-40 bg-background/80 backdrop-blur-sm border-b border-border/50 py-4">
+      <section className="sticky top-16 z-40 bg-background/80 dark:bg-card/80 backdrop-blur-sm border-b border-border/50 py-4">
         <div className="container px-4">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {filterTabs.map((tab) => (
@@ -116,8 +116,8 @@ export default function TemplateGallery() {
                 }}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-colors ${
                   activeFilter === tab.id
-                    ? "bg-primary-500 text-white"
-                    : "bg-card border border-border text-foreground hover:border-primary-300"
+                    ? "bg-primary text-white"
+                    : "bg-card border border-border text-content hover:border-primary/50"
                 }`}
               >
                 {tab.label}
@@ -160,7 +160,7 @@ export default function TemplateGallery() {
               transition={{ duration: 0.4 }}
               className="text-center py-12"
             >
-              <p className="text-secondary mb-4">No templates found matching your search.</p>
+              <p className="text-content-secondary mb-4">No templates found matching your search.</p>
               <button
                 onClick={() => {
                   setSearchQuery("");
