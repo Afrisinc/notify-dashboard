@@ -130,7 +130,7 @@ export default function AppContacts() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-[200px]">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
             <Input placeholder="Search contacts..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <Select value={tagFilter} onValueChange={setTagFilter}>
@@ -156,7 +156,7 @@ export default function AppContacts() {
         <Card className="border-border/60 flex-1">
           <CardContent className="p-4 flex items-center gap-3">
             <Users className="h-5 w-5 text-primary" />
-            <div><p className="text-2xl font-bold text-foreground">{contacts.length}</p><p className="text-xs text-muted-foreground">Total Contacts</p></div>
+            <div><p className="text-2xl font-bold text-content">{contacts.length}</p><p className="text-xs text-content-secondary">Total Contacts</p></div>
           </CardContent>
         </Card>
         <Card className="border-border/60 flex-1">
@@ -181,17 +181,17 @@ export default function AppContacts() {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-12 text-muted-foreground">No contacts found</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-12 text-content-secondary">No contacts found</TableCell></TableRow>
             ) : (
               filtered.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.firstName || ""} {c.lastName || ""}</TableCell>
-                  <TableCell className="text-muted-foreground">{c.email}</TableCell>
-                  <TableCell className="text-muted-foreground hidden md:table-cell">{c.phone || "—"}</TableCell>
+                  <TableCell className="text-content-secondary">{c.email}</TableCell>
+                  <TableCell className="text-content-secondary hidden md:table-cell">{c.phone || "—"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">{c.tags.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}</div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-xs hidden sm:table-cell">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-content-secondary text-xs hidden sm:table-cell">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))
             )}

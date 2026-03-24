@@ -181,8 +181,8 @@ export default function OrgMembers() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Members</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl font-semibold text-content">Members</h1>
+          <p className="text-sm text-content-secondary mt-1">
             {currentOrg.name} · Error loading members
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function OrgMembers() {
             <p className="text-sm text-destructive mb-4">
               Failed to load organization members. The endpoint may not be available yet.
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-content-secondary">
               Error: {error instanceof Error ? error.message : "Unknown error"}
             </p>
           </CardContent>
@@ -204,8 +204,8 @@ export default function OrgMembers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Members</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl font-semibold text-content">Members</h1>
+          <p className="text-sm text-content-secondary mt-1">
             {currentOrg.name} · {members.length} member{members.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -254,7 +254,7 @@ export default function OrgMembers() {
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
         <Input
           placeholder="Search members..."
           value={search}
@@ -273,17 +273,17 @@ export default function OrgMembers() {
                     {getInitials(member.firstName, member.lastName)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-medium text-content">
                       {member.firstName} {member.lastName}
                     </p>
-                    <p className="text-xs text-muted-foreground">{member.email}</p>
+                    <p className="text-xs text-content-secondary">{member.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className={`text-[10px] flex items-center gap-1 ${roleBadge(member.role)}`}>
                     {roleIcon(member.role)} {member.role}
                   </Badge>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[10px] text-content-secondary">
                     {new Date(member.joinedAt).toLocaleDateString()}
                   </span>
                   {member.role !== "OWNER" && (

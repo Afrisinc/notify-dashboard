@@ -163,7 +163,7 @@ export default function AppTemplates() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-[200px]">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
             <Input placeholder="Search templates..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <Select value={channelFilter} onValueChange={setChannelFilter}>
@@ -192,7 +192,7 @@ export default function AppTemplates() {
         <Card>
           <CardContent className="py-8 flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading templates...</span>
+            <span className="text-sm text-content-secondary">Loading templates...</span>
           </CardContent>
         </Card>
       )}
@@ -201,8 +201,8 @@ export default function AppTemplates() {
       {!isLoading && filtered.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
-            <FileText className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No templates found. Create one or import from the marketplace.</p>
+            <FileText className="h-10 w-10 icon-muted mx-auto mb-3" />
+            <p className="text-sm text-content-secondary">No templates found. Create one or import from the marketplace.</p>
           </CardContent>
         </Card>
       ) : !isLoading ? (

@@ -101,13 +101,13 @@ export default function Marketplace() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Template Marketplace</h1>
-        <p className="text-sm text-muted-foreground mt-1">Browse and install reusable notification templates</p>
+        <h1 className="text-2xl font-semibold text-content">Template Marketplace</h1>
+        <p className="text-sm text-content-secondary mt-1">Browse and install reusable notification templates</p>
       </div>
 
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
           <Input placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <div className="flex gap-1.5">
@@ -155,9 +155,9 @@ export default function Marketplace() {
       ) : templates.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
-            <Store className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-1">No templates found</h3>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters.</p>
+            <Store className="h-12 w-12 icon-muted mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-content mb-1">No templates found</h3>
+            <p className="text-sm text-content-secondary">Try adjusting your filters.</p>
           </CardContent>
         </Card>
       ) : (
@@ -172,18 +172,18 @@ export default function Marketplace() {
                       {tpl.channel}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{tpl.description}</p>
+                  <p className="text-xs text-content-secondary mt-1.5 line-clamp-2">{tpl.description}</p>
                 </CardHeader>
                 <CardContent className="mt-auto pt-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-3 text-xs text-content-secondary">
                       <span className="flex items-center gap-1">
                         <Star className="h-3 w-3 text-warning" /> {tpl.rating?.toFixed(1) || "N/A"}
                       </span>
                       <span>{(tpl.installs || 0).toLocaleString()} installs</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-semibold ${tpl.price === 0 ? "text-success" : "text-foreground"}`}>
+                      <span className={`text-xs font-semibold ${tpl.price === 0 ? "text-success" : "text-content"}`}>
                         {tpl.price === 0 ? "Free" : `$${tpl.price}`}
                       </span>
                       <Button
@@ -197,7 +197,7 @@ export default function Marketplace() {
                       </Button>
                     </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-2">
+                  <p className="text-[10px] text-content-secondary mt-2">
                     by {typeof tpl.creator === "string" ? tpl.creator : tpl.creator.name}
                   </p>
                 </CardContent>

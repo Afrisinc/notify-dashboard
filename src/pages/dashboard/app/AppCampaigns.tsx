@@ -156,7 +156,7 @@ export default function AppCampaigns() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
           <Input placeholder="Search campaigns..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Button size="sm" onClick={() => { setStep(1); setShowCreate(true); }}>
@@ -167,8 +167,8 @@ export default function AppCampaigns() {
       {filtered.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
-            <Megaphone className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No campaigns yet. Create one to start sending bulk notifications.</p>
+            <Megaphone className="h-10 w-10 icon-muted mx-auto mb-3" />
+            <p className="text-sm text-content-secondary">No campaigns yet. Create one to start sending bulk notifications.</p>
           </CardContent>
         </Card>
       ) : (
@@ -185,8 +185,8 @@ export default function AppCampaigns() {
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <span className="text-sm font-medium text-foreground truncate block">{camp.name}</span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-sm font-medium text-content truncate block">{camp.name}</span>
+                      <span className="text-xs text-content-secondary">
                         {tpl?.name || "Unknown template"} · {camp.recipientCount} recipients
                       </span>
                     </div>
@@ -195,12 +195,12 @@ export default function AppCampaigns() {
                     <Badge variant="secondary" className="text-[10px]">{camp.channel}</Badge>
                     <Badge variant="outline" className={`text-[10px] ${cfg.color}`}>{camp.status}</Badge>
                     {camp.status === "completed" && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-content-secondary">
                         {camp.deliveredCount}/{camp.sentCount} delivered
                       </span>
                     )}
                     {camp.scheduledAt && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-content-secondary">
                         {new Date(camp.scheduledAt).toLocaleDateString()}
                       </span>
                     )}

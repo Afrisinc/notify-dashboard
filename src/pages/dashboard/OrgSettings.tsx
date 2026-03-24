@@ -68,7 +68,7 @@ export default function OrgSettings() {
       return (
         <div className="space-y-6">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading organization settings...</p>
+            <p className="text-content-secondary">Loading organization settings...</p>
           </div>
         </div>
       );
@@ -179,8 +179,8 @@ export default function OrgSettings() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Organization Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage {currentOrg.name}</p>
+        <h1 className="text-2xl font-semibold text-content">Organization Settings</h1>
+        <p className="text-sm text-content-secondary mt-1">Manage {currentOrg.name}</p>
       </div>
 
       <Card className="border-border/60">
@@ -264,7 +264,7 @@ export default function OrgSettings() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-content-secondary mb-4">
             Deleting your organization will permanently remove all apps, templates, and data. This action cannot be undone.
           </p>
           <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

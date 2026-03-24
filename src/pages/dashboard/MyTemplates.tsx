@@ -16,13 +16,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SelectFilter } from "@/components/ui/select-filter";
 import { Search, Plus, Upload, X, Edit, Eye, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -127,7 +121,7 @@ export default function MyTemplates() {
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative flex-1 min-w-0 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
           <Input
             placeholder="Search templates..."
             value={search}
@@ -136,16 +130,16 @@ export default function MyTemplates() {
           />
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          <Select value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Templates</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
-            </SelectContent>
-          </Select>
+          <SelectFilter
+            value={visibilityFilter}
+            onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
+            placeholder="Filter templates"
+            options={[
+              { value: "all", label: "All Templates" },
+              { value: "published", label: "Published" },
+              { value: "private", label: "Private" },
+            ]}
+          />
           <Button onClick={() => navigate("/dashboard/templates/new")} className="gap-2">
             <Plus className="h-4 w-4" /> Create New
           </Button>
@@ -184,9 +178,9 @@ export default function MyTemplates() {
       ) : filtered.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="py-12 text-center">
-            <Search className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-            <h3 className="heading-label text-foreground">No templates found</h3>
-            <p className="text-secondary text-sm mt-1">
+            <Search className="h-12 w-12 icon-muted mx-auto mb-3" />
+            <h3 className="heading-label text-content">No templates found</h3>
+            <p className="text-content-secondary text-sm mt-1">
               {templates.length === 0
                 ? "Create your first template to get started"
                 : "Try adjusting your filters"}
@@ -204,8 +198,8 @@ export default function MyTemplates() {
                     {/* Header: Name + Status */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="heading-label text-foreground truncate">{template.subject}</h3>
-                        <p className="text-secondary text-sm line-clamp-1">{template.description}</p>
+                        <h3 className="heading-label text-content truncate">{template.subject}</h3>
+                        <p className="text-content-secondary text-sm line-clamp-1">{template.description}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Badge variant="secondary" className={`text-[10px] ${channelColor(template.channel)}`}>

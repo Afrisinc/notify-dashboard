@@ -308,7 +308,7 @@ export default function AppSettings() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{webhook.url}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-content-secondary">
                         {webhook.events.length} events • {webhook.isActive ? "Active" : "Inactive"}
                       </p>
                     </div>

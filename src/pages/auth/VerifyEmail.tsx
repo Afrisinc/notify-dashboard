@@ -56,7 +56,7 @@ const VerifyEmail = () => {
             {state === "idle" && (
             <>
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <Mail className="w-8 h-8 text-muted-foreground" />
+                <Mail className="w-8 h-8 icon-muted" />
               </div>
               <h2 className="heading-label">Check your inbox</h2>
               <p className="text-secondary text-sm">

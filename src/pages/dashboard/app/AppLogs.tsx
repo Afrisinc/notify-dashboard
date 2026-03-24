@@ -114,33 +114,33 @@ export default function AppLogs() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Card className="border-border/60">
             <div className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Total</p>
-              <p className="text-xl font-bold text-foreground">{summary.totalCount}</p>
+              <p className="text-xs text-content-secondary">Total</p>
+              <p className="text-xl font-bold text-content">{summary.totalCount}</p>
             </div>
           </Card>
           <Card className="border-border/60">
             <div className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Delivered</p>
+              <p className="text-xs text-content-secondary">Delivered</p>
               <p className="text-xl font-bold text-success">{summary.deliveredCount}</p>
               <p className="text-xs text-success/70">{summary.deliveryRate}%</p>
             </div>
           </Card>
           <Card className="border-border/60">
             <div className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Failed</p>
+              <p className="text-xs text-content-secondary">Failed</p>
               <p className="text-xl font-bold text-destructive">{summary.failedCount}</p>
               <p className="text-xs text-destructive/70">{summary.failureRate}%</p>
             </div>
           </Card>
           <Card className="border-border/60">
             <div className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Pending</p>
+              <p className="text-xs text-content-secondary">Pending</p>
               <p className="text-xl font-bold text-warning">{summary.pendingCount}</p>
             </div>
           </Card>
           <Card className="border-border/60">
             <div className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Bounced</p>
+              <p className="text-xs text-content-secondary">Bounced</p>
               <p className="text-xl font-bold text-destructive">{summary.bouncedCount}</p>
             </div>
           </Card>
@@ -150,7 +150,7 @@ export default function AppLogs() {
       {/* Filters and Actions */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
           <Input
             placeholder="Search by email or template..."
             className="pl-9"

@@ -65,7 +65,7 @@ export default function AppNotifications() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <p className="text-sm text-muted-foreground">{total} notifications</p>
+        <p className="text-sm text-content-secondary">{total} notifications</p>
         <Button
           size="sm"
           onClick={() => navigate(`/dashboard/apps/${appId}/notifications/send`)}
@@ -140,8 +140,8 @@ export default function AppNotifications() {
       {!isLoading && !error && notifications.length === 0 && (
         <Card className="border-dashed border-2">
           <CardContent className="py-16 text-center">
-            <Bell className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No notifications found.</p>
+            <Bell className="h-10 w-10 icon-muted mx-auto mb-3" />
+            <p className="text-sm text-content-secondary">No notifications found.</p>
           </CardContent>
         </Card>
       )}
@@ -157,10 +157,10 @@ export default function AppNotifications() {
                     <CollapsibleTrigger asChild>
                       <button className="w-full flex items-center justify-between py-3 px-4 hover:bg-muted/50 transition-colors">
                         <div className="flex-1 text-left min-w-0">
-                          <span className="text-sm font-medium text-foreground block truncate">
+                          <span className="text-sm font-medium text-content block truncate">
                             {notification.recipient}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-content-secondary">
                             {notification.templateCode ? `Template: ${notification.templateCode}` : `ID: ${(notification.templateId || '').slice(0, 8)}...`}
                           </span>
                         </div>
