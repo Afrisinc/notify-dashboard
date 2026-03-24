@@ -4,6 +4,7 @@
  */
 
 import { useQuery, useMutation, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
+import { useCurrentAccountId } from '@/hooks/useAuth';
 import { Template } from '@/types/templates';
 import {
   fetchTemplates,
@@ -248,8 +249,10 @@ export function useUpdateTemplate(): UseMutationResult<any, Error, { id: string;
  * Hook to delete a template
  */
 export function useDeleteTemplate(): UseMutationResult<any, Error, string> {
+  const accountId = useCurrentAccountId();
+
   return useMutation({
-    mutationFn: (templateId) => deleteTemplateService(templateId),
+    mutationFn: (templateId) => deleteTemplateService(templateId, accountId),
   });
 }
 

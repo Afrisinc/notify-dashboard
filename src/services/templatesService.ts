@@ -564,10 +564,11 @@ export async function updateTemplateService(
  * Delete template
  * DELETE /api/templates/{id}
  */
-export async function deleteTemplateService(templateId: string) {
+export async function deleteTemplateService(templateId: string, accountId?: string) {
   try {
     const client = getApiClient();
-    const response = await client.delete<any>(`/api/templates/${templateId}`);
+    const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+    const response = await client.delete<any>(`/api/templates/${templateId}`, config);
 
     return response.data.data || response.data;
   } catch (error) {
