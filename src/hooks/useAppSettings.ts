@@ -10,10 +10,17 @@ import {
   testWebhookService,
   getWebhookLogsService,
   deleteAppService,
+  getEmailConfigService,
+  setEmailConfigService,
+  resetEmailConfigService,
+  verifyDNSService,
   type UpdateAppSettingsPayload,
   type UpdateAllowedDomainsPayload,
   type CreateWebhookPayload,
   type UpdateWebhookPayload,
+  type AppEmailConfig,
+  type SetEmailConfigPayload,
+  type DNSVerificationResult,
 } from "@/services/appSettings";
 import { useCurrentAccountId } from "@/hooks/useAuth";
 
@@ -205,5 +212,59 @@ export function useDeleteApp() {
 
   return useMutation({
     mutationFn: (appId: string) => deleteAppService(appId, accountId ?? undefined),
+  });
+}
+
+// ──────────────────────────────────────────
+// EMAIL CONFIGURATION
+// ──────────────────────────────────────────
+
+export function useEmailConfig(appId: string) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["emailConfig", appId, accountId],
+    queryFn: () => getEmailConfigService(appId, accountId ?? undefined),
+    enabled: !!appId && !!accountId,
+    staleTime: 60_000,
+  });
+}
+
+export function useSetEmailConfig() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: SetEmailConfigPayload }) =>
+      setEmailConfigService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailConfig", appId],
+      });
+    },
+  });
+}
+
+export function useResetEmailConfig() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId }: { appId: string }) =>
+      resetEmailConfigService(appId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailConfig", appId],
+      });
+    },
+  });
+}
+
+export function useVerifyDNS() {
+  const accountId = useCurrentAccountId();
+
+  return useMutation({
+    mutationFn: ({ appId, email }: { appId: string; email: string }) =>
+      verifyDNSService(appId, email, accountId ?? undefined),
   });
 }

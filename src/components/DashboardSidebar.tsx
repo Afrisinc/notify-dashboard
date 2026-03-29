@@ -6,6 +6,7 @@ import {
   Settings,
   Users,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -35,6 +36,7 @@ const mainNav = [
 ];
 
 const orgNav = [
+  { title: "Billing", url: "/dashboard/billing", icon: CreditCard },
   { title: "Members", url: "/dashboard/organization/members", icon: Users },
   { title: "Settings", url: "/dashboard/organization/settings", icon: Settings },
 ];
