@@ -46,6 +46,7 @@ import UserTemplateEditor from "./pages/dashboard/UserTemplateEditor";
 import Marketplace from "./pages/dashboard/Marketplace";
 import OrgMembers from "./pages/dashboard/OrgMembers";
 import OrgSettings from "./pages/dashboard/OrgSettings";
+import Billing from "./pages/dashboard/Billing";
 
 // App sub-pages
 import AppOverview from "./pages/dashboard/app/AppOverview";
@@ -175,6 +176,7 @@ const App = () => {
                     </Route>
 
                     <Route path="marketplace" element={<Marketplace />} />
+                    <Route path="billing" element={<Billing />} />
                     <Route path="organization/members" element={<OrgMembers />} />
                     <Route path="organization/settings" element={<OrgSettings />} />
                   </Route>

@@ -186,7 +186,7 @@ export default function AppNotifications() {
                     <CollapsibleContent className="px-4 pb-3 border-t border-border/50">
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-muted-foreground">Provider Logs:</p>
-                        {notification.logs.map((log, idx) => (
+                        {notification.logs?.map((log, idx) => (
                           <div key={idx} className="bg-muted/30 rounded p-2 space-y-1">
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-medium">{log.provider}</span>

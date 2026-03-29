@@ -279,3 +279,64 @@ export const deleteAppService = async (appId: string, accountId?: string) => {
   const { data } = await getApiClient().delete<any>(`/api/apps/${appId}`, config);
   return data.data;
 };
+
+// ──────────────────────────────────────────
+// EMAIL CONFIGURATION
+// ──────────────────────────────────────────
+
+export interface AppEmailConfig {
+  fromEmail: string;
+  fromName: string | null;
+  replyToEmail: string | null;
+  replyToName: string | null;
+  isVerified: boolean;
+}
+
+export interface SetEmailConfigPayload {
+  fromEmail: string;
+  fromName?: string | null;
+  replyToEmail?: string | null;
+  replyToName?: string | null;
+}
+
+export const getEmailConfigService = async (appId: string, accountId?: string): Promise<AppEmailConfig> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/email-config`, config);
+  return data.data as AppEmailConfig;
+};
+
+export const setEmailConfigService = async (appId: string, payload: SetEmailConfigPayload, accountId?: string): Promise<AppEmailConfig> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-config`, payload, config);
+  return data.data as AppEmailConfig;
+};
+
+export const resetEmailConfigService = async (appId: string, accountId?: string): Promise<void> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  await getApiClient().delete<any>(`/api/apps/${appId}/email-config`, config);
+};
+
+export interface DNSVerificationResult {
+  domain: string;
+  spf: {
+    status: 'verified' | 'not_found' | 'invalid' | 'error';
+    records: string[];
+    message: string;
+  };
+  dkim: {
+    status: 'verified' | 'not_found' | 'invalid' | 'error';
+    records: string[];
+    message: string;
+  };
+  dmarc: {
+    status: 'verified' | 'not_found' | 'optional';
+    records: string[];
+    message: string;
+  };
+}
+
+export const verifyDNSService = async (appId: string, email: string, accountId?: string): Promise<DNSVerificationResult> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const res = await getApiClient().post<any>(`/api/apps/${appId}/email-config/verify-dns`, { email }, config);
+  return res.data.data as DNSVerificationResult;
+};
