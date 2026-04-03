@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useForgotPassword } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { L } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
 import Logo from "@/components/Logo";
 import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import AuthCard from "@/components/auth/AuthCard";
@@ -12,29 +11,25 @@ import FormInput from "@/components/auth/FormInput";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { resetPassword } = useAuth();
+  const { mutate: forgotPassword, isPending: loading } = useForgotPassword();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    const { error } = await resetPassword(email);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
-    setSent(true);
-    setLoading(false);
+    forgotPassword(email, {
+      onSuccess: () => {
+        setSent(true);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Error",
+          description: error.response?.data?.resp_msg || error.message || "Failed to send reset link",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   return (

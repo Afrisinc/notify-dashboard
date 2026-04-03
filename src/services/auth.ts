@@ -57,7 +57,7 @@ export const signupService = async (payload: SignupPayload) => {
  * Request password reset email
  */
 export const forgotPasswordService = async (email: string) => {
-  const { data } = await getApiClient().post('/api/auth/reset-password', { email });
+  const { data } = await getApiClient().post('/api/auth/forgot-password', { email });
   return data;
 };
 
@@ -65,9 +65,9 @@ export const forgotPasswordService = async (email: string) => {
  * Confirm password reset with new password
  */
 export const resetPasswordService = async (token: string, password: string) => {
-  const { data } = await getApiClient().post('/api/auth/reset-password/confirm', {
+  const { data } = await getApiClient().post('/api/auth/reset-password', {
     token,
-    password
+    newPassword: password
   });
   return data;
 };
