@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getRuntimeConfig } from "@/lib/config";
+import { useResetPassword } from "@/hooks/useAuth";
 import Logo from "@/components/Logo";
 import BackgroundDecorator from "@/components/auth/BackgroundDecorator";
 import AuthCard from "@/components/auth/AuthCard";
@@ -25,11 +25,11 @@ const ResetPasswordSchema = z
 type ResetPasswordForm = z.infer<typeof ResetPasswordSchema>;
 
 const ResetPassword = () => {
-  const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { mutate: resetPassword, isPending: loading } = useResetPassword();
 
   const token = searchParams.get("token") || "";
 
@@ -51,35 +51,21 @@ const ResetPassword = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const config = getRuntimeConfig();
-      const response = await fetch(`${config.serverUrl}/auth/reset-password/confirm`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password: formData.password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast({
-          title: "Reset Failed",
-          description: errorData.resp_msg || "Password reset failed. Please try again.",
-          variant: "destructive",
-        });
-        return;
+    resetPassword(
+      { token, password: formData.password },
+      {
+        onSuccess: () => {
+          setDone(true);
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Reset Failed",
+            description: error.response?.data?.resp_msg || error.message || "Password reset failed. Please try again.",
+            variant: "destructive",
+          });
+        },
       }
-
-      setDone(true);
-    } catch {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   return (

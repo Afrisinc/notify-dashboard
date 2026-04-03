@@ -63,10 +63,10 @@ const Login = () => {
           });
         }
       },
-      onError: (error: Error) => {
+      onError: (error: any) => {
         toast({
           title: "Login Failed",
-          description: error.message || "Login failed",
+          description: error.response?.data?.resp_msg || error.message || "Login failed",
           variant: "destructive",
         });
       },
