@@ -80,6 +80,8 @@ export interface CreateUserTemplatePayload {
   content: string;
   language?: string;
   description: string;
+  design_json?: any;
+  editor_type?: string;
 }
 
 export interface CreateUserTemplateResponse {
