@@ -17,6 +17,8 @@ export interface CreateAppTemplatePayload {
   is_public?: boolean;
   language?: string;
   visibility?: "private" | "public";
+  design_json?: any;
+  editor_type?: string;
 }
 
 export interface AppTemplateResponse {
