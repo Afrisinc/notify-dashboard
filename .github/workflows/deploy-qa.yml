@@ -21,7 +21,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Login to GitHub Container Registry
+      # Step 2: Set image tags
+      - name: Set image tags
+        id: meta
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "qa_tag=qa" >> $GITHUB_OUTPUT
+
+      # Step 3: Login to GitHub Container Registry
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -29,17 +37,19 @@ jobs:
           username: ${{ secrets.GHCR_OWNER }}  # org name, e.g., afrisinc
           password: ${{ secrets.GHCR_TOKEN }}  # your PAT
 
-      # Step 3: Build Docker image
+      # Step 4: Build Docker image
       - name: Build Docker image
         run: |
           docker build \
             --build-arg VITE_API_URL=${{ secrets.VITE_API_QA_URL }} \
-            -t ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:latest .
+            -t ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:${{ steps.meta.outputs.short_sha }} \
+            -t ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:${{ steps.meta.outputs.qa_tag }} .
 
-      # Step 4: Push Docker image to GHCR
-      - name: Push Docker image
+      # Step 5: Push Docker images
+      - name: Push Docker images
         run: |
-          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:latest
+          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:${{ steps.meta.outputs.short_sha }}
+          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify:${{ steps.meta.outputs.qa_tag }}
 
       # Step 5: SSH deploy to VPS
       - name: Deploy to VPS
