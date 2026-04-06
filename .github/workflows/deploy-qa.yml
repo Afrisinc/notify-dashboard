@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - develop  # deploy on pushes to develop
-  pull_request:
-    branches:
-      - develop  # deploy on PRs to develop
 
 jobs:
   deploy:
