@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Shield, Crown, User, Trash2 } from "lucide-react";
 import { useOrganizationMembers, useRemoveOrganizationMember, useCreateOrganizationInvite } from "@/hooks/useOrganization";
+import { useCurrentAccountId } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -41,6 +42,8 @@ export default function OrgMembers() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+
+  const accountId = useCurrentAccountId();
 
   // Fetch members - all hooks must be called before any early returns
   const { data: membersData, isLoading, error } = useOrganizationMembers(currentOrg?.id || "");
@@ -90,9 +93,19 @@ export default function OrgMembers() {
       return;
     }
 
+    if (!accountId) {
+      toast({
+        title: "Error",
+        description: "Account ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await inviteMutation.mutateAsync({
         orgId: currentOrg.id,
+        accountId: accountId,
         payload: {
           email: inviteEmail,
           role: inviteRole,

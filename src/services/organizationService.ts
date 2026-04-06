@@ -97,10 +97,10 @@ export const deleteOrganizationService = async (orgId: string) => {
  * Send an invite to a user to join the organization
  * Only admins and owners can create invites
  */
-export const createOrganizationInviteService = async (orgId: string, payload: CreateInvitePayload) => {
+export const createOrganizationInviteService = async (orgId: string, accountId: string, payload: CreateInvitePayload) => {
   const { data } = await getApiClient().post(`/api/organizations/${orgId}/invites`, payload, {
     headers: {
-      'x-account-id': orgId,
+      'x-account-id': accountId,
     },
   });
   return data.data;
