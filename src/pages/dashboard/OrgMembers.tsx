@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Shield, Crown, User, Trash2 } from "lucide-react";
 import { useOrganizationMembers, useRemoveOrganizationMember, useCreateOrganizationInvite } from "@/hooks/useOrganization";
+import { useCurrentAccountId } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -41,6 +42,8 @@ export default function OrgMembers() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+
+  const accountId = useCurrentAccountId();
 
   // Fetch members - all hooks must be called before any early returns
   const { data: membersData, isLoading, error } = useOrganizationMembers(currentOrg?.id || "");
@@ -90,9 +93,19 @@ export default function OrgMembers() {
       return;
     }
 
+    if (!accountId) {
+      toast({
+        title: "Error",
+        description: "Account ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await inviteMutation.mutateAsync({
         orgId: currentOrg.id,
+        accountId: accountId,
         payload: {
           email: inviteEmail,
           role: inviteRole,
@@ -108,9 +121,11 @@ export default function OrgMembers() {
       setInviteRole("MEMBER");
       setShowInvite(false);
     } catch (error) {
+      const axiosError = error as { response?: { data?: {resp_msg?:string; message?: string } }; message?: string };
+      const errorMessage = axiosError?.response?.data?.resp_msg || axiosError?.response?.data?.message || axiosError?.message || "Failed to send invite";
       toast({
         title: "Error",
-        description: "Failed to send invite",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -230,7 +245,7 @@ export default function OrgMembers() {
               </div>
               <div>
                 <label className="text-sm font-medium">Role</label>
-                <Select value={inviteRole} onValueChange={(value: any) => setInviteRole(value)}>
+                <Select value={inviteRole} onValueChange={(value: "MEMBER" | "ADMIN") => setInviteRole(value)}>
                   <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>

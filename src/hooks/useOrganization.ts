@@ -94,8 +94,8 @@ export function useCreateOrganizationInvite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orgId, payload }: { orgId: string; payload: CreateInvitePayload }) =>
-      createOrganizationInviteService(orgId, payload),
+    mutationFn: ({ orgId, accountId, payload }: { orgId: string; accountId: string; payload: CreateInvitePayload }) =>
+      createOrganizationInviteService(orgId, accountId, payload),
     onSuccess: (_data, { orgId }) => {
       // Invalidate organization invites
       queryClient.invalidateQueries({
