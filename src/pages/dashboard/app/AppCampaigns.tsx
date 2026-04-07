@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useCampaigns, useCreateCampaign, useUpdateCampaign, useDeleteCampaign, useSendCampaign, useScheduleCampaign, useDuplicateCampaign } from "@/hooks/useCampaigns";
 import { useAppTemplates } from "@/hooks/useApps";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Megaphone, Send, Clock, CheckCircle2, XCircle, AlertCircle, ChevronRight, ChevronLeft, Trash2 } from "lucide-react";
+import { Plus, Search, Megaphone, Send, Clock, CheckCircle2, XCircle, AlertCircle, ChevronRight, ChevronLeft, Trash2, BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -24,6 +24,7 @@ const statusConfig: Record<string, { icon: typeof CheckCircle2; color: string }>
 
 export default function AppCampaigns() {
   const { appId } = useParams<{ appId: string }>();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [step, setStep] = useState(1);
@@ -203,6 +204,18 @@ export default function AppCampaigns() {
                       <span className="text-xs text-content-secondary">
                         {new Date(camp.scheduledAt).toLocaleDateString()}
                       </span>
+                    )}
+                    {camp.status === "completed" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/dashboard/apps/${appId}/campaigns/${camp.id}/analytics`);
+                        }}
+                      >
+                        <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                      </Button>
                     )}
                     {camp.status === "draft" && (
                       <Button

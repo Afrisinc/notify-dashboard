@@ -372,7 +372,7 @@ export default function AppSettings() {
           <CardTitle className="text-base flex items-center gap-2">
             <Webhook className="h-4 w-4" /> Webhooks
           </CardTitle>
-          <CardDescription>Configure webhook endpoints for delivery events.</CardDescription>
+          <CardDescription>Configure webhook endpoints for delivery events and contact form submissions (e.g., Slack/Teams alerts).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Existing Webhooks */}
@@ -432,31 +432,34 @@ export default function AppSettings() {
               <Label>Events</Label>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {[
-                  "notification.delivered",
-                  "notification.failed",
-                  "notification.bounced",
-                  "notification.opened",
+                  { name: "contact.created", label: "New Contact (Contact Form)" },
+                  { name: "notification.delivered", label: "Email Delivered" },
+                  { name: "notification.failed", label: "Email Failed" },
+                  { name: "notification.bounced", label: "Email Bounced" },
+                  { name: "notification.opened", label: "Email Opened" },
+                  { name: "notification.clicked", label: "Link Clicked" },
+                  { name: "campaign.sent", label: "Campaign Sent" },
                 ].map((event) => (
-                  <label key={event} className="flex items-center gap-2 text-sm">
+                  <label key={event.name} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
-                      checked={webhookForm.events.includes(event)}
+                      checked={webhookForm.events.includes(event.name)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setWebhookForm({
                             ...webhookForm,
-                            events: [...webhookForm.events, event],
+                            events: [...webhookForm.events, event.name],
                           });
                         } else {
                           setWebhookForm({
                             ...webhookForm,
-                            events: webhookForm.events.filter((ev) => ev !== event),
+                            events: webhookForm.events.filter((ev) => ev !== event.name),
                           });
                         }
                       }}
                       className="rounded"
                     />
-                    {event}
+                    {event.label}
                   </label>
                 ))}
               </div>

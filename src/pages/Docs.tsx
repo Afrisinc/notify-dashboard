@@ -80,7 +80,7 @@ const Docs = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-3">
-            <img src="/notify-logo.svg" alt="Notify Logo" className="h-10 w-10" />
+            <img src="/notify-logo.png" alt="Notify Logo" className="h-10 w-10" />
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-1">
                 <Code2 className="h-3 w-3" /> Developer Documentation
