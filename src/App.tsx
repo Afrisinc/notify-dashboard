@@ -55,6 +55,7 @@ import AppSendNotification from "./pages/dashboard/app/AppSendNotification";
 import AppTemplates from "./pages/dashboard/app/AppTemplates";
 import AppContacts from "./pages/dashboard/app/AppContacts";
 import AppCampaigns from "./pages/dashboard/app/AppCampaigns";
+import AppCampaignAnalytics from "./pages/dashboard/app/AppCampaignAnalytics";
 import AppApiKeys from "./pages/dashboard/app/AppApiKeys";
 import AppLogs from "./pages/dashboard/app/AppLogs";
 import AppSettings from "./pages/dashboard/app/AppSettings";
@@ -170,6 +171,7 @@ const App = () => {
                       <Route path="templates" element={<AppTemplates />} />
                       <Route path="contacts" element={<AppContacts />} />
                       <Route path="campaigns" element={<AppCampaigns />} />
+                      <Route path="campaigns/:campaignId/analytics" element={<AppCampaignAnalytics />} />
                       <Route path="api-keys" element={<AppApiKeys />} />
                       <Route path="logs" element={<AppLogs />} />
                       <Route path="settings" element={<AppSettings />} />
