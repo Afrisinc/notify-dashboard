@@ -4,10 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Search, Shield, Crown, User, Trash2 } from "lucide-react";
+import { UserPlus, Shield, Crown, User, Trash2 } from "lucide-react";
 import { useOrganizationMembers, useRemoveOrganizationMember, useCreateOrganizationInvite } from "@/hooks/useOrganization";
 import { useCurrentAccountId } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { SearchInput } from "@/components/ui/search-input";
 import {
   Dialog,
   DialogContent,
@@ -268,15 +269,13 @@ export default function OrgMembers() {
         </Dialog>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 icon-muted" />
-        <Input
-          placeholder="Search members..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Search members..."
+        size="sm"
+        className="max-w-sm"
+      />
 
       <div className="space-y-2">
         {filtered.length > 0 ? (

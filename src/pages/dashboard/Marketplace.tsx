@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Search,
   Download,
   Star,
   Store,
@@ -44,19 +42,27 @@ import { useCurrentAccountId } from "@/hooks/useAuth";
 import { MarketplaceTemplateCard } from "@/components/MarketplaceTemplateCard";
 import { MarketplaceTemplatePreviewDialog } from "@/components/MarketplaceTemplatePreviewDialog";
 import { TemplateSkeletonGrid } from "@/components/TemplateCardSkeleton";
-import { mockTemplates, MarketplaceTemplate } from "@/data/marketplaceTemplates";
+import { MarketplaceTemplate } from "@/data/marketplaceTemplates";
 import { motion } from "framer-motion";
+import { OptionButtons } from "@/components/OptionButtons";
+import { SearchInput } from "@/components/ui/search-input";
 
 type ChannelFilter = "all" | "email" | "sms" | "push" | "in-app";
 type PriceFilter = "all" | "free" | "paid";
 type SortOption = "trending" | "rating" | "newest" | "popular";
 
-const channelOptions: { value: ChannelFilter; label: string }[] = [
-  { value: "all", label: "All Channels" },
-  { value: "email", label: "Email" },
-  { value: "sms", label: "SMS" },
-  { value: "push", label: "Push" },
-  { value: "in-app", label: "In-App" },
+const channelOptions = [
+  { id: "all", label: "All Channels" },
+  { id: "email", label: "Email" },
+  { id: "sms", label: "SMS" },
+  { id: "push", label: "Push" },
+  { id: "in-app", label: "In-App" },
+];
+
+const priceOptions = [
+  { id: "all", label: "All" },
+  { id: "free", label: "Free" },
+  { id: "paid", label: "Paid" },
 ];
 
 const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
@@ -91,30 +97,18 @@ export default function Marketplace() {
   let error: Error | null = null;
   let totalCount = 0;
 
-  try {
-    const { data: templatesResponse, isLoading: apiLoading, error: apiError } = useMarketplaceTemplates({
-      search: search || undefined,
-      channel: channelFilter !== "all" ? channelFilter : undefined,
-      price: priceFilter !== "all" ? priceFilter : undefined,
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-    });
+  const { data: templatesResponse, isLoading: apiLoading, error: apiError } = useMarketplaceTemplates({
+    search: search || undefined,
+    channel: channelFilter !== "all" ? channelFilter : undefined,
+    price: priceFilter !== "all" ? priceFilter : undefined,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+  });
 
-    templates = templatesResponse?.templates || [];
-    totalCount = templatesResponse?.total || 0;
-    isLoading = apiLoading;
-    error = apiError;
-  } catch {
-    // Fallback to mock data if API fails
-    templates = mockTemplates;
-    totalCount = mockTemplates.length;
-  }
-
-  // Use mock data as fallback
-  if (!templates || templates.length === 0) {
-    templates = mockTemplates;
-    totalCount = mockTemplates.length;
-  }
+  templates = templatesResponse?.templates || [];
+  totalCount = templatesResponse?.total || 0;
+  isLoading = apiLoading;
+  error = apiError;
 
   // Update all loaded templates when page changes
   const displayTemplates = currentPage === 1 ? templates : allLoadedTemplates;
@@ -248,14 +242,13 @@ export default function Marketplace() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="relative group"
       >
-        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-content-secondary transition-colors group-focus-within:text-primary" />
-        <Input
-          placeholder="Find a template (e.g. welcome, order confirmation, password reset)..."
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 h-11 text-base rounded-xl border-border/60 focus:ring-primary/40 focus:border-primary/50 transition-all group-focus-within:shadow-sm group-focus-within:shadow-primary/10"
+          onChange={setSearch}
+          placeholder="Find a template (e.g. welcome, order confirmation, password reset)..."
+          size="lg"
+          inputClassName="h-11 text-base"
         />
       </motion.div>
 
@@ -290,18 +283,14 @@ export default function Marketplace() {
             <Label className="text-xs font-bold text-content-secondary uppercase tracking-wider">
               Channel
             </Label>
-            <div className="flex flex-wrap gap-2">
-              {channelOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant={channelFilter === option.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleFilterChange(setChannelFilter, option.value)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
+            <OptionButtons
+              options={channelOptions}
+              selected={channelFilter}
+              onSelect={(id) => handleFilterChange(setChannelFilter, id as ChannelFilter)}
+              variant="channel"
+              size="md"
+              shape="pill"
+            />
           </div>
 
           {/* Row 2: Price & Sort */}
@@ -311,18 +300,14 @@ export default function Marketplace() {
               <Label className="text-xs font-bold text-content-secondary uppercase tracking-wider">
                 Price
               </Label>
-              <div className="flex gap-2">
-                {(["all", "free", "paid"] as PriceFilter[]).map((p) => (
-                  <Button
-                    key={p}
-                    variant={priceFilter === p ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleFilterChange(setPriceFilter, p)}
-                  >
-                    {p === "all" ? "All" : p === "free" ? "Free" : "Paid"}
-                  </Button>
-                ))}
-              </div>
+              <OptionButtons
+                options={priceOptions}
+                selected={priceFilter}
+                onSelect={(id) => handleFilterChange(setPriceFilter, id as PriceFilter)}
+                variant="pricing"
+                size="md"
+                shape="pill"
+              />
             </div>
 
             {/* Sort Option */}
@@ -377,14 +362,6 @@ export default function Marketplace() {
           </div>
         )}
       </motion.div>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Failed to load marketplace templates. Showing cached templates.</AlertDescription>
-        </Alert>
-      )}
 
       {/* Templates Grid */}
       <motion.div

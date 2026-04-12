@@ -12,9 +12,10 @@ import { SelectFilter } from "@/components/ui/select-filter";
 import { MyTemplateCard } from "@/components/MyTemplateCard";
 import { MyTemplateSkeletonGrid } from "@/components/MyTemplateCardSkeleton";
 import { PublishTemplateDialog, type PublishTemplateData } from "@/components/PublishTemplateDialog";
-import { Search, Plus, AlertCircle, Sparkles } from "lucide-react";
+import { Plus, AlertCircle, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { SearchInput } from "@/components/ui/search-input";
 
 type VisibilityFilter = "all" | "published" | "private";
 
@@ -202,15 +203,14 @@ export default function MyTemplates() {
         className="space-y-5"
       >
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
-          <div className="lg:col-span-3 relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-content-secondary transition-colors group-focus-within:text-primary flex-shrink-0" />
-            <Input
-              placeholder="Search templates by name or description..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 h-12 rounded-xl border-border/40 dark:border-border/50 dark:bg-slate-800 focus:ring-primary/40 focus:border-primary/50 text-base"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search templates by name or description..."
+            size="lg"
+            className="lg:col-span-3"
+            inputClassName="h-12"
+          />
 
           <div className="flex gap-3 items-center flex-wrap lg:col-span-2">
             <SelectFilter

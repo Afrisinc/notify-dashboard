@@ -41,7 +41,7 @@ import { MarketplaceTemplateCard } from "@/components/MarketplaceTemplateCard";
 import { MarketplaceTemplatePreviewDialog } from "@/components/MarketplaceTemplatePreviewDialog";
 import { TemplateGalleryHero } from "@/components/TemplateGalleryHero";
 import { TemplateCategorySection } from "@/components/TemplateCategorySection";
-import { mockTemplates, MarketplaceTemplate } from "@/data/marketplaceTemplates";
+import { MarketplaceTemplate } from "@/data/marketplaceTemplates";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type TemplateFilter = "all" | "email" | "sms" | "push" | "in-app";
@@ -70,6 +70,10 @@ export default function TemplateGallery() {
   const [previewTemplate, setPreviewTemplate] = useState<MarketplaceTemplate | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  const handleExplore = () => {
+    document.getElementById('templates-grid')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Fetch templates using React Query
   const {
     data: templatesData,
@@ -95,8 +99,7 @@ export default function TemplateGallery() {
   const isLoading = searchQuery ? isLoadingSearch : isLoadingAll;
   const error = searchQuery ? errorSearch : errorAll;
 
-  // Use mock data as fallback
-  const templates = (apiTemplates && apiTemplates.length > 0) ? apiTemplates : mockTemplates;
+  const templates = apiTemplates || [];
 
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
@@ -152,31 +155,13 @@ export default function TemplateGallery() {
           setActiveFilter(filter as TemplateFilter);
           setSearchQuery("");
         }}
-        templatesCount={mockTemplates.length}
+        templatesCount={100}
+        onExplore={handleExplore}
       />
 
       {/* Templates Grid */}
-      <section className="py-12 relative z-10">
+      <section id="templates-grid" className="py-12 relative z-10">
         <div className="container max-w-6xl mx-auto px-4">
-          {/* Error Alert */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6"
-            >
-              <Card className="border-destructive/50 bg-destructive/5">
-                <CardContent className="pt-6 flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-                  <p className="text-sm text-destructive">
-                    Failed to load templates. Showing cached templates.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
           {/* Loading State - Template skeleton */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

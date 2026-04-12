@@ -54,7 +54,7 @@ export function MarketplaceTemplatePreviewDialog({
         </div>
 
         <div className="space-y-5">
-          {/* Preview Image - Priority: previewUrl > thumbnail > image > placeholder */}
+          {/* Preview Image - Priority: previewUrl > previewImage > thumbnail > image > placeholder */}
           <motion.div
             initial={{ opacity: 0, scale: isDashboard ? 0.98 : 1 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -67,9 +67,9 @@ export function MarketplaceTemplatePreviewDialog({
                 className={`absolute inset-0 bg-gradient-to-br ${template.color} ${isDashboard ? "opacity-35" : "opacity-30"} mix-blend-multiply`}
               />
             )}
-            {template.previewUrl || template.thumbnail || template.image ? (
+            {template.previewUrl || template.previewImage || template.thumbnail || template.image ? (
               <img
-                src={template.previewUrl || template.thumbnail || template.image}
+                src={template.previewUrl || template.previewImage || template.thumbnail || template.image}
                 alt={template.subject || template.name}
                 className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 z-10"
               />

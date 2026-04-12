@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -23,6 +23,11 @@ interface PublishTemplateDialogProps {
     subject: string;
     description: string;
     channel: string;
+    previewImage?: string | null;
+    tags?: string[];
+    category?: string;
+    pricing?: "free" | "paid";
+    price?: number | null;
   };
   onPublish: (data: PublishTemplateData) => Promise<void>;
   isLoading?: boolean;
@@ -69,6 +74,24 @@ export function PublishTemplateDialog({
   const [tagInput, setTagInput] = useState("");
   const [previewError, setPreviewError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync form data when dialog opens or template changes
+  useEffect(() => {
+    if (open && template) {
+      setFormData({
+        title: template.subject || "",
+        description: template.description || "",
+        category: template.category || "",
+        tags: (template.tags && template.tags.length > 0 && template.tags[0] !== "none") ? template.tags : [],
+        previewImageUrl: template.previewImage || undefined,
+        pricing: template.pricing || "free",
+        price: template.price || 0,
+      });
+      setStep("details");
+      setTagInput("");
+      setPreviewError("");
+    }
+  }, [open, template?.id]);
 
   const requiredFields = [
     { name: "Title", field: "title", done: !!formData.title?.trim() },
@@ -177,39 +200,132 @@ export function PublishTemplateDialog({
           transition={{ duration: 0.3 }}
           className="space-y-8 px-0"
         >
-          {/* Requirements Checklist */}
-          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-2xl p-6 space-y-5">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary dark:text-primary/90 flex-shrink-0" />
-              <p className="text-xs font-bold text-content dark:text-white uppercase tracking-widest">
-                Before You Publish
-              </p>
+          {/* Requirements Checklist & Live Preview Split */}
+          <div className="grid lg:grid-cols-[1fr_1.2fr] gap-6">
+            {/* Requirements Checklist */}
+            <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-2xl p-6 space-y-5">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary dark:text-primary/90 flex-shrink-0" />
+                <p className="text-xs font-bold text-content dark:text-white uppercase tracking-widest">
+                  Before You Publish
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {requiredFields.map((req, idx) => (
+                  <motion.div
+                    key={req.field}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div
+                      className={`h-5 w-5 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 transition-all ${
+                        req.done
+                          ? "bg-green-500/30 text-green-600 dark:text-green-400"
+                          : "bg-slate-500/20 text-slate-600 dark:text-slate-400"
+                      }`}
+                    >
+                      {req.done ? "✓" : "○"}
+                    </div>
+                    <span className={`text-sm leading-tight ${req.done ? "text-content dark:text-white font-medium" : "text-content-secondary dark:text-foreground/70"}`}>
+                      {req.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {requiredFields.map((req, idx) => (
-                <motion.div
-                  key={req.field}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="flex items-center gap-3"
-                >
-                  <div
-                    className={`h-5 w-5 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 transition-all ${
-                      req.done
-                        ? "bg-green-500/30 text-green-600 dark:text-green-400"
-                        : "bg-slate-500/20 text-slate-600 dark:text-slate-400"
-                    }`}
-                  >
-                    {req.done ? "✓" : "○"}
+            {/* Live Preview Section */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-card dark:bg-slate-800 border border-border/40 dark:border-border/60 rounded-2xl p-6 space-y-4 h-fit"
+            >
+              <p className="text-xs font-bold text-content-secondary dark:text-foreground/70 uppercase tracking-widest">
+                Marketplace Preview
+              </p>
+
+              {/* Preview Image */}
+              <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 aspect-video flex items-center justify-center border border-border/40 dark:border-border/60">
+                {formData.previewImageUrl ? (
+                  <img
+                    src={formData.previewImageUrl}
+                    alt="Template Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <ImageIcon className="h-8 w-8 text-content-secondary dark:text-foreground/50 mx-auto mb-2" />
+                    <p className="text-xs text-content-secondary dark:text-foreground/60">
+                      Upload preview image
+                    </p>
                   </div>
-                  <span className={`text-sm leading-tight ${req.done ? "text-content dark:text-white font-medium" : "text-content-secondary dark:text-foreground/70"}`}>
-                    {req.name}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
+                )}
+              </div>
+
+              {/* Template Title */}
+              <div>
+                <p className="text-xs font-semibold text-content-secondary dark:text-foreground/70 mb-2">TITLE</p>
+                <p className="text-sm font-bold text-content dark:text-white line-clamp-2">
+                  {formData.title || "Template Name"}
+                </p>
+              </div>
+
+              {/* Category Badge */}
+              {formData.category && (
+                <div>
+                  <p className="text-xs font-semibold text-content-secondary dark:text-foreground/70 mb-2">CATEGORY</p>
+                  <Badge variant="secondary" className="bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary/90 border-0">
+                    {formData.category}
+                  </Badge>
+                </div>
+              )}
+
+              {/* Tags Preview */}
+              {formData.tags && formData.tags.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-content-secondary dark:text-foreground/70 mb-2">TAGS</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {formData.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="outline"
+                        className="text-[10px] bg-background/50 dark:bg-slate-700/50 border-border/60 dark:border-border/40 text-content dark:text-foreground/80"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Display */}
+              {formData.pricing && (
+                <div className="pt-2 border-t border-border/40 dark:border-border/60">
+                  <p className="text-xs font-semibold text-content-secondary dark:text-foreground/70 mb-2">PRICING</p>
+                  <div className="flex items-center gap-2">
+                    {formData.pricing === "free" ? (
+                      <>
+                        <div className="h-6 px-2.5 rounded-full bg-green-500/20 dark:bg-green-500/30 flex items-center">
+                          <span className="text-xs font-bold text-green-700 dark:text-green-300">Free</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-6 px-2.5 rounded-full bg-primary/20 dark:bg-primary/30 flex items-center">
+                          <span className="text-xs font-bold text-primary dark:text-primary/90">
+                            ${formData.price || 0}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </motion.div>
           </div>
 
           {/* Template Details Form */}

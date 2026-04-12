@@ -14,9 +14,10 @@ export interface MarketplaceTemplate {
   installs: number;
   image?: string; // Legacy: URL to preview image (fallback)
   previewUrl?: string; // Primary: Published template preview URL from assets service
+  previewImage?: string | null; // API response field: preview image URL
   thumbnail?: string; // Secondary: Published template thumbnail URL from assets service
   tags: string[];
-  creator: {
+  creator?: {
     id: string;
     name: string;
     avatar: string;
@@ -26,10 +27,10 @@ export interface MarketplaceTemplate {
     subject?: string;
     content?: string;
   };
-  features: string[];
-  variables: string[];
-  updatedAt: string;
-  color: string; // Gradient color for card
+  features?: string[];
+  variables?: string[];
+  updatedAt?: string;
+  color?: string; // Gradient color for card
 }
 
 export const mockTemplates: MarketplaceTemplate[] = [

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/ui/search-input";
 import {
   Accordion,
   AccordionContent,
@@ -54,13 +53,12 @@ export function FAQ({
         </motion.div>
 
         {searchable && (
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50 dark:text-foreground/60" />
-            <Input
-              placeholder="Search questions..."
+          <div className="mb-6">
+            <SearchInput
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
+              onChange={setQuery}
+              placeholder="Search questions..."
+              size="sm"
             />
           </div>
         )}

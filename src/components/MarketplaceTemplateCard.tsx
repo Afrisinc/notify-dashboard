@@ -30,6 +30,7 @@ export function MarketplaceTemplateCard({
     "in-app": "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
   };
 
+  
   const channelLabels: Record<string, string> = {
     email: "Email",
     sms: "SMS",
@@ -62,10 +63,10 @@ export function MarketplaceTemplateCard({
           />
         )}
 
-        {/* Animated Template Image - Priority: previewUrl > thumbnail > image > placeholder */}
-        {template.previewUrl || template.thumbnail || template.image ? (
+        {/* Animated Template Image - Priority: previewUrl > previewImage > thumbnail > image > placeholder */}
+        {template.previewImage || template.previewUrl || template.thumbnail || template.image ? (
           <img
-            src={template.previewUrl || template.thumbnail || template.image}
+            src={template.previewImage || template.previewUrl || template.thumbnail || template.image}
             alt={template.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
