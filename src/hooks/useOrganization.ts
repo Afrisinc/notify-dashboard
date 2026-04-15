@@ -6,6 +6,8 @@ import {
   deleteOrganizationService,
   createOrganizationInviteService,
   getOrganizationMembersService,
+  getOrganizationInvitesService,
+  getUserInvitesService,
   removeOrganizationMemberService,
   getInviteDetailsService,
   acceptInviteService,
@@ -113,7 +115,29 @@ export function useOrganizationMembers(orgId: string, page: number = 1, limit: n
   return useQuery({
     queryKey: ["organizationMembers", orgId, page, limit],
     queryFn: () => getOrganizationMembersService(orgId, page, limit),
-    enabled: !!orgId,
+    enabled: !!orgId && orgId !== "personal",
+  });
+}
+
+/**
+ * Get organization invites with pagination
+ * Any member can view the pending invites
+ */
+export function useOrganizationInvites(orgId: string, page: number = 1, limit: number = 10) {
+  return useQuery({
+    queryKey: ["organizationInvites", orgId, page, limit],
+    queryFn: () => getOrganizationInvitesService(orgId, page, limit),
+    enabled: !!orgId && orgId !== "personal",
+  });
+}
+
+/**
+ * Get all pending invites for the logged in user
+ */
+export function useUserInvites() {
+  return useQuery({
+    queryKey: ["userInvites"],
+    queryFn: () => getUserInvitesService(),
   });
 }
 
@@ -171,6 +195,14 @@ export function useAcceptInvite() {
       // Invalidate organization queries to refresh member list
       queryClient.invalidateQueries({
         queryKey: ["organizations"],
+      });
+      // Invalidate user invites so the list clears the accepted one
+      queryClient.invalidateQueries({
+        queryKey: ["userInvites"],
+      });
+      // Invalidate user organizations so the new org shows up for the user immediately
+      queryClient.invalidateQueries({
+        queryKey: ["userOrganizations"],
       });
     },
   });
