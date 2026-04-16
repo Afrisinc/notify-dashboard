@@ -28,7 +28,7 @@ export interface InviteDetails {
   email: string;
   role: "OWNER" | "ADMIN" | "MEMBER";
   organizationId: string;
-  organizationName: string;
+  orgName: string;
   invitedBy: string;
   createdAt: string;
   expiresAt: string;
@@ -189,5 +189,14 @@ export const getInviteDetailsService = async (inviteId: string, token: string) =
  */
 export const acceptInviteService = async (inviteId: string, token: string) => {
   const { data } = await getApiClient().post(`/api/invites/${inviteId}/${token}/accept`);
+  return data.data;
+};
+
+/**
+ * Decline organization invite
+ * Authentication required - user email must match invite email
+ */
+export const declineInviteService = async (inviteId: string, token: string) => {
+  const { data } = await getApiClient().post(`/api/invites/${inviteId}/${token}/decline`);
   return data.data;
 };

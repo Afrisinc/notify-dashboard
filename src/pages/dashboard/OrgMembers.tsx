@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Shield, Crown, User, Trash2, Mail, Clock, Check, X } from "lucide-react";
-import { useOrganizationMembers, useOrganizationInvites, useUserInvites, useAcceptInvite, useRemoveOrganizationMember, useCreateOrganizationInvite } from "@/hooks/useOrganization";
+import { useOrganizationMembers, useOrganizationInvites, useUserInvites, useAcceptInvite, useDeclineInvite, useRemoveOrganizationMember, useCreateOrganizationInvite } from "@/hooks/useOrganization";
 import { useCurrentAccountId } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { SearchInput } from "@/components/ui/search-input";
@@ -53,6 +53,7 @@ export default function OrgMembers() {
   const inviteMutation = useCreateOrganizationInvite();
   const removeMutation = useRemoveOrganizationMember();
   const acceptMutation = useAcceptInvite();
+  const declineMutation = useDeclineInvite();
 
   // Handle missing organization - early return AFTER all hooks
   if (!currentOrg) {
@@ -90,7 +91,9 @@ export default function OrgMembers() {
   );
 
   const filteredInvites = invites.filter(
-    (i) => i.status !== "accepted" && i.email.toLowerCase().includes(search.toLowerCase())
+    (i) => i.status === "pending" &&
+           new Date(i.expiresAt) > new Date() &&
+           i.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleInvite = async () => {
@@ -192,7 +195,9 @@ export default function OrgMembers() {
   };
 
   if (currentOrg?.name === "Personal") {
-    const userInvites = userInvitesData?.invites || [];
+    const userInvites = (userInvitesData?.invites || []).filter(
+      (invite: any) => invite.status !== "expired" && new Date(invite.expiresAt) > new Date()
+    );
     
     if (isUserInvitesLoading) {
       return (
@@ -240,7 +245,7 @@ export default function OrgMembers() {
                           </p>
                           <span className="text-content-secondary text-xs">•</span>
                           <span className="text-xs flex items-center bg-warning/10 text-warning px-2 py-0.5 rounded-full whitespace-nowrap">
-                            <Clock className="w-3 h-3 mr-1" /> Pending
+                            <Clock className="w-3 h-3 mr-1" /> Pending (Expires {new Date(invite.expiresAt).toLocaleDateString()})
                           </span>
                         </div>
                       </div>
@@ -251,16 +256,26 @@ export default function OrgMembers() {
                         size="sm"
                         variant="outline"
                         className="w-full sm:w-auto"
-                        onClick={() => {
-                          toast({ title: "Not implemented", description: "Decline flow not fully scaffolded yet." });
+                        disabled={declineMutation.isPending || acceptMutation.isPending}
+                        onClick={async () => {
+                           try {
+                             await declineMutation.mutateAsync({
+                               inviteId: invite.id,
+                               token: invite.token,
+                             });
+                             toast({ title: "Success", description: "Invite declined successfully" });
+                           } catch (err) {
+                             toast({ title: "Error", description: "Failed to decline invite", variant: "destructive" });
+                           }
                         }}
                       >
-                        <X className="h-4 w-4 mr-2" /> Decline
+                        <X className="h-4 w-4 mr-2" /> 
+                        {declineMutation.isPending ? "Declining..." : "Decline"}
                       </Button>
                       <Button 
                         size="sm"
                         className="w-full sm:w-auto"
-                        disabled={acceptMutation.isPending}
+                        disabled={acceptMutation.isPending || declineMutation.isPending}
                         onClick={async () => {
                            try {
                              await acceptMutation.mutateAsync({
@@ -327,7 +342,7 @@ export default function OrgMembers() {
         <div>
           <h1 className="text-2xl font-semibold text-content">Members & Invites</h1>
           <p className="text-sm text-content-secondary mt-1">
-            {currentOrg.name} · {members.length} member{members.length !== 1 ? "s" : ""} · {invites.filter((i) => i.status === "pending").length} pending invite{invites.filter((i) => i.status === "pending").length !== 1 ? "s" : ""}
+            {currentOrg.name} · {members.length} member{members.length !== 1 ? "s" : ""} · {invites.filter((i) => i.status === "pending" && new Date(i.expiresAt) > new Date()).length} pending invite{invites.filter((i) => i.status === "pending" && new Date(i.expiresAt) > new Date()).length !== 1 ? "s" : ""}
           </p>
         </div>
         <Dialog open={showInvite} onOpenChange={setShowInvite}>
@@ -470,7 +485,7 @@ export default function OrgMembers() {
                         <p className="text-sm font-medium text-content">{invite.email}</p>
                         <p className="text-xs text-warning flex items-center gap-1 mt-0.5">
                           <Clock className="w-3 h-3" />
-                          {invite.status === "expired" ? "Expired" : "Pending"} - Expires {new Date(invite.expiresAt).toLocaleDateString()}
+                          Pending - Expires {new Date(invite.expiresAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
