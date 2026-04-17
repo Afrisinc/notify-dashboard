@@ -11,6 +11,7 @@ import {
   removeOrganizationMemberService,
   getInviteDetailsService,
   acceptInviteService,
+  declineInviteService,
   type CreateOrganizationPayload,
   type UpdateOrganizationPayload,
   type CreateInvitePayload,
@@ -200,9 +201,32 @@ export function useAcceptInvite() {
       queryClient.invalidateQueries({
         queryKey: ["userInvites"],
       });
-      // Invalidate user organizations so the new org shows up for the user immediately
+// Invalidate user organizations so the new org shows up for the user immediately
       queryClient.invalidateQueries({
         queryKey: ["userOrganizations"],
+      });
+    },
+  });
+}
+
+/**
+ * Decline organization invite
+ * Authentication required - user email must match invite email
+ */
+export function useDeclineInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ inviteId, token }: { inviteId: string; token: string }) =>
+      declineInviteService(inviteId, token),
+    onSuccess: (_data, { inviteId, token }) => {
+      // Invalidate user invites so the list clears the declined one
+      queryClient.invalidateQueries({
+        queryKey: ["userInvites"],
+      });
+      // General cache refresh for the specific invite
+      queryClient.invalidateQueries({
+        queryKey: ["inviteDetails", inviteId, token],
       });
     },
   });
