@@ -14,6 +14,17 @@ import {
   setEmailConfigService,
   resetEmailConfigService,
   verifyDNSService,
+  createDomainService,
+  getDomainRecordsService,
+  verifyDomainService,
+  updateDomainService,
+  deleteDomainService,
+  getEmailProviderService,
+  setSimpleEmailConfigService,
+  getGmailOAuthUrlService,
+  saveGmailOAuthCallbackService,
+  setGmailAppPasswordService,
+  resetEmailProviderService,
   type UpdateAppSettingsPayload,
   type UpdateAllowedDomainsPayload,
   type CreateWebhookPayload,
@@ -21,6 +32,10 @@ import {
   type AppEmailConfig,
   type SetEmailConfigPayload,
   type DNSVerificationResult,
+  type CreateDomainPayload,
+  type UpdateDomainPayload,
+  type CustomDomain,
+  type DomainVerificationResult,
 } from "@/services/appSettings";
 import { useCurrentAccountId } from "@/hooks/useAuth";
 
@@ -266,5 +281,182 @@ export function useVerifyDNS() {
   return useMutation({
     mutationFn: ({ appId, email }: { appId: string; email: string }) =>
       verifyDNSService(appId, email, accountId ?? undefined),
+  });
+}
+
+// ──────────────────────────────────────────
+// CUSTOM DOMAINS (notification-service)
+// ──────────────────────────────────────────
+
+export function useCreateDomain() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, payload }: { appId: string; payload: CreateDomainPayload }) =>
+      createDomainService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["domains", appId],
+      });
+    },
+  });
+}
+
+export function useGetDomainRecords(appId: string, domainId: string) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["domainRecords", appId, domainId, accountId],
+    queryFn: () => getDomainRecordsService(appId, domainId, accountId ?? undefined),
+    enabled: !!appId && !!domainId && !!accountId,
+    staleTime: 30_000,
+  });
+}
+
+export function useVerifyDomain() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, domainId }: { appId: string; domainId: string }) =>
+      verifyDomainService(appId, domainId, accountId ?? undefined),
+    onSuccess: (_data, { appId, domainId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["domainRecords", appId, domainId],
+      });
+    },
+  });
+}
+
+export function useUpdateDomain() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, domainId, payload }: { appId: string; domainId: string; payload: UpdateDomainPayload }) =>
+      updateDomainService(appId, domainId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId, domainId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["domainRecords", appId, domainId],
+      });
+    },
+  });
+}
+
+export function useDeleteDomain() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId, domainId }: { appId: string; domainId: string }) =>
+      deleteDomainService(appId, domainId, accountId ?? undefined),
+    onSuccess: (_data, { appId, domainId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["domains", appId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["domainRecords", appId, domainId],
+      });
+    },
+  });
+}
+
+// ──────────────────────────────────────────
+// EMAIL PROVIDER (Unified: Simple, Gmail, Custom Domain)
+// ──────────────────────────────────────────
+
+export function useEmailProvider(appId: string) {
+  const accountId = useCurrentAccountId();
+
+  return useQuery({
+    queryKey: ["emailProvider", appId, accountId],
+    queryFn: () => getEmailProviderService(appId, accountId ?? undefined),
+    enabled: !!appId && !!accountId,
+    staleTime: 60_000,
+  });
+}
+
+export function useSetSimpleEmailConfig() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      payload,
+    }: {
+      appId: string;
+      payload: Parameters<typeof setSimpleEmailConfigService>[1];
+    }) => setSimpleEmailConfigService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailProvider", appId],
+      });
+    },
+  });
+}
+
+export function useGmailOAuthUrl() {
+  const accountId = useCurrentAccountId();
+
+  return useMutation({
+    mutationFn: ({ appId }: { appId: string }) =>
+      getGmailOAuthUrlService(appId, accountId ?? undefined),
+  });
+}
+
+export function useSaveGmailOAuthCallback() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      payload,
+    }: {
+      appId: string;
+      payload: Parameters<typeof saveGmailOAuthCallbackService>[1];
+    }) => saveGmailOAuthCallbackService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailProvider", appId],
+      });
+    },
+  });
+}
+
+export function useSetGmailAppPassword() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appId,
+      payload,
+    }: {
+      appId: string;
+      payload: Parameters<typeof setGmailAppPasswordService>[1];
+    }) => setGmailAppPasswordService(appId, payload, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailProvider", appId],
+      });
+    },
+  });
+}
+
+export function useResetEmailProvider() {
+  const accountId = useCurrentAccountId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appId }: { appId: string }) =>
+      resetEmailProviderService(appId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["emailProvider", appId],
+      });
+    },
   });
 }

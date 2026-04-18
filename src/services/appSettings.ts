@@ -1,3 +1,4 @@
+import { EmailProvider, GmailAppPasswordPayload, GmailOAuthCallbackPayload, GmailOAuthUrlResponse, SimpleConfigPayload } from "@/types/appSettings";
 import getApiClient from "./apiClient";
 
 // ──────────────────────────────────────────
@@ -339,4 +340,139 @@ export const verifyDNSService = async (appId: string, email: string, accountId?:
   const config = accountId ? { headers: { "x-account-id": accountId } } : {};
   const res = await getApiClient().post<any>(`/api/apps/${appId}/email-config/verify-dns`, { email }, config);
   return res.data.data as DNSVerificationResult;
+};
+
+// ──────────────────────────────────────────
+// CUSTOM DOMAINS (notification-service)
+// ──────────────────────────────────────────
+
+export interface CreateDomainPayload {
+  domain: string;
+  fromName: string;
+  fromEmail: string;
+}
+
+export interface UpdateDomainPayload {
+  fromName?: string;
+  fromEmail?: string;
+}
+
+export interface DomainDNSRecord {
+  type: string;
+  name: string;
+  value: string;
+  label: string;
+  purpose?: string;
+}
+
+export interface CustomDomain {
+  id: string;
+  domain: string;
+  fromName: string;
+  fromEmail: string;
+  status: "pending" | "verified" | "suspended";
+  verified: {
+    spf: boolean;
+    dkim: boolean;
+    dmarc: boolean;
+  };
+  dnsRecords: DomainDNSRecord[];
+  verifiedAt?: string;
+  createdAt: string;
+}
+
+export interface DomainVerificationResult {
+  verified: boolean;
+  checks: {
+    spf: boolean;
+    dkim: boolean;
+    dmarc: boolean;
+  };
+  message?: string;
+}
+
+export const createDomainService = async (appId: string, payload: CreateDomainPayload, accountId?: string): Promise<CustomDomain> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/domains`, payload, config);
+  return data.data as CustomDomain;
+};
+
+export const getDomainRecordsService = async (appId: string, domainId: string, accountId?: string): Promise<CustomDomain> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/domains/${domainId}/records`, config);
+  return data.data as CustomDomain;
+};
+
+export const verifyDomainService = async (appId: string, domainId: string, accountId?: string): Promise<DomainVerificationResult> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/domains/${domainId}/verify`, {}, config);
+  return data.data as DomainVerificationResult;
+};
+
+export const updateDomainService = async (appId: string, domainId: string, payload: UpdateDomainPayload, accountId?: string): Promise<CustomDomain> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().patch<any>(`/api/apps/${appId}/domains/${domainId}`, payload, config);
+  return data.data as CustomDomain;
+};
+
+export const deleteDomainService = async (appId: string, domainId: string, accountId?: string): Promise<void> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  await getApiClient().delete<any>(`/api/apps/${appId}/domains/${domainId}`, config);
+};
+
+// ──────────────────────────────────────────
+// EMAIL PROVIDER (Unified: Simple, Gmail, Custom Domain)
+// ──────────────────────────────────────────
+
+// Get current email provider config
+export const getEmailProviderService = async (appId: string, accountId?: string): Promise<EmailProvider | null> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/email-provider`, config);
+  return data.data as EmailProvider | null;
+};
+
+// Set simple sender configuration
+export const setSimpleEmailConfigService = async (
+  appId: string,
+  payload: SimpleConfigPayload,
+  accountId?: string
+): Promise<EmailProvider> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-provider/simple`, payload, config);
+  return data.data as EmailProvider;
+};
+
+// Get Gmail OAuth2 URL
+export const getGmailOAuthUrlService = async (appId: string, accountId?: string): Promise<GmailOAuthUrlResponse> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/email-provider/gmail/oauth/url`, config);
+  return data.data as GmailOAuthUrlResponse;
+};
+
+// Handle Gmail OAuth callback
+export const saveGmailOAuthCallbackService = async (
+  appId: string,
+  payload: GmailOAuthCallbackPayload,
+  accountId?: string
+): Promise<EmailProvider> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-provider/gmail/oauth/callback`, payload, config);
+  return data.data as EmailProvider;
+};
+
+// Set Gmail app password
+export const setGmailAppPasswordService = async (
+  appId: string,
+  payload: GmailAppPasswordPayload,
+  accountId?: string
+): Promise<EmailProvider> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-provider/gmail/app-password`, payload, config);
+  return data.data as EmailProvider;
+};
+
+// Reset to default email provider
+export const resetEmailProviderService = async (appId: string, accountId?: string): Promise<void> => {
+  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
+  await getApiClient().delete<any>(`/api/apps/${appId}/email-provider`, config);
 };
