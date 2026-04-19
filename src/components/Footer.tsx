@@ -40,7 +40,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-border/50 mt-10 pt-6 text-center">
-        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Notifyr. All rights reserved.</p>
+        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Notify. All rights reserved.</p>
         <p className="text-xs text-muted-foreground/70 mt-1">An Afrisinc Product</p>
       </div>
     </div>
