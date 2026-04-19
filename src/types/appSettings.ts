@@ -1,7 +1,7 @@
 export interface EmailProvider {
   id: string;
-  provider: 'gmail' | 'sendgrid' | 'notify' | 'custom_domain';
-  method: "simple" | "gmail_oauth2" | "gmail_password" | "custom_domain";
+  provider: 'gmail' | 'notify' | 'custom_domain';
+  method: "oauth2" | "app_password" | null;
   isActive: boolean;
   // Simple
   fromEmail?: string;

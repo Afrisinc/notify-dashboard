@@ -34,6 +34,11 @@ export function EmailProviderSection({ appId }: EmailProviderSectionProps) {
   const { toast } = useToast();
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
+  // Auto-select Gmail tab if OAuth params present
+  const params = new URLSearchParams(window.location.search);
+  const hasOAuthParams = params.has('code') && params.has('state');
+  const [activeTab, setActiveTab] = useState(hasOAuthParams ? 'gmail' : 'simple');
+
   const { data: emailProvider, isLoading } = useEmailProvider(appId);
   const resetProviderMutation = useResetEmailProvider();
 
@@ -236,7 +241,7 @@ export function EmailProviderSection({ appId }: EmailProviderSectionProps) {
         <CardDescription>Choose how your app will send emails. Only one provider can be active at a time.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="simple" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="simple">Simple</TabsTrigger>
             <TabsTrigger value="gmail">Gmail</TabsTrigger>

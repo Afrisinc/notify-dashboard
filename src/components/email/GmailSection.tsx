@@ -54,15 +54,24 @@ export function GmailSection({ appId }: EmailSectionProps) {
   const resetProviderMutation = useResetEmailProvider();
 
   // Check if Gmail is configured
-  const gmailConfig = emailProvider && (emailProvider.method === 'gmail_oauth2' || emailProvider.method === 'gmail_password') ? emailProvider : null;
+  const gmailConfig = emailProvider?.provider === 'gmail' ? emailProvider : null;
 
   // Check for OAuth callback parameters on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('gmail_code');
-    const state = params.get('gmail_state');
+    const code = params.get('code');
+    const state = params.get('state');
 
-    if (code && state && gmailConfig === undefined) {
+    console.log('GmailSection - OAuth params check:', { code: !!code, state: !!state, url: window.location.search });
+
+    // Process callback if code and state exist and no other OAuth params in URL (to prevent re-triggering)
+    if (code && state && !window.location.search.includes('oauth_processed')) {
+      console.log('GmailSection - Processing OAuth callback');
+      // Mark as processed to prevent re-triggering
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.append('oauth_processed', 'true');
+      window.history.replaceState({}, document.title, `?${newParams.toString()}`);
+
       handleOAuthCallback(code, state);
     }
   }, []);
@@ -79,8 +88,14 @@ export function GmailSection({ appId }: EmailSectionProps) {
   const handleOAuthConnect = async () => {
     try {
       const result = await getOAuthUrlMutation.mutateAsync({ appId });
-      // Store state in sessionStorage for verification on callback
-      sessionStorage.setItem('gmail_oauth_state', result.state);
+      // Store state and referrer in sessionStorage for verification and redirect
+      sessionStorage.setItem('oauth_state', result.state);
+      // Store clean referrer without OAuth params
+      const url = new URL(window.location.href);
+      url.searchParams.delete('code');
+      url.searchParams.delete('state');
+      url.searchParams.delete('oauth_processed');
+      sessionStorage.setItem('oauth_referrer', url.pathname + url.search);
       // Redirect to Google's OAuth consent screen
       window.location.href = result.url;
     } catch (error) {
@@ -94,26 +109,37 @@ export function GmailSection({ appId }: EmailSectionProps) {
 
   const handleOAuthCallback = async (code: string, state: string) => {
     try {
-      // Verify state token
-      const savedState = sessionStorage.getItem('gmail_oauth_state');
+      // Verify state token for CSRF protection
+      const savedState = sessionStorage.getItem('oauth_state');
       if (savedState !== state) {
         throw new Error('Invalid state token - potential CSRF attack');
       }
 
-      await saveOAuthCallbackMutation.mutateAsync({
+      console.log('GmailSection - Calling OAuth callback with:', { appId, code: !!code, state: !!state });
+      const result = await saveOAuthCallbackMutation.mutateAsync({
         appId,
         payload: { code, state },
       });
+      console.log('GmailSection - OAuth callback result:', result);
 
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-      sessionStorage.removeItem('gmail_oauth_state');
+      // Get referrer page, default to home
+      const referrer = sessionStorage.getItem('oauth_referrer') || '/';
+
+      // Clear sessionStorage
+      sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_referrer');
 
       toast({
         title: 'Success',
         description: 'Gmail account connected successfully!',
       });
+
+      // Wait a moment for database to commit, then redirect
+      setTimeout(() => {
+        window.location.href = referrer;
+      }, 1000);
     } catch (error) {
+      console.error('OAuth callback error:', error);
       toast({
         title: 'Error',
         description: getErrorMessage(error, 'Failed to connect Gmail'),
