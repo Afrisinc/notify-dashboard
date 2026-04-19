@@ -302,22 +302,29 @@ export function EmailDomainSection({ appId }: EmailDomainSectionProps) {
   // Verified state
   if (step === "verified" && getDomainRecordsQuery.data) {
     return (
-      <Card className="border-border/60 border-green-200 bg-green-50/50">
+      <Card className="border-border/60">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Mail className="h-4 w-4" /> ✅ Custom Domain Verified
           </CardTitle>
           <CardDescription>Your domain is ready to use</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm text-content">
-              <strong>Domain:</strong> {getDomainRecordsQuery.data.domain}
+        <CardContent className="space-y-6">
+          <div className="bg-surface rounded-lg border border-border/60 p-4 space-y-2">
+            <p className="text-xs font-semibold text-content-secondary uppercase tracking-wide">Active Domain</p>
+            <p className="text-2xl font-bold text-content break-all">
+              {getDomainRecordsQuery.data.domain}
             </p>
-            <p className="text-xs text-content-secondary">
-              All DNS records have been verified. You can now send emails using this domain.
+            <p className="text-sm text-content-secondary">
+              All DNS records verified. Emails will be sent from this domain.
             </p>
           </div>
+
+          <Alert className="bg-surface/60 border-border/60">
+            <AlertDescription className="text-content-secondary text-xs">
+              <strong className="text-content">SPF:</strong> ✅ Verified | <strong className="text-content">DKIM:</strong> ✅ Verified | <strong className="text-content">DMARC:</strong> ✅ Verified
+            </AlertDescription>
+          </Alert>
 
           <Separator />
 
