@@ -348,76 +348,54 @@ export const verifyDNSService = async (appId: string, email: string, accountId?:
 
 export interface CreateDomainPayload {
   domain: string;
-  fromName: string;
-  fromEmail: string;
-}
-
-export interface UpdateDomainPayload {
-  fromName?: string;
-  fromEmail?: string;
-}
-
-export interface DomainDNSRecord {
-  type: string;
-  name: string;
-  value: string;
-  label: string;
-  purpose?: string;
+  selector?: string;
 }
 
 export interface CustomDomain {
   id: string;
   domain: string;
-  fromName: string;
-  fromEmail: string;
-  status: "pending" | "verified" | "suspended";
-  verified: {
-    spf: boolean;
-    dkim: boolean;
-    dmarc: boolean;
-  };
-  dnsRecords: DomainDNSRecord[];
-  verifiedAt?: string;
-  createdAt: string;
+  selector?: string;
+  domainStatus: "pending" | "verified";
+  spfVerified: boolean;
+  dkimVerified: boolean;
+  dmarcVerified: boolean;
+  dns_records?: Array<{
+    type: string;
+    name: string;
+    value: string;
+  }>;
+}
+
+export interface DomainDNSRecords {
+  domain: string;
+  spf?: { name: string; value: string; verified: boolean };
+  dkim?: { selector: string; name: string; value: string; verified: boolean };
+  dmarc?: { name: string; value: string; verified: boolean };
 }
 
 export interface DomainVerificationResult {
-  verified: boolean;
-  checks: {
-    spf: boolean;
-    dkim: boolean;
-    dmarc: boolean;
-  };
-  message?: string;
+  domain: string;
+  spfVerified: boolean;
+  dkimVerified: boolean;
+  dmarcVerified: boolean;
 }
 
 export const createDomainService = async (appId: string, payload: CreateDomainPayload, accountId?: string): Promise<CustomDomain> => {
   const config = accountId ? { headers: { "x-account-id": accountId } } : {};
-  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/domains`, payload, config);
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-provider/custom-domain`, payload, config);
   return data.data as CustomDomain;
 };
 
-export const getDomainRecordsService = async (appId: string, domainId: string, accountId?: string): Promise<CustomDomain> => {
+export const getDomainRecordsService = async (appId: string, accountId?: string): Promise<DomainDNSRecords | null> => {
   const config = accountId ? { headers: { "x-account-id": accountId } } : {};
-  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/domains/${domainId}/records`, config);
-  return data.data as CustomDomain;
+  const { data } = await getApiClient().get<any>(`/api/apps/${appId}/email-provider/custom-domain/records`, config);
+  return data.data as DomainDNSRecords | null;
 };
 
-export const verifyDomainService = async (appId: string, domainId: string, accountId?: string): Promise<DomainVerificationResult> => {
+export const verifyDomainService = async (appId: string, accountId?: string): Promise<DomainVerificationResult> => {
   const config = accountId ? { headers: { "x-account-id": accountId } } : {};
-  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/domains/${domainId}/verify`, {}, config);
+  const { data } = await getApiClient().post<any>(`/api/apps/${appId}/email-provider/custom-domain/verify`, {}, config);
   return data.data as DomainVerificationResult;
-};
-
-export const updateDomainService = async (appId: string, domainId: string, payload: UpdateDomainPayload, accountId?: string): Promise<CustomDomain> => {
-  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
-  const { data } = await getApiClient().patch<any>(`/api/apps/${appId}/domains/${domainId}`, payload, config);
-  return data.data as CustomDomain;
-};
-
-export const deleteDomainService = async (appId: string, domainId: string, accountId?: string): Promise<void> => {
-  const config = accountId ? { headers: { "x-account-id": accountId } } : {};
-  await getApiClient().delete<any>(`/api/apps/${appId}/domains/${domainId}`, config);
 };
 
 // ──────────────────────────────────────────

@@ -17,8 +17,6 @@ import {
   createDomainService,
   getDomainRecordsService,
   verifyDomainService,
-  updateDomainService,
-  deleteDomainService,
   getEmailProviderService,
   setSimpleEmailConfigService,
   getGmailOAuthUrlService,
@@ -29,13 +27,8 @@ import {
   type UpdateAllowedDomainsPayload,
   type CreateWebhookPayload,
   type UpdateWebhookPayload,
-  type AppEmailConfig,
   type SetEmailConfigPayload,
-  type DNSVerificationResult,
   type CreateDomainPayload,
-  type UpdateDomainPayload,
-  type CustomDomain,
-  type DomainVerificationResult,
 } from "@/services/appSettings";
 import { useCurrentAccountId } from "@/hooks/useAuth";
 
@@ -303,13 +296,13 @@ export function useCreateDomain() {
   });
 }
 
-export function useGetDomainRecords(appId: string, domainId: string) {
+export function useGetDomainRecords(appId: string) {
   const accountId = useCurrentAccountId();
 
   return useQuery({
-    queryKey: ["domainRecords", appId, domainId, accountId],
-    queryFn: () => getDomainRecordsService(appId, domainId, accountId ?? undefined),
-    enabled: !!appId && !!domainId && !!accountId,
+    queryKey: ["domainRecords", appId, accountId],
+    queryFn: () => getDomainRecordsService(appId, accountId ?? undefined),
+    enabled: !!appId && !!accountId,
     staleTime: 30_000,
   });
 }
@@ -319,44 +312,11 @@ export function useVerifyDomain() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ appId, domainId }: { appId: string; domainId: string }) =>
-      verifyDomainService(appId, domainId, accountId ?? undefined),
-    onSuccess: (_data, { appId, domainId }) => {
+    mutationFn: ({ appId }: { appId: string }) =>
+      verifyDomainService(appId, accountId ?? undefined),
+    onSuccess: (_data, { appId }) => {
       queryClient.invalidateQueries({
-        queryKey: ["domainRecords", appId, domainId],
-      });
-    },
-  });
-}
-
-export function useUpdateDomain() {
-  const accountId = useCurrentAccountId();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ appId, domainId, payload }: { appId: string; domainId: string; payload: UpdateDomainPayload }) =>
-      updateDomainService(appId, domainId, payload, accountId ?? undefined),
-    onSuccess: (_data, { appId, domainId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["domainRecords", appId, domainId],
-      });
-    },
-  });
-}
-
-export function useDeleteDomain() {
-  const accountId = useCurrentAccountId();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ appId, domainId }: { appId: string; domainId: string }) =>
-      deleteDomainService(appId, domainId, accountId ?? undefined),
-    onSuccess: (_data, { appId, domainId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["domains", appId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["domainRecords", appId, domainId],
+        queryKey: ["domainRecords", appId],
       });
     },
   });
