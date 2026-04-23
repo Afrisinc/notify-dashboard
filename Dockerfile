@@ -25,9 +25,6 @@ FROM nginx:alpine
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 8099
+EXPOSE 7000
 
 CMD ["nginx", "-g", "daemon off;"]
