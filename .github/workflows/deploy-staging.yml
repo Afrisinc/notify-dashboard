@@ -39,14 +39,14 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_API_URL=${{ secrets.VITE_API_STAGING_URL }} \
-            -t ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify-dashboard:${{ steps.meta.outputs.short_sha }} \
-            -t ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify-dashboard:${{ steps.meta.outputs.staging_tag }} .
+            -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.short_sha }} \
+            -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.staging_tag }} .
 
       # Step 5: Push Docker images
       - name: Push Docker images
         run: |
-          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify-dashboard:${{ steps.meta.outputs.short_sha }}
-          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/afrisinc-notify-dashboard:${{ steps.meta.outputs.staging_tag }}
+          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.short_sha }}
+          docker push ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.staging_tag }}
 
       # Step 5: SSH deploy to VPS
       - name: Deploy to VPS
@@ -68,7 +68,7 @@ jobs:
 
             echo "$DEPLOY_GHCR_TOKEN" | docker login ghcr.io -u "$DEPLOY_GHCR_USERNAME" --password-stdin
 
-            docker compose -p notify-staging --env-file .env.staging -f docker-compose.yml pull
-            docker compose -p notify-staging --env-file .env.staging -f docker-compose.yml up -d
+            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml pull
+            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml up -d
             docker image prune -af
-            docker compose -p notify-staging --env-file .env.staging -f docker-compose.yml ps
+            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml ps
