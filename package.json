@@ -5,20 +5,29 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.0",
+    "axios": "^1.17.0",
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "recharts": "^2.13.0",
-    "lucide-react": "^0.468.0"
+    "recharts": "^2.13.0"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.101.0",
+    "@types/node": "^25.9.3",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
     "vite": "^6.0.5"
   }
 }

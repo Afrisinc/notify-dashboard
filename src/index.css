@@ -1,116 +1,124 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+}
 
 /* ── Brand Color Scale ── */
 :root {
-  --notify-primary-500: #0293E4;
-  --notify-primary-400: #36A9EA;
-  --notify-primary-300: #66BEEE;
-  --notify-primary-200: #9BD3F6;
-  --notify-primary-100: #CCE9FB;
+  --notify-primary-500: #0293e4;
+  --notify-primary-400: #36a9ea;
+  --notify-primary-300: #66beee;
+  --notify-primary-200: #9bd3f6;
+  --notify-primary-100: #cce9fb;
 
   --notify-secondary: hsl(160, 40%, 25%);
   --notify-secondary-light: hsl(160, 40%, 35%);
 
   /* Light mode */
-  --notify-bg:               hsl(220, 20%, 97%);
-  --notify-bg-card:          hsl(0, 0%, 100%);
-  --notify-bg-muted:         hsl(220, 14%, 95%);
-  --notify-fg:               hsl(220, 20%, 10%);
-  --notify-fg-muted:         hsl(220, 10%, 46%);
-  --notify-border:           hsl(220, 13%, 90%);
-  --notify-input:            hsl(220, 13%, 90%);
-  --notify-ring:             hsl(187, 85%, 43%);
+  --notify-bg: hsl(220, 20%, 97%);
+  --notify-bg-card: hsl(0, 0%, 100%);
+  --notify-bg-muted: hsl(220, 14%, 95%);
+  --notify-fg: hsl(220, 20%, 10%);
+  --notify-fg-muted: hsl(220, 10%, 46%);
+  --notify-border: hsl(220, 13%, 90%);
+  --notify-input: hsl(220, 13%, 90%);
+  --notify-ring: hsl(187, 85%, 43%);
 
-  --notify-primary:          hsl(187, 85%, 43%);
-  --notify-primary-fg:       hsl(0, 0%, 100%);
-  --notify-accent:           hsl(187, 40%, 92%);
-  --notify-accent-fg:        hsl(187, 85%, 30%);
+  --notify-primary: hsl(187, 85%, 43%);
+  --notify-primary-fg: hsl(0, 0%, 100%);
+  --notify-accent: hsl(187, 40%, 92%);
+  --notify-accent-fg: hsl(187, 85%, 30%);
 
-  --notify-success:          hsl(152, 60%, 40%);
-  --notify-success-fg:       hsl(0, 0%, 100%);
-  --notify-warning:          hsl(38, 92%, 50%);
-  --notify-warning-fg:       hsl(0, 0%, 100%);
-  --notify-destructive:      hsl(0, 72%, 51%);
-  --notify-destructive-fg:   hsl(0, 0%, 100%);
+  --notify-success: hsl(152, 60%, 40%);
+  --notify-success-fg: hsl(0, 0%, 100%);
+  --notify-warning: hsl(38, 92%, 50%);
+  --notify-warning-fg: hsl(0, 0%, 100%);
+  --notify-destructive: hsl(0, 72%, 51%);
+  --notify-destructive-fg: hsl(0, 0%, 100%);
 
-  --notify-sidebar-bg:       hsl(220, 20%, 97%);
-  --notify-sidebar-fg:       hsl(220, 10%, 30%);
-  --notify-sidebar-accent:   hsl(187, 40%, 94%);
-  --notify-sidebar-accent-fg:hsl(187, 85%, 30%);
-  --notify-sidebar-border:   hsl(220, 13%, 90%);
+  --notify-sidebar-bg: hsl(220, 20%, 97%);
+  --notify-sidebar-fg: hsl(220, 10%, 30%);
+  --notify-sidebar-accent: hsl(187, 40%, 94%);
+  --notify-sidebar-accent-fg: hsl(187, 85%, 30%);
+  --notify-sidebar-border: hsl(220, 13%, 90%);
 
   /* Gradients */
-  --notify-gradient-hero:    linear-gradient(180deg, hsl(210 20% 98%) 0%, hsl(210 15% 95%) 100%);
-  --notify-gradient-card:    linear-gradient(135deg, hsl(210 20% 100%) 0%, hsl(210 15% 98%) 100%);
+  --notify-gradient-hero: linear-gradient(180deg, hsl(210 20% 98%) 0%, hsl(210 15% 95%) 100%);
+  --notify-gradient-card: linear-gradient(135deg, hsl(210 20% 100%) 0%, hsl(210 15% 98%) 100%);
   --notify-gradient-primary: linear-gradient(135deg, hsl(187 85% 43%) 0%, hsl(187 70% 50%) 100%);
 
   /* Shadows */
-  --notify-shadow-sm:      0 1px 2px 0 rgba(0,0,0,0.05);
-  --notify-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  --notify-shadow-lg:      0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-  --notify-shadow-xl:      0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-  --notify-shadow-primary: 0 8px 16px 0 rgba(2,147,228,0.15);
+  --notify-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --notify-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --notify-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --notify-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --notify-shadow-primary: 0 8px 16px 0 rgba(2, 147, 228, 0.15);
 
   /* Radii */
-  --notify-radius-sm:   0.375rem;
-  --notify-radius-md:   0.5rem;
-  --notify-radius-lg:   0.625rem;
-  --notify-radius-xl:   0.75rem;
-  --notify-radius-2xl:  1rem;
+  --notify-radius-sm: 0.375rem;
+  --notify-radius-md: 0.5rem;
+  --notify-radius-lg: 0.625rem;
+  --notify-radius-xl: 0.75rem;
+  --notify-radius-2xl: 1rem;
   --notify-radius-full: 9999px;
 
   /* Typography */
-  --notify-font-sans:    'Manrope', system-ui, -apple-system, sans-serif;
+  --notify-font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
   --notify-font-heading: 'Playfair Display', Georgia, serif;
-  --notify-font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+  --notify-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --notify-text-xs:   0.75rem;
-  --notify-text-sm:   0.875rem;
+  --notify-text-xs: 0.75rem;
+  --notify-text-sm: 0.875rem;
   --notify-text-base: 1rem;
-  --notify-text-md:   1.125rem;
-  --notify-text-lg:   1.25rem;
-  --notify-text-xl:   1.563rem;
-  --notify-text-2xl:  1.953rem;
-  --notify-text-3xl:  2.441rem;
-  --notify-text-4xl:  3.052rem;
+  --notify-text-md: 1.125rem;
+  --notify-text-lg: 1.25rem;
+  --notify-text-xl: 1.563rem;
+  --notify-text-2xl: 1.953rem;
+  --notify-text-3xl: 2.441rem;
+  --notify-text-4xl: 3.052rem;
 
-  --notify-leading-tight:   1.1;
-  --notify-leading-snug:    1.2;
-  --notify-leading-normal:  1.5;
+  --notify-leading-tight: 1.1;
+  --notify-leading-snug: 1.2;
+  --notify-leading-normal: 1.5;
   --notify-leading-relaxed: 1.7;
 }
 
 /* ── Dark Mode (app default) ── */
-[data-theme="dark"] {
-  --notify-bg:               hsl(224, 20%, 5%);
-  --notify-bg-card:          hsl(224, 18%, 8%);
-  --notify-bg-muted:         hsl(224, 14%, 12%);
-  --notify-fg:               hsl(210, 20%, 95%);
-  --notify-fg-muted:         hsl(215, 15%, 55%);
-  --notify-border:           hsl(224, 14%, 14%);
-  --notify-input:            hsl(224, 14%, 16%);
-  --notify-ring:             hsl(187, 85%, 48%);
+[data-theme='dark'] {
+  --notify-bg: hsl(224, 20%, 5%);
+  --notify-bg-card: hsl(224, 18%, 8%);
+  --notify-bg-muted: hsl(224, 14%, 12%);
+  --notify-fg: hsl(210, 20%, 95%);
+  --notify-fg-muted: hsl(215, 15%, 55%);
+  --notify-border: hsl(224, 14%, 14%);
+  --notify-input: hsl(224, 14%, 16%);
+  --notify-ring: hsl(187, 85%, 48%);
 
-  --notify-primary:          hsl(187, 85%, 48%);
-  --notify-primary-fg:       hsl(224, 20%, 5%);
-  --notify-accent:           hsl(224, 14%, 14%);
-  --notify-accent-fg:        hsl(187, 85%, 60%);
+  --notify-primary: hsl(187, 85%, 48%);
+  --notify-primary-fg: hsl(224, 20%, 5%);
+  --notify-accent: hsl(224, 14%, 14%);
+  --notify-accent-fg: hsl(187, 85%, 60%);
 
-  --notify-success:          hsl(152, 60%, 45%);
-  --notify-warning:          hsl(38, 92%, 55%);
-  --notify-destructive:      hsl(0, 62%, 50%);
+  --notify-success: hsl(152, 60%, 45%);
+  --notify-warning: hsl(38, 92%, 55%);
+  --notify-destructive: hsl(0, 62%, 50%);
 
-  --notify-sidebar-bg:       hsl(224, 20%, 4%);
-  --notify-sidebar-fg:       hsl(215, 15%, 65%);
-  --notify-sidebar-accent:   hsl(224, 14%, 10%);
-  --notify-sidebar-accent-fg:hsl(210, 20%, 90%);
-  --notify-sidebar-border:   hsl(224, 14%, 12%);
+  --notify-sidebar-bg: hsl(224, 20%, 4%);
+  --notify-sidebar-fg: hsl(215, 15%, 65%);
+  --notify-sidebar-accent: hsl(224, 14%, 10%);
+  --notify-sidebar-accent-fg: hsl(210, 20%, 90%);
+  --notify-sidebar-border: hsl(224, 14%, 12%);
 
-  --notify-gradient-hero:    linear-gradient(180deg, hsl(224 20% 8%) 0%, hsl(224 20% 5%) 100%);
-  --notify-gradient-card:    linear-gradient(135deg, hsl(224 18% 12%) 0%, hsl(224 18% 8%) 100%);
+  --notify-gradient-hero: linear-gradient(180deg, hsl(224 20% 8%) 0%, hsl(224 20% 5%) 100%);
+  --notify-gradient-card: linear-gradient(135deg, hsl(224 18% 12%) 0%, hsl(224 18% 8%) 100%);
 }
 
 body {
@@ -122,12 +130,27 @@ body {
   overflow-x: hidden;
 }
 
-a { color: inherit; text-decoration: none; }
-button { font-family: var(--notify-font-sans); cursor: pointer; border: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font-family: var(--notify-font-sans);
+  cursor: pointer;
+  border: none;
+}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(224,14%,20%); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(224, 14%, 20%);
+  border-radius: 3px;
+}
 
 /* ── Hero responsive ── */
 .hero-grid {
@@ -137,7 +160,9 @@ button { font-family: var(--notify-font-sans); cursor: pointer; border: none; }
   align-items: center;
 }
 @media (max-width: 960px) {
-  .hero-grid { grid-template-columns: 1fr; }
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Notify text gradient ── */

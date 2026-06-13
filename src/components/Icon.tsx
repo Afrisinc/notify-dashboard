@@ -1,3 +1,10 @@
+interface IconProps {
+  name: string
+  size?: number
+  color?: string
+  stroke?: number
+}
+
 const paths = {
   mail: (
     <>
@@ -248,7 +255,7 @@ const paths = {
   ),
 }
 
-export default function Icon({ name, size = 20, color = 'currentColor', stroke = 1.5 }) {
+export default function Icon({ name, size = 20, color = 'currentColor', stroke = 1.5 }: IconProps) {
   return (
     <svg
       width={size}

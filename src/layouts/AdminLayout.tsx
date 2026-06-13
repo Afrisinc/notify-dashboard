@@ -3,7 +3,13 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
 import { C } from '../design'
 
-const navItems = [
+interface NavItem {
+  to: string
+  icon: string
+  label: string
+}
+
+const navItems: NavItem[] = [
   { to: '/admin/dashboard', icon: 'home', label: 'Dashboard' },
   { to: '/admin/clients', icon: 'users', label: 'Clients' },
   { to: '/admin/notifications', icon: 'bell', label: 'Notifications' },
@@ -12,9 +18,14 @@ const navItems = [
   { to: '/admin/support', icon: 'help', label: 'Support' },
 ]
 
-const bottomItems = [{ to: '/admin/settings', icon: 'settings', label: 'Settings' }]
+const bottomItems: NavItem[] = [{ to: '/admin/settings', icon: 'settings', label: 'Settings' }]
 
-function Sidebar({ collapsed, setCollapsed }) {
+interface SidebarProps {
+  collapsed: boolean
+  setCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void
+}
+
+function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -364,8 +375,8 @@ function Header() {
             outline: 'none',
             transition: 'border-color 0.15s',
           }}
-          onFocus={(e) => (e.target.style.borderColor = 'rgba(2,147,228,0.4)')}
-          onBlur={(e) => (e.target.style.borderColor = 'hsl(224,14%,16%)')}
+          onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+          onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
         />
       </div>
 
