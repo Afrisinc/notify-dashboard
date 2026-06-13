@@ -298,14 +298,26 @@ export default function Clients() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 1fr 0.8fr 0.8fr 1fr 120px',
+            gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1.2fr 120px',
             gap: 0,
             padding: '12px 20px',
             borderBottom: `1px solid hsl(224,14%,12%)`,
             background: 'hsl(224,14%,10%)',
           }}
         >
-          {['Client', 'Plan', 'Sent', 'Delivery', 'Templates', 'Channels', 'Status', 'Joined', 'Actions'].map((h) => (
+          {[
+            'Client',
+            'Plan',
+            'Sent',
+            'Delivery',
+            'Templates',
+            'Channels',
+            'Status',
+            'Joined',
+            'Organization Name',
+            'Organization Type',
+            'Actions',
+          ].map((h) => (
             <div
               key={h}
               style={{
@@ -329,7 +341,7 @@ export default function Clients() {
               key={c.id}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 1fr 0.8fr 0.8fr 1fr 120px',
+                gridTemplateColumns: '2fr 1fr 0.8fr 0.8fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1.2fr 120px',
                 gap: 0,
                 padding: '14px 20px',
                 borderBottom: i < clients.length - 1 ? `1px solid hsl(224,14%,11%)` : 'none',
@@ -389,9 +401,9 @@ export default function Clients() {
                   fontSize: 13,
                   fontWeight: 600,
                   color:
-                    parseFloat(c.deliveryRate) >= 99
+                    Number.parseFloat(c.deliveryRate) >= 99
                       ? C.success
-                      : parseFloat(c.deliveryRate) >= 97
+                      : Number.parseFloat(c.deliveryRate) >= 97
                         ? C.warning
                         : C.destructive,
                 }}
@@ -408,6 +420,30 @@ export default function Clients() {
                 <Badge label={displayStatus} colors={STATUS_COLORS[displayStatus] || STATUS_COLORS.default} />
               </div>
               <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(215,15%,65%)' }}>{c.joined}</p>
+              <p
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'hsl(210,20%,85%)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {c.organizationName || '-'}
+              </p>
+              <p
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'hsl(210,20%,85%)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {c.organizationType || '-'}
+              </p>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
                   title="View"

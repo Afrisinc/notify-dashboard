@@ -14,6 +14,8 @@ export interface Client {
   status: ClientStatus
   joined: string
   channels: string[]
+  organizationName: string
+  organizationType: string
 }
 
 export interface ClientsResponse {
