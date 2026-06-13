@@ -1,5 +1,6 @@
 export type ClientPlan = 'FREE' | 'PAYG' | 'STARTER' | 'SCALE' | 'ENTERPRISE'
 export type ClientStatus = 'active' | 'suspended' | 'trial'
+export type OrganizationType = 'INDIVIDUAL' | 'ORGANIZATION'
 export type ApiClientPlan = 'FREE' | 'STARTER' | 'SCALE' | 'ENTERPRISE' | 'PAYG'
 export type ApiClientStatus = 'active' | 'suspended' | 'trial'
 
@@ -15,7 +16,7 @@ export interface Client {
   joined: string
   channels: string[]
   organizationName: string
-  organizationType: string
+  organizationType: OrganizationType
 }
 
 export interface ClientsResponse {
