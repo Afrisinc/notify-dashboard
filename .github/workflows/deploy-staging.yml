@@ -33,11 +33,9 @@ jobs:
           username: ${{ secrets.GHCR_OWNER }} # org name, e.g., afrisinc
           password: ${{ secrets.GHCR_TOKEN }} # your PAT
 
-      # Step 4: Build Docker image
       - name: Build Docker image
         run: |
           docker build \
-            --build-arg VITE_API_URL=${{ secrets.VITE_API_STAGING_URL }} \
             -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.short_sha }} \
             -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.staging_tag }} .
 
@@ -67,7 +65,6 @@ jobs:
 
             echo "$DEPLOY_GHCR_TOKEN" | docker login ghcr.io -u "$DEPLOY_GHCR_USERNAME" --password-stdin
 
-            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml pull
-            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml up -d
+            docker compose  pull
+            docker compose up -d
             docker image prune -af
-            docker compose -p notify-dashboard-staging --env-file .env.staging -f docker-compose.yml ps

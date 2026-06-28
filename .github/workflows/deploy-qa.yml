@@ -33,11 +33,9 @@ jobs:
           username: ${{ secrets.GHCR_OWNER }} # org name, e.g., afrisinc
           password: ${{ secrets.GHCR_TOKEN }} # your PAT
 
-      # Step 4: Build Docker image
       - name: Build Docker image
         run: |
           docker build \
-            --build-arg VITE_API_URL=${{ secrets.VITE_API_QA_URL }} \
             -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.short_sha }} \
             -t ghcr.io/${{ secrets.GHCR_OWNER }}/notify-dashboard:${{ steps.meta.outputs.qa_tag }} .
 
