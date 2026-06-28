@@ -262,8 +262,8 @@ function Nav({ onDashboard }) {
               key={link}
               href={`#${link.toLowerCase()}`}
               style={{ fontSize: 14, fontWeight: 500, color: C.fgMuted, transition: 'color 0.15s' }}
-              onMouseEnter={(e) => (e.target.style.color = C.fg)}
-              onMouseLeave={(e) => (e.target.style.color = C.fgMuted)}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = C.fg)}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = C.fgMuted)}
             >
               {link}
             </a>
@@ -280,8 +280,8 @@ function Nav({ onDashboard }) {
               background: 'transparent',
               transition: 'color 0.15s',
             }}
-            onMouseEnter={(e) => (e.target.style.color = C.fg)}
-            onMouseLeave={(e) => (e.target.style.color = C.fgMuted)}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = C.fg)}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = C.fgMuted)}
           >
             Sign in
           </button>
@@ -777,7 +777,23 @@ function HowItWorks() {
 }
 
 // ── Pricing ───────────────────────────────────────────────────
-function PricingCard({ plan, price, sub, features, cta, highlight, onDashboard }) {
+function PricingCard({
+  plan,
+  price,
+  sub,
+  features,
+  cta,
+  highlight,
+  onDashboard,
+}: {
+  plan: any
+  price: any
+  sub?: any
+  features: any
+  cta: any
+  highlight: any
+  onDashboard: any
+}) {
   const [hov, setHov] = useState(false)
   return (
     <div
@@ -1288,8 +1304,8 @@ function Footer() {
                     key={l}
                     href="#"
                     style={{ fontSize: 14, color: C.fgMuted, transition: 'color 0.15s' }}
-                    onMouseEnter={(e) => (e.target.style.color = C.fg)}
-                    onMouseLeave={(e) => (e.target.style.color = C.fgMuted)}
+                    onMouseEnter={(e) => ((e.target as HTMLElement).style.color = C.fg)}
+                    onMouseLeave={(e) => ((e.target as HTMLElement).style.color = C.fgMuted)}
                   >
                     {l}
                   </a>

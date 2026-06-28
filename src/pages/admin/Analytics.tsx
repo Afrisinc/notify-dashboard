@@ -45,7 +45,7 @@ const topClients = [
   { name: 'PingApp', sent: 220000, plan: 'Pro' },
 ]
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null
   return (
     <div
@@ -66,7 +66,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-function Card({ children, title, subtitle, style }) {
+function Card({ children, title, subtitle, style }: { children: any; title: any; subtitle?: any; style?: any }) {
   return (
     <div
       style={{

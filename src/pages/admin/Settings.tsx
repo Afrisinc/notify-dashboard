@@ -74,7 +74,19 @@ function Toggle({ on, onChange }) {
   )
 }
 
-function Input({ value, onChange, placeholder, type = 'text', mono }) {
+function Input({
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  mono,
+}: {
+  value: any
+  onChange: any
+  placeholder?: any
+  type?: string
+  mono?: any
+}) {
   return (
     <input
       value={value}

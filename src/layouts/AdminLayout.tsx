@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
 import { C } from '../design'
+import { getUser, clearSession, displayName, initials } from '@/lib/auth'
 
 interface NavItem {
   to: string
@@ -27,9 +28,11 @@ interface SidebarProps {
 
 function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const navigate = useNavigate()
+  const user = getUser()
 
   const handleLogout = () => {
-    navigate('/')
+    clearSession()
+    navigate('/', { replace: true })
   }
 
   return (
@@ -278,7 +281,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
               flexShrink: 0,
             }}
           >
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#36A9EA' }}>A</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#36A9EA' }}>{user ? initials(user) : 'A'}</span>
           </div>
           {!collapsed && (
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -292,7 +295,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                   textOverflow: 'ellipsis',
                 }}
               >
-                Admin
+                {user ? displayName(user) : 'Admin'}
               </p>
               <p
                 style={{
@@ -303,7 +306,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                   textOverflow: 'ellipsis',
                 }}
               >
-                admin@notify.io
+                {user?.email ?? 'admin@notify.io'}
               </p>
             </div>
           )}

@@ -29,7 +29,21 @@ const channelBreakdown = [
   { label: 'In-app', value: 4, color: 'hsl(260,60%,55%)' },
 ]
 
-function StatCard({ icon, label, value, sub, trend, trendUp }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  trend,
+  trendUp,
+}: {
+  icon: any
+  label: any
+  value: any
+  sub: any
+  trend?: any
+  trendUp?: any
+}) {
   return (
     <div
       style={{
@@ -160,7 +174,7 @@ function ChannelBadge({ channel }) {
   )
 }
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null
   return (
     <div

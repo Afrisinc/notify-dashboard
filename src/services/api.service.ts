@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getToken, clearSession } from '@/lib/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -10,26 +11,25 @@ export const apiClient = axios.create({
   },
 })
 
-// Request interceptor
+// Attach JWT on every request
 apiClient.interceptors.request.use(
   (config) => {
-    // Add auth token if available
-    // const token = localStorage.getItem('auth_token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    const token = getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => Promise.reject(error)
 )
 
-// Response interceptor
+// On 401 — clear session and redirect to SSO entry point
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle common errors
     if (error.response?.status === 401) {
-      // Handle unauthorized
+      clearSession()
+      window.location.replace('/')
     }
     return Promise.reject(error)
   }
