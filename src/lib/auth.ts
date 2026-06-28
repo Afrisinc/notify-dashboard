@@ -2,6 +2,7 @@ import { AUTH_UI_URL } from '@/lib/env'
 
 const TOKEN_KEY = 'notify_admin_token'
 const USER_KEY = 'notify_admin_user'
+const DEFAULT_AUTH_URL = 'https://auth.afrisinc.com/login'
 
 export interface NotifyAdminUser {
   id: string
@@ -34,7 +35,7 @@ export function clearSession(): void {
 }
 
 export function redirectToLogin(): void {
-  const loginUrl = AUTH_UI_URL || '/login'
+  const loginUrl = AUTH_UI_URL || DEFAULT_AUTH_URL
   globalThis.location.replace(loginUrl)
 }
 
