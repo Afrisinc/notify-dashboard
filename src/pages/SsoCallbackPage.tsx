@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { decodeJwtPayload, userFromPayload, storeSession } from '@/lib/auth'
+import { decodeJwtPayload, userFromPayload, storeSession, redirectToLogin } from '@/lib/auth'
 
-/**
- * SsoCallbackPage — /sso/callback
- *
- * Receives the JWT forwarded by the platform after the user selects Notify:
- *   platform /select-product → click Notify
- *   → window.location = baseUrl + "/sso/callback?token=JWT"
- *   → decode JWT → store token + user → navigate to /admin/dashboard
- */
 export default function SsoCallbackPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -20,7 +12,7 @@ export default function SsoCallbackPage() {
 
     if (!token) {
       setError('No token provided. Redirecting…')
-      setTimeout(() => navigate('/', { replace: true }), 2000)
+      setTimeout(() => redirectToLogin(), 2000)
       return
     }
 
@@ -28,7 +20,7 @@ export default function SsoCallbackPage() {
 
     if (!payload) {
       setError('Invalid token. Redirecting…')
-      setTimeout(() => navigate('/', { replace: true }), 2000)
+      setTimeout(() => redirectToLogin(), 2000)
       return
     }
 
@@ -36,12 +28,12 @@ export default function SsoCallbackPage() {
 
     if (!user) {
       setError('Incomplete token payload. Redirecting…')
-      setTimeout(() => navigate('/', { replace: true }), 2000)
+      setTimeout(() => redirectToLogin(), 2000)
       return
     }
 
     storeSession(token, user)
-    navigate('/admin/dashboard', { replace: true })
+    navigate('/dashboard', { replace: true })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {

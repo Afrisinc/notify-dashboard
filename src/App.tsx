@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import LandingPage from './pages/LandingPage'
 import SsoCallbackPage from './pages/SsoCallbackPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminLayout from './layouts/AdminLayout'
@@ -15,22 +14,16 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
-        <Route path="/" element={<LandingPage />} />
-
-        {/* SSO callback — receives JWT from platform after product selection */}
         <Route path="/sso/callback" element={<SsoCallbackPage />} />
-
-        {/* Protected admin routes */}
         <Route
-          path="/admin"
+          path="/"
           element={
             <ProtectedRoute>
               <AdminLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="clients" element={<Clients />} />
           <Route path="notifications" element={<Notifications />} />

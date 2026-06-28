@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
 import { C } from '../design'
-import { getUser, clearSession, displayName, initials } from '@/lib/auth'
+import { getUser, logout, displayName, initials } from '@/lib/auth'
 
 interface NavItem {
   to: string
@@ -11,15 +11,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/admin/dashboard', icon: 'home', label: 'Dashboard' },
-  { to: '/admin/clients', icon: 'users', label: 'Clients' },
-  { to: '/admin/notifications', icon: 'bell', label: 'Notifications' },
-  { to: '/admin/templates', icon: 'layers', label: 'Templates' },
-  { to: '/admin/analytics', icon: 'chart', label: 'Analytics' },
-  { to: '/admin/support', icon: 'help', label: 'Support' },
+  { to: '/dashboard', icon: 'home', label: 'Dashboard' },
+  { to: '/clients', icon: 'users', label: 'Clients' },
+  { to: '/notifications', icon: 'bell', label: 'Notifications' },
+  { to: '/templates', icon: 'layers', label: 'Templates' },
+  { to: '/analytics', icon: 'chart', label: 'Analytics' },
+  { to: '/support', icon: 'help', label: 'Support' },
 ]
 
-const bottomItems: NavItem[] = [{ to: '/admin/settings', icon: 'settings', label: 'Settings' }]
+const bottomItems: NavItem[] = [{ to: '/settings', icon: 'settings', label: 'Settings' }]
 
 interface SidebarProps {
   collapsed: boolean
@@ -31,8 +31,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const user = getUser()
 
   const handleLogout = () => {
-    clearSession()
-    navigate('/', { replace: true })
+    logout()
   }
 
   return (
