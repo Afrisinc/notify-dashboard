@@ -9,3 +9,4 @@ export function getEnv(key: string): string {
 }
 
 export const API_BASE_URL = getEnv('VITE_API_BASE_URL')
+export const AUTH_UI_URL = getEnv('VITE_AUTH_UI_URL')

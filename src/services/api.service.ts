@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getToken, clearSession } from '@/lib/auth'
+import { getToken, logout } from '@/lib/auth'
 import { API_BASE_URL } from '@/lib/env'
 
 export const apiClient = axios.create({
@@ -22,13 +22,11 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// On 401 — clear session and redirect to SSO entry point
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      clearSession()
-      window.location.replace('/')
+      logout()
     }
     return Promise.reject(error)
   }

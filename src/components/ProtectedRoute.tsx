@@ -1,19 +1,12 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { isAuthenticated } from '@/lib/auth'
+import { isAuthenticated, redirectToLogin } from '@/lib/auth'
 
-/**
- * ProtectedRoute — wraps any route that requires an auth session.
- * If no token is found in localStorage, redirects to / (landing/login).
- */
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate()
-
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/', { replace: true })
+      redirectToLogin()
     }
-  }, [navigate])
+  }, [])
 
   if (!isAuthenticated()) {
     return (

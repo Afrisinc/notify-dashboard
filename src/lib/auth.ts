@@ -1,11 +1,4 @@
-/**
- * Auth storage helpers for the Notify admin dashboard.
- *
- * The SSO token is passed in from the platform via:
- *   /sso/callback?token=<jwt>
- *
- * We store it here and the apiClient picks it up for every request.
- */
+import { AUTH_UI_URL } from '@/lib/env'
 
 const TOKEN_KEY = 'notify_admin_token'
 const USER_KEY = 'notify_admin_user'
@@ -38,6 +31,16 @@ export function getUser(): NotifyAdminUser | null {
 export function clearSession(): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
+}
+
+export function redirectToLogin(): void {
+  const loginUrl = AUTH_UI_URL || '/login'
+  globalThis.location.replace(loginUrl)
+}
+
+export function logout(): void {
+  clearSession()
+  redirectToLogin()
 }
 
 export function isAuthenticated(): boolean {
