@@ -1,33 +1,8 @@
 import { useState } from 'react'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
-
-const weekData = [
-  { day: 'Mon', email: 4200, sms: 800, push: 1200 },
-  { day: 'Tue', email: 5800, sms: 1100, push: 1600 },
-  { day: 'Wed', email: 4900, sms: 920, push: 1400 },
-  { day: 'Thu', email: 7200, sms: 1500, push: 2100 },
-  { day: 'Fri', email: 6100, sms: 1300, push: 1900 },
-  { day: 'Sat', email: 3200, sms: 650, push: 900 },
-  { day: 'Sun', email: 2900, sms: 580, push: 750 },
-]
-
-const recentActivity = [
-  { client: 'Acme Corp', channel: 'email', count: 12400, status: 'delivered', time: '2 min ago' },
-  { client: 'TechStart', channel: 'sms', count: 320, status: 'delivered', time: '8 min ago' },
-  { client: 'Flowbase', channel: 'push', count: 5600, status: 'delivered', time: '15 min ago' },
-  { client: 'Launchpad', channel: 'email', count: 890, status: 'failed', time: '32 min ago' },
-  { client: 'Stackr', channel: 'email', count: 2100, status: 'delivered', time: '1h ago' },
-  { client: 'DevTools Co', channel: 'sms', count: 140, status: 'pending', time: '1h 20m ago' },
-]
-
-const channelBreakdown = [
-  { label: 'Email', value: 67, color: C.primary },
-  { label: 'SMS', value: 18, color: C.warning },
-  { label: 'Push', value: 11, color: C.success },
-  { label: 'In-app', value: 4, color: 'hsl(260,60%,55%)' },
-]
+import { useDashboard } from '../../hooks'
 
 function StatCard({
   icon,
@@ -128,7 +103,7 @@ function StatCard({
   )
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status: string }) {
   const map = {
     delivered: {
       bg: 'rgba(39,174,96,0.12)',
@@ -142,7 +117,7 @@ function StatusBadge({ status }) {
       color: 'hsl(38,92%,55%)',
     },
   }
-  const s = map[status]
+  const s = map[status as keyof typeof map]
   return (
     <span
       style={{
@@ -164,11 +139,11 @@ function StatusBadge({ status }) {
   )
 }
 
-function ChannelBadge({ channel }) {
+function ChannelBadge({ channel }: { channel: string }) {
   const icons = { email: 'mail', sms: 'sms', push: 'bell', 'in-app': 'layers' }
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <Icon name={icons[channel] || 'bell'} size={13} color="hsl(215,15%,55%)" />
+      <Icon name={icons[channel as keyof typeof icons] || 'bell'} size={13} color="hsl(215,15%,55%)" />
       <span style={{ fontSize: 13, color: 'hsl(215,15%,65%)', textTransform: 'capitalize' }}>{channel}</span>
     </div>
   )
@@ -195,8 +170,60 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   )
 }
 
+function LoadingSkeleton() {
+  return (
+    <div style={{ opacity: 0.5 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            style={{
+              background: 'hsl(224,18%,8%)',
+              border: `1px solid hsl(224,14%,14%)`,
+              borderRadius: 12,
+              padding: '22px 24px',
+              height: 140,
+              animation: 'pulse 2s infinite',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ErrorMessage() {
+  return (
+    <div
+      style={{
+        padding: '16px 20px',
+        background: 'rgba(231,76,60,0.1)',
+        border: '1px solid rgba(231,76,60,0.3)',
+        borderRadius: 8,
+        color: 'hsl(0,62%,60%)',
+        marginBottom: 24,
+      }}
+    >
+      Failed to load dashboard data. Please refresh the page.
+    </div>
+  )
+}
+
 export default function Dashboard() {
-  const [period, setPeriod] = useState('7d')
+  const [period, setPeriod] = useState<'24h' | '7d' | '30d' | '90d'>('7d')
+  const { data, isLoading, isError } = useDashboard({ period })
+
+  if (isError) {
+    return (
+      <div>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'hsl(210,20%,95%)', marginBottom: 4 }}>Dashboard</h1>
+          <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>Overview of your notification platform</p>
+        </div>
+        <ErrorMessage />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -224,7 +251,7 @@ export default function Dashboard() {
           <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>Overview of your notification platform</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {['24h', '7d', '30d', '90d'].map((p) => (
+          {(['24h', '7d', '30d', '90d'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
@@ -265,358 +292,375 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
-        <StatCard icon="send" label="Messages Sent" value="48.2K" sub="This week" trend="12.4%" trendUp />
-        <StatCard icon="check" label="Delivery Rate" value="99.1%" sub="Last 7 days" trend="0.3%" trendUp />
-        <StatCard icon="users" label="Active Clients" value="142" sub="Total onboarded" trend="8" trendUp />
-        <StatCard icon="layers" label="Templates" value="38" sub="Across all clients" />
-      </div>
-
-      {/* Charts row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 24 }}>
-        {/* Area chart */}
-        <div
-          style={{
-            background: 'hsl(224,18%,8%)',
-            border: `1px solid hsl(224,14%,14%)`,
-            borderRadius: 12,
-            padding: '20px 24px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: 'hsl(210,20%,95%)',
-                  marginBottom: 2,
-                }}
-              >
-                Notification Volume
-              </p>
-              <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>Messages sent per day by channel</p>
-            </div>
-            <div style={{ display: 'flex', gap: 16 }}>
-              {[
-                { label: 'Email', color: C.primary },
-                { label: 'SMS', color: C.warning },
-                { label: 'Push', color: C.success },
-              ].map((l) => (
-                <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: l.color }} />
-                  <span style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>{l.label}</span>
-                </div>
-              ))}
-            </div>
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : data ? (
+        <>
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+            <StatCard {...data.stats.messagesSent} />
+            <StatCard {...data.stats.deliveryRate} />
+            <StatCard {...data.stats.activeClients} />
+            <StatCard {...data.stats.templates} />
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={weekData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-              <defs>
-                <linearGradient id="emailGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={C.primary} stopOpacity={0.15} />
-                  <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="smsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={C.warning} stopOpacity={0.12} />
-                  <stop offset="95%" stopColor={C.warning} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="pushGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={C.success} stopOpacity={0.12} />
-                  <stop offset="95%" stopColor={C.success} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(224,14%,14%)" vertical={false} />
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="email"
-                stroke={C.primary}
-                strokeWidth={2}
-                fill="url(#emailGrad)"
-                name="Email"
-              />
-              <Area type="monotone" dataKey="sms" stroke={C.warning} strokeWidth={2} fill="url(#smsGrad)" name="SMS" />
-              <Area
-                type="monotone"
-                dataKey="push"
-                stroke={C.success}
-                strokeWidth={2}
-                fill="url(#pushGrad)"
-                name="Push"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Channel breakdown */}
-        <div
-          style={{
-            background: 'hsl(224,18%,8%)',
-            border: `1px solid hsl(224,14%,14%)`,
-            borderRadius: 12,
-            padding: '20px 24px',
-          }}
-        >
-          <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 2 }}>Channel Mix</p>
-          <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 20 }}>Distribution by channel type</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {channelBreakdown.map((ch) => (
-              <div key={ch.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: 'hsl(210,20%,80%)' }}>{ch.label}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: ch.color }}>{ch.value}%</span>
-                </div>
-                <div style={{ height: 6, borderRadius: 3, background: 'hsl(224,14%,14%)' }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      borderRadius: 3,
-                      background: ch.color,
-                      width: `${ch.value}%`,
-                      transition: 'width 0.6s ease',
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div
-            style={{
-              marginTop: 24,
-              padding: '14px 16px',
-              background: 'hsl(224,14%,10%)',
-              borderRadius: 8,
-              border: `1px solid hsl(224,14%,14%)`,
-            }}
-          >
-            <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 4 }}>Peak send time</p>
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'hsl(210,20%,90%)' }}>Thu 10–11 AM UTC</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Recent activity */}
-        <div
-          style={{
-            background: 'hsl(224,18%,8%)',
-            border: `1px solid hsl(224,14%,14%)`,
-            borderRadius: 12,
-            padding: '20px 24px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16,
-            }}
-          >
-            <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)' }}>Recent Sends</p>
-            <button
+          {/* Charts row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 24 }}>
+            {/* Area chart */}
+            <div
               style={{
-                fontSize: 12,
-                color: '#36A9EA',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 500,
+                background: 'hsl(224,18%,8%)',
+                border: `1px solid hsl(224,14%,14%)`,
+                borderRadius: 12,
+                padding: '20px 24px',
               }}
             >
-              View all
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {recentActivity.map((a, i) => (
               <div
-                key={i}
                 style={{
                   display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: 12,
-                  padding: '11px 0',
-                  borderBottom: i < recentActivity.length - 1 ? `1px solid hsl(224,14%,12%)` : 'none',
+                  marginBottom: 20,
                 }}
               >
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    background: 'hsl(224,14%,12%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#36A9EA' }}>{a.client[0]}</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div>
                   <p
                     style={{
-                      fontSize: 13,
                       fontWeight: 600,
-                      color: 'hsl(210,20%,90%)',
+                      fontSize: 15,
+                      color: 'hsl(210,20%,95%)',
                       marginBottom: 2,
                     }}
                   >
-                    {a.client}
+                    Notification Volume
                   </p>
-                  <ChannelBadge channel={a.channel} />
+                  <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>Messages sent per day by channel</p>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: 'hsl(210,20%,85%)',
-                      marginBottom: 2,
-                    }}
-                  >
-                    {a.count.toLocaleString()}
-                  </p>
-                  <StatusBadge status={a.status} />
+                <div style={{ display: 'flex', gap: 16 }}>
+                  {[
+                    { label: 'Email', color: C.primary },
+                    { label: 'SMS', color: C.warning },
+                    { label: 'Push', color: C.success },
+                  ].map((l) => (
+                    <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: l.color }} />
+                      <span style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>{l.label}</span>
+                    </div>
+                  ))}
                 </div>
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: 'hsl(215,15%,45%)',
-                    flexShrink: 0,
-                    minWidth: 60,
-                    textAlign: 'right',
-                  }}
-                >
-                  {a.time}
-                </p>
               </div>
-            ))}
-          </div>
-        </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={data.notificationVolume} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                  <defs>
+                    <linearGradient id="emailGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={C.primary} stopOpacity={0.15} />
+                      <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="smsGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={C.warning} stopOpacity={0.12} />
+                      <stop offset="95%" stopColor={C.warning} stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="pushGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={C.success} stopOpacity={0.12} />
+                      <stop offset="95%" stopColor={C.success} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="email"
+                    stroke={C.primary}
+                    strokeWidth={2}
+                    fill="url(#emailGrad)"
+                    name="Email"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="sms"
+                    stroke={C.warning}
+                    strokeWidth={2}
+                    fill="url(#smsGrad)"
+                    name="SMS"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="push"
+                    stroke={C.success}
+                    strokeWidth={2}
+                    fill="url(#pushGrad)"
+                    name="Push"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
-        {/* Quick actions + system health */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Quick actions */}
-          <div
-            style={{
-              background: 'hsl(224,18%,8%)',
-              border: `1px solid hsl(224,14%,14%)`,
-              borderRadius: 12,
-              padding: '20px 24px',
-            }}
-          >
-            <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 14 }}>Quick Actions</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                { icon: 'send', label: 'Send Notification', primary: true },
-                { icon: 'plus', label: 'Add Client', primary: false },
-                { icon: 'layers', label: 'New Template', primary: false },
-                { icon: 'api', label: 'API Keys', primary: false },
-              ].map((a) => (
-                <button
-                  key={a.label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: a.primary ? 'rgba(2,147,228,0.15)' : 'hsl(224,14%,10%)',
-                    border: `1px solid ${a.primary ? 'rgba(2,147,228,0.3)' : 'hsl(224,14%,16%)'}`,
-                    color: a.primary ? '#36A9EA' : 'hsl(210,20%,80%)',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <Icon name={a.icon} size={15} color={a.primary ? '#36A9EA' : 'hsl(215,15%,60%)'} />
-                  {a.label}
-                </button>
-              ))}
+            {/* Channel breakdown */}
+            <div
+              style={{
+                background: 'hsl(224,18%,8%)',
+                border: `1px solid hsl(224,14%,14%)`,
+                borderRadius: 12,
+                padding: '20px 24px',
+              }}
+            >
+              <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 2 }}>Channel Mix</p>
+              <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 20 }}>Distribution by channel type</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {data.channelBreakdown.map((ch) => (
+                  <div key={ch.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: 'hsl(210,20%,80%)' }}>{ch.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: ch.color }}>{ch.value}%</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 3, background: 'hsl(224,14%,14%)' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          borderRadius: 3,
+                          background: ch.color,
+                          width: `${ch.value}%`,
+                          transition: 'width 0.6s ease',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div
+                style={{
+                  marginTop: 24,
+                  padding: '14px 16px',
+                  background: 'hsl(224,14%,10%)',
+                  borderRadius: 8,
+                  border: `1px solid hsl(224,14%,14%)`,
+                }}
+              >
+                <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 4 }}>Peak send time</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: 'hsl(210,20%,90%)' }}>{data.peakSendTime}</p>
+              </div>
             </div>
           </div>
 
-          {/* System health */}
-          <div
-            style={{
-              background: 'hsl(224,18%,8%)',
-              border: `1px solid hsl(224,14%,14%)`,
-              borderRadius: 12,
-              padding: '20px 24px',
-              flex: 1,
-            }}
-          >
-            <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 14 }}>System Health</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: 'Email Gateway', status: 'Operational', ok: true },
-                { label: 'SMS Provider', status: 'Operational', ok: true },
-                { label: 'Push Service', status: 'Operational', ok: true },
-                { label: 'API Endpoint', status: 'Degraded', ok: false },
-                { label: 'Webhook Queue', status: 'Operational', ok: true },
-              ].map((h) => (
-                <div
-                  key={h.label}
+          {/* Bottom row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {/* Recent activity */}
+            <div
+              style={{
+                background: 'hsl(224,18%,8%)',
+                border: `1px solid hsl(224,14%,14%)`,
+                borderRadius: 12,
+                padding: '20px 24px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)' }}>Recent Sends</p>
+                <button
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 12px',
-                    background: 'hsl(224,14%,10%)',
-                    borderRadius: 7,
-                    border: `1px solid hsl(224,14%,14%)`,
+                    fontSize: 12,
+                    color: '#36A9EA',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: 500,
                   }}
                 >
-                  <span style={{ fontSize: 13, color: 'hsl(210,20%,80%)' }}>{h.label}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  View all
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {data.recentActivity.map((a, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '11px 0',
+                      borderBottom: i < data.recentActivity.length - 1 ? `1px solid hsl(224,14%,12%)` : 'none',
+                    }}
+                  >
                     <div
                       style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: h.ok ? 'hsl(152,60%,45%)' : 'hsl(38,92%,55%)',
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: h.ok ? 'hsl(152,60%,50%)' : 'hsl(38,92%,55%)',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        background: 'hsl(224,14%,12%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
                       }}
                     >
-                      {h.status}
-                    </span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#36A9EA' }}>{a.client[0]}</span>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: 'hsl(210,20%,90%)',
+                          marginBottom: 2,
+                        }}
+                      >
+                        {a.client}
+                      </p>
+                      <ChannelBadge channel={a.channel} />
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: 'hsl(210,20%,85%)',
+                          marginBottom: 2,
+                        }}
+                      >
+                        {a.count.toLocaleString()}
+                      </p>
+                      <StatusBadge status={a.status} />
+                    </div>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: 'hsl(215,15%,45%)',
+                        flexShrink: 0,
+                        minWidth: 60,
+                        textAlign: 'right',
+                      }}
+                    >
+                      {a.time}
+                    </p>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick actions + system health */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Quick actions */}
+              <div
+                style={{
+                  background: 'hsl(224,18%,8%)',
+                  border: `1px solid hsl(224,14%,14%)`,
+                  borderRadius: 12,
+                  padding: '20px 24px',
+                }}
+              >
+                <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 14 }}>
+                  Quick Actions
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {[
+                    { icon: 'send', label: 'Send Notification', primary: true },
+                    { icon: 'plus', label: 'Add Client', primary: false },
+                    { icon: 'layers', label: 'New Template', primary: false },
+                    { icon: 'api', label: 'API Keys', primary: false },
+                  ].map((a) => (
+                    <button
+                      key={a.label}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '10px 14px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: a.primary ? 'rgba(2,147,228,0.15)' : 'hsl(224,14%,10%)',
+                        border: `1px solid ${a.primary ? 'rgba(2,147,228,0.3)' : 'hsl(224,14%,16%)'}`,
+                        color: a.primary ? '#36A9EA' : 'hsl(210,20%,80%)',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <Icon name={a.icon} size={15} color={a.primary ? '#36A9EA' : 'hsl(215,15%,60%)'} />
+                      {a.label}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* System health */}
+              <div
+                style={{
+                  background: 'hsl(224,18%,8%)',
+                  border: `1px solid hsl(224,14%,14%)`,
+                  borderRadius: 12,
+                  padding: '20px 24px',
+                  flex: 1,
+                }}
+              >
+                <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 14 }}>
+                  System Health
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {data.systemHealth.map((h) => (
+                    <div
+                      key={h.label}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        background: 'hsl(224,14%,10%)',
+                        borderRadius: 7,
+                        border: `1px solid hsl(224,14%,14%)`,
+                      }}
+                    >
+                      <span style={{ fontSize: 13, color: 'hsl(210,20%,80%)' }}>{h.label}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <div
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            background: h.ok ? 'hsl(152,60%,45%)' : 'hsl(38,92%,55%)',
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: h.ok ? 'hsl(152,60%,50%)' : 'hsl(38,92%,55%)',
+                          }}
+                        >
+                          {h.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      ) : null}
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   )
 }
