@@ -1,22 +1,35 @@
-export type ClientPlan = 'FREE' | 'PAYG' | 'STARTER' | 'SCALE' | 'ENTERPRISE'
+export type ClientPlan = 'FREE' | 'PAYG' | 'STARTER' | 'SCALE' | 'ENTERPRISE' | 'PRO'
 export type ClientStatus = 'active' | 'suspended' | 'trial'
-export type OrganizationType = 'INDIVIDUAL' | 'ORGANIZATION'
-export type ApiClientPlan = 'FREE' | 'STARTER' | 'SCALE' | 'ENTERPRISE' | 'PAYG'
-export type ApiClientStatus = 'active' | 'suspended' | 'trial'
+export type OrganizationRole = 'owner' | 'member' | 'admin'
 
-export interface Client {
+export interface Organization {
   id: number
   name: string
   plan: ClientPlan
-  email: string
+  role: OrganizationRole
   sent: string
-  deliveryRate: string
   templates: number
   status: ClientStatus
   joined: string
-  channels: string[]
-  organizationName: string
-  organizationType: OrganizationType
+}
+
+export interface ClientStats {
+  totalOrganizations: number
+  ownedOrganizations: number
+  memberOrganizations: number
+  aggregatedStats: {
+    sent: string
+    templates: number
+    deliveryRate: string
+  }
+}
+
+export interface Client {
+  id: string
+  name: string
+  email: string
+  organizations: Organization[]
+  stats: ClientStats
 }
 
 export interface ClientsResponse {
@@ -35,6 +48,6 @@ export interface GetClientsParams {
   limit?: number
   offset?: number
   search?: string
-  status?: ApiClientStatus
-  plan?: ApiClientPlan
+  status?: ClientStatus
+  plan?: ClientPlan
 }
