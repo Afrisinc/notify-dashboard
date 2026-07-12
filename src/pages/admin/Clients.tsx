@@ -109,12 +109,9 @@ function ClientRow({
       >
         {/* Expand Icon + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Icon
-            name={expanded ? 'chevronDown' : 'chevronRight'}
-            size={16}
-            color="hsl(215,15%,55%)"
-            style={{ transition: 'transform 0.2s' }}
-          />
+          <div style={{ transition: 'transform 0.2s' }}>
+            <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={16} color="hsl(215,15%,55%)" />
+          </div>
           <div
             style={{
               width: 36,
