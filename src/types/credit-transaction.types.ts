@@ -20,6 +20,8 @@ export interface CreditTransaction {
   notificationId?: string
   paymentRef?: string
   bonusPercent?: number
+  paymentStatus?: string
+  isCompleted: boolean
   createdAt: string
 }
 
