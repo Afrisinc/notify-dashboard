@@ -9,6 +9,7 @@ import Templates from './pages/admin/Templates'
 import Analytics from './pages/admin/Analytics'
 import Settings from './pages/admin/Settings'
 import Support from './pages/admin/Support'
+import CreditTransactions from './pages/admin/CreditTransactions'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="templates" element={<Templates />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="credit-transactions" element={<CreditTransactions />} />
           <Route path="settings" element={<Settings />} />
           <Route path="support" element={<Support />} />
         </Route>
