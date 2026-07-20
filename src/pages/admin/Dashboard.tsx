@@ -12,20 +12,20 @@ function StatCard({
   trend,
   trendUp,
 }: {
-  icon: any
-  label: any
-  value: any
-  sub: any
-  trend?: any
-  trendUp?: any
+  icon: string
+  label: string
+  value: string | number
+  sub?: string
+  trend?: string
+  trendUp?: boolean
 }) {
   return (
     <div
+      className="card-padding"
       style={{
         background: 'hsl(224,18%,8%)',
         border: `1px solid hsl(224,14%,14%)`,
         borderRadius: 12,
-        padding: '22px 24px',
       }}
     >
       <div
@@ -72,28 +72,15 @@ function StatCard({
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              {trendUp ? (
-                <>
-                  <polyline points="18 15 12 9 6 15" />
-                </>
-              ) : (
-                <>
-                  <polyline points="6 9 12 15 18 9" />
-                </>
-              )}
+              {trendUp ? <polyline points="18 15 12 9 6 15" /> : <polyline points="6 9 12 15 18 9" />}
             </svg>
             <span style={{ fontSize: 11, fontWeight: 600, color: trendUp ? C.success : C.destructive }}>{trend}</span>
           </div>
         )}
       </div>
       <p
-        style={{
-          fontSize: 26,
-          fontWeight: 800,
-          letterSpacing: '-0.02em',
-          color: 'hsl(210,20%,95%)',
-          marginBottom: 4,
-        }}
+        className="stat-value"
+        style={{ fontWeight: 800, letterSpacing: '-0.02em', color: 'hsl(210,20%,95%)', marginBottom: 4 }}
       >
         {value}
       </p>
@@ -105,17 +92,9 @@ function StatCard({
 
 function StatusBadge({ status }: { status: string }) {
   const map = {
-    delivered: {
-      bg: 'rgba(39,174,96,0.12)',
-      border: 'rgba(39,174,96,0.25)',
-      color: 'hsl(152,60%,50%)',
-    },
+    delivered: { bg: 'rgba(39,174,96,0.12)', border: 'rgba(39,174,96,0.25)', color: 'hsl(152,60%,50%)' },
     failed: { bg: 'rgba(231,76,60,0.12)', border: 'rgba(231,76,60,0.25)', color: 'hsl(0,62%,60%)' },
-    pending: {
-      bg: 'rgba(243,156,18,0.12)',
-      border: 'rgba(243,156,18,0.25)',
-      color: 'hsl(38,92%,55%)',
-    },
+    pending: { bg: 'rgba(243,156,18,0.12)', border: 'rgba(243,156,18,0.25)', color: 'hsl(38,92%,55%)' },
   }
   const s = map[status as keyof typeof map]
   return (
@@ -173,7 +152,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 function LoadingSkeleton() {
   return (
     <div style={{ opacity: 0.5 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="responsive-grid-4" style={{ marginBottom: 24 }}>
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -217,7 +196,9 @@ export default function Dashboard() {
     return (
       <div>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'hsl(210,20%,95%)', marginBottom: 4 }}>Dashboard</h1>
+          <h1 className="page-title" style={{ fontWeight: 700, color: 'hsl(210,20%,95%)', marginBottom: 4 }}>
+            Dashboard
+          </h1>
           <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>Overview of your notification platform</p>
         </div>
         <ErrorMessage />
@@ -227,30 +208,17 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Page header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 28,
-        }}
-      >
+      <div className="responsive-header" style={{ marginBottom: 28 }}>
         <div>
           <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'hsl(210,20%,95%)',
-              letterSpacing: '-0.02em',
-              marginBottom: 4,
-            }}
+            className="page-title"
+            style={{ fontWeight: 700, color: 'hsl(210,20%,95%)', letterSpacing: '-0.02em', marginBottom: 4 }}
           >
             Dashboard
           </h1>
           <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>Overview of your notification platform</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {(['24h', '7d', '30d', '90d'] as const).map((p) => (
             <button
               key={p}
@@ -296,47 +264,39 @@ export default function Dashboard() {
         <LoadingSkeleton />
       ) : data ? (
         <>
-          {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+          <div className="responsive-grid-4" style={{ marginBottom: 24 }}>
             <StatCard {...data.stats.messagesSent} />
             <StatCard {...data.stats.deliveryRate} />
             <StatCard {...data.stats.activeClients} />
             <StatCard {...data.stats.templates} />
           </div>
 
-          {/* Charts row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 24 }}>
-            {/* Area chart */}
+          <div className="responsive-grid-2-1" style={{ marginBottom: 24 }}>
             <div
+              className="card-padding"
               style={{
                 background: 'hsl(224,18%,8%)',
                 border: `1px solid hsl(224,14%,14%)`,
                 borderRadius: 12,
-                padding: '20px 24px',
               }}
             >
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   marginBottom: 20,
+                  flexWrap: 'wrap',
+                  gap: 12,
                 }}
               >
                 <div>
-                  <p
-                    style={{
-                      fontWeight: 600,
-                      fontSize: 15,
-                      color: 'hsl(210,20%,95%)',
-                      marginBottom: 2,
-                    }}
-                  >
+                  <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 2 }}>
                     Notification Volume
                   </p>
                   <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>Messages sent per day by channel</p>
                 </div>
-                <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                   {[
                     { label: 'Email', color: C.primary },
                     { label: 'SMS', color: C.warning },
@@ -349,70 +309,71 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={data.notificationVolume} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                  <defs>
-                    <linearGradient id="emailGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.primary} stopOpacity={0.15} />
-                      <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="smsGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.warning} stopOpacity={0.12} />
-                      <stop offset="95%" stopColor={C.warning} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="pushGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.success} stopOpacity={0.12} />
-                      <stop offset="95%" stopColor={C.success} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="day"
-                    tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="email"
-                    stroke={C.primary}
-                    strokeWidth={2}
-                    fill="url(#emailGrad)"
-                    name="Email"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="sms"
-                    stroke={C.warning}
-                    strokeWidth={2}
-                    fill="url(#smsGrad)"
-                    name="SMS"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="push"
-                    stroke={C.success}
-                    strokeWidth={2}
-                    fill="url(#pushGrad)"
-                    name="Push"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={data.notificationVolume} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                    <defs>
+                      <linearGradient id="emailGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={C.primary} stopOpacity={0.15} />
+                        <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="smsGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={C.warning} stopOpacity={0.12} />
+                        <stop offset="95%" stopColor={C.warning} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="pushGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={C.success} stopOpacity={0.12} />
+                        <stop offset="95%" stopColor={C.success} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: 'hsl(215,15%,50%)' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey="email"
+                      stroke={C.primary}
+                      strokeWidth={2}
+                      fill="url(#emailGrad)"
+                      name="Email"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="sms"
+                      stroke={C.warning}
+                      strokeWidth={2}
+                      fill="url(#smsGrad)"
+                      name="SMS"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="push"
+                      stroke={C.success}
+                      strokeWidth={2}
+                      fill="url(#pushGrad)"
+                      name="Push"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
-            {/* Channel breakdown */}
             <div
+              className="card-padding"
               style={{
                 background: 'hsl(224,18%,8%)',
                 border: `1px solid hsl(224,14%,14%)`,
                 borderRadius: 12,
-                padding: '20px 24px',
               }}
             >
               <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 2 }}>Channel Mix</p>
@@ -453,25 +414,16 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Bottom row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {/* Recent activity */}
+          <div className="responsive-grid-2">
             <div
+              className="card-padding"
               style={{
                 background: 'hsl(224,18%,8%)',
                 border: `1px solid hsl(224,14%,14%)`,
                 borderRadius: 12,
-                padding: '20px 24px',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 16,
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)' }}>Recent Sends</p>
                 <button
                   style={{
@@ -496,6 +448,7 @@ export default function Dashboard() {
                       gap: 12,
                       padding: '11px 0',
                       borderBottom: i < data.recentActivity.length - 1 ? `1px solid hsl(224,14%,12%)` : 'none',
+                      flexWrap: 'wrap',
                     }}
                   >
                     <div
@@ -512,28 +465,14 @@ export default function Dashboard() {
                     >
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#36A9EA' }}>{a.client[0]}</span>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: 'hsl(210,20%,90%)',
-                          marginBottom: 2,
-                        }}
-                      >
+                    <div style={{ flex: 1, minWidth: 100 }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,90%)', marginBottom: 2 }}>
                         {a.client}
                       </p>
                       <ChannelBadge channel={a.channel} />
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <p
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: 'hsl(210,20%,85%)',
-                          marginBottom: 2,
-                        }}
-                      >
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
                         {a.count.toLocaleString()}
                       </p>
                       <StatusBadge status={a.status} />
@@ -543,7 +482,7 @@ export default function Dashboard() {
                         fontSize: 11,
                         color: 'hsl(215,15%,45%)',
                         flexShrink: 0,
-                        minWidth: 60,
+                        minWidth: 50,
                         textAlign: 'right',
                       }}
                     >
@@ -554,21 +493,19 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick actions + system health */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Quick actions */}
               <div
+                className="card-padding"
                 style={{
                   background: 'hsl(224,18%,8%)',
                   border: `1px solid hsl(224,14%,14%)`,
                   borderRadius: 12,
-                  padding: '20px 24px',
                 }}
               >
                 <p style={{ fontWeight: 600, fontSize: 15, color: 'hsl(210,20%,95%)', marginBottom: 14 }}>
                   Quick Actions
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
                   {[
                     { icon: 'send', label: 'Send Notification', primary: true },
                     { icon: 'plus', label: 'Add Client', primary: false },
@@ -599,13 +536,12 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* System health */}
               <div
+                className="card-padding"
                 style={{
                   background: 'hsl(224,18%,8%)',
                   border: `1px solid hsl(224,14%,14%)`,
                   borderRadius: 12,
-                  padding: '20px 24px',
                   flex: 1,
                 }}
               >

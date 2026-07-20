@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
 import { useClients } from '../../hooks'
-import { SkeletonClientRow, SkeletonCard, skeletonStyles } from '../../components/SkeletonLoader'
+import { SkeletonClientRow, skeletonStyles } from '../../components/SkeletonLoader'
 import type { Client } from '../../types'
 
 const getPlanDisplayName = (plan: string) => {
@@ -92,7 +92,6 @@ function ClientRow({
         opacity: isFetching ? 0.6 : 1,
       }}
     >
-      {/* Client Header Row */}
       <div
         onClick={onToggle}
         style={{
@@ -103,11 +102,11 @@ function ClientRow({
           alignItems: 'center',
           cursor: 'pointer',
           transition: 'all 0.15s',
+          minWidth: 700,
         }}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(224,14%,13%)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = expanded ? 'hsl(224,14%,12%)' : 'transparent')}
       >
-        {/* Expand Icon + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ transition: 'transform 0.2s' }}>
             <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={16} color="hsl(215,15%,55%)" />
@@ -133,31 +132,26 @@ function ClientRow({
           </div>
         </div>
 
-        {/* Client Name & Email */}
         <div>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,90%)', marginBottom: 2 }}>{client.name}</p>
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>{client.email}</p>
         </div>
 
-        {/* Total Organizations */}
         <div>
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 2 }}>Organizations</p>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{client.stats.totalOrganizations}</p>
         </div>
 
-        {/* Messages Sent */}
         <div>
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 2 }}>Sent</p>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{stats.sent}</p>
         </div>
 
-        {/* Templates */}
         <div>
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 2 }}>Templates</p>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{stats.templates}</p>
         </div>
 
-        {/* Delivery Rate */}
         <div>
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 2 }}>Delivery</p>
           <p
@@ -171,7 +165,6 @@ function ClientRow({
           </p>
         </div>
 
-        {/* Actions */}
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
           <button
             style={{
@@ -212,7 +205,6 @@ function ClientRow({
         </div>
       </div>
 
-      {/* Organizations Rows (Expanded) */}
       {expanded && (
         <div style={{ background: 'hsl(224,14%,10%)' }}>
           {client.organizations.length === 0 ? (
@@ -231,14 +223,13 @@ function ClientRow({
                   borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
                   alignItems: 'center',
                   fontSize: 12,
+                  minWidth: 700,
                 }}
               >
-                {/* Org Icon */}
                 <div style={{ color: 'hsl(215,15%,55%)' }}>
                   <Icon name="layers" size={14} color="hsl(215,15%,55%)" />
                 </div>
 
-                {/* Org Name & Role */}
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
                     {org.name}
@@ -246,22 +237,17 @@ function ClientRow({
                   <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)' }}>Role: {org.role}</p>
                 </div>
 
-                {/* Plan */}
                 <Badge label={getPlanDisplayName(org.plan)} colors={PLAN_COLORS[org.plan] || PLAN_COLORS.default} />
 
-                {/* Sent */}
                 <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.sent}</p>
 
-                {/* Templates */}
                 <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.templates}</p>
 
-                {/* Status */}
                 <Badge
                   label={getStatusDisplayName(org.status)}
                   colors={STATUS_COLORS[org.status] || STATUS_COLORS.default}
                 />
 
-                {/* Joined */}
                 <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', textAlign: 'right' }}>{org.joined}</p>
               </div>
             ))
@@ -324,24 +310,11 @@ export default function Clients() {
     <div>
       <style>{skeletonStyles}</style>
 
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 28,
-        }}
-      >
+      <div className="responsive-header" style={{ marginBottom: 28 }}>
         <div>
           <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'hsl(210,20%,95%)',
-              letterSpacing: '-0.02em',
-              marginBottom: 4,
-            }}
+            className="page-title"
+            style={{ fontWeight: 700, color: 'hsl(210,20%,95%)', letterSpacing: '-0.02em', marginBottom: 4 }}
           >
             Clients
           </h1>
@@ -362,6 +335,7 @@ export default function Clients() {
             cursor: 'pointer',
             boxShadow: '0 2px 10px rgba(2,147,228,0.3)',
             transition: 'all 0.15s',
+            whiteSpace: 'nowrap',
           }}
         >
           <Icon name="plus" size={15} color="#fff" />
@@ -369,9 +343,8 @@ export default function Clients() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
+      <div className="responsive-filters" style={{ marginBottom: 20 }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <div style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}>
             <Icon name="search" size={14} color="hsl(215,15%,50%)" />
           </div>
@@ -396,7 +369,6 @@ export default function Clients() {
         </div>
       </div>
 
-      {/* Table */}
       <div
         style={{
           background: 'hsl(224,18%,8%)',
@@ -407,68 +379,68 @@ export default function Clients() {
           minHeight: 300,
         }}
       >
-        {/* Table header */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-            gap: 16,
-            padding: '12px 20px',
-            borderBottom: '1px solid hsl(224,14%,12%)',
-            background: 'hsl(224,14%,10%)',
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}></div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Client
+        <div className="responsive-table-wrapper">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
+              gap: 16,
+              padding: '12px 20px',
+              borderBottom: '1px solid hsl(224,14%,12%)',
+              background: 'hsl(224,14%,10%)',
+              minWidth: 700,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}></div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Client
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Organizations
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Sent
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Templates
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Delivery
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+              Actions
+            </div>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Organizations
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Sent
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Templates
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Delivery
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
-            Actions
-          </div>
+
+          {clients.map((client) => (
+            <ClientRow
+              key={client.id}
+              client={client}
+              expanded={expandedClients.has(client.id)}
+              onToggle={() => toggleClient(client.id)}
+              isFetching={isFetching}
+            />
+          ))}
+
+          {clients.length === 0 && !isLoading && (
+            <div style={{ padding: '48px', textAlign: 'center' }}>
+              <Icon name="search" size={32} color="hsl(215,15%,35%)" />
+              <p style={{ color: 'hsl(215,15%,50%)', marginTop: 12, fontSize: 14 }}>
+                {search ? 'No clients match your search' : 'No clients found'}
+              </p>
+            </div>
+          )}
+
+          {isLoading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {Array.from({ length: limit }).map((_, i) => (
+                <SkeletonClientRow key={i} showOrganizations={true} />
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Rows */}
-        {clients.map((client) => (
-          <ClientRow
-            key={client.id}
-            client={client}
-            expanded={expandedClients.has(client.id)}
-            onToggle={() => toggleClient(client.id)}
-            isFetching={isFetching}
-          />
-        ))}
-
-        {clients.length === 0 && !isLoading && (
-          <div style={{ padding: '48px', textAlign: 'center' }}>
-            <Icon name="search" size={32} color="hsl(215,15%,35%)" />
-            <p style={{ color: 'hsl(215,15%,50%)', marginTop: 12, fontSize: 14 }}>
-              {search ? 'No clients match your search' : 'No clients found'}
-            </p>
-          </div>
-        )}
-
-        {isLoading && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {Array.from({ length: limit }).map((_, i) => (
-              <SkeletonClientRow key={i} showOrganizations={true} />
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Footer */}
       {!isLoading && clients.length > 0 && (
         <div
           style={{
@@ -476,12 +448,14 @@ export default function Clients() {
             justifyContent: 'space-between',
             alignItems: 'center',
             marginTop: 16,
+            flexWrap: 'wrap',
+            gap: 12,
           }}
         >
           <p style={{ fontSize: 13, color: 'hsl(215,15%,50%)' }}>
             Showing {Math.min(meta.offset + clients.length, meta.total)} of {meta.total} clients
           </p>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
               const pageNum = Math.max(1, currentPage - 2) + i
               return pageNum <= totalPages ? pageNum : null
