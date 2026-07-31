@@ -1,6 +1,7 @@
 export type TransactionType = 'topup' | 'deduction' | 'bonus' | 'refund'
 export type Channel = 'EMAIL' | 'SMS' | 'PUSH' | 'IN_APP'
 export type AccountType = 'INDIVIDUAL' | 'ORGANIZATION'
+export type PaymentStatus = 'COMPLETED' | 'PENDING' | 'FAILED'
 
 export interface CreditTransaction {
   transactionId: string
@@ -20,8 +21,10 @@ export interface CreditTransaction {
   notificationId?: string
   paymentRef?: string
   bonusPercent?: number
-  paymentStatus?: string
+  status?: PaymentStatus
   isCompleted: boolean
+  isPending: boolean
+  isFailed: boolean
   createdAt: string
 }
 
@@ -56,6 +59,7 @@ export interface CreditTransactionsResponse {
 export interface GetCreditTransactionsParams {
   search?: string
   type?: TransactionType | string
+  status?: PaymentStatus | string
   channel?: Channel
   accountId?: string
   minAmount?: number

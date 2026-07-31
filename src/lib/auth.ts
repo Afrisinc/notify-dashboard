@@ -41,7 +41,8 @@ export function redirectToLogin(): void {
 
 export function logout(): void {
   clearSession()
-  redirectToLogin()
+  // Redirect disabled - reload page to show auth required screen
+  globalThis.location.reload()
 }
 
 export function isAuthenticated(): boolean {

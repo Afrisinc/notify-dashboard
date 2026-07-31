@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { decodeJwtPayload, userFromPayload, storeSession, redirectToLogin } from '@/lib/auth'
+import { decodeJwtPayload, userFromPayload, storeSession } from '@/lib/auth'
 
 export default function SsoCallbackPage() {
   const [searchParams] = useSearchParams()
@@ -11,24 +11,21 @@ export default function SsoCallbackPage() {
     const token = searchParams.get('token')
 
     if (!token) {
-      setError('No token provided. Redirecting…')
-      setTimeout(() => redirectToLogin(), 2000)
+      setError('No token provided.')
       return
     }
 
     const payload = decodeJwtPayload(token)
 
     if (!payload) {
-      setError('Invalid token. Redirecting…')
-      setTimeout(() => redirectToLogin(), 2000)
+      setError('Invalid token.')
       return
     }
 
     const user = userFromPayload(payload)
 
     if (!user) {
-      setError('Incomplete token payload. Redirecting…')
-      setTimeout(() => redirectToLogin(), 2000)
+      setError('Incomplete token payload.')
       return
     }
 

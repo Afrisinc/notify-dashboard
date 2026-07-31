@@ -3,7 +3,7 @@ import Icon from '../../components/Icon'
 import { C } from '../../design'
 import { useCreditTransactions } from '../../hooks'
 import { SkeletonClientRow, skeletonStyles } from '../../components/SkeletonLoader'
-import type { TransactionType, CreditTransaction } from '../../types/credit-transaction.types'
+import type { TransactionType, CreditTransaction, PaymentStatus } from '../../types/credit-transaction.types'
 
 const TRANSACTION_TYPES: Record<TransactionType, { label: string; bg: string; border: string; color: string }> = {
   topup: { label: 'Top-up', bg: 'rgba(39,174,96,0.12)', border: 'rgba(39,174,96,0.25)', color: 'hsl(152,60%,50%)' },
@@ -15,6 +15,17 @@ const TRANSACTION_TYPES: Record<TransactionType, { label: string; bg: string; bo
   },
   bonus: { label: 'Bonus', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)', color: 'hsl(260,60%,65%)' },
   refund: { label: 'Refund', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.25)', color: 'hsl(217,92%,65%)' },
+}
+
+const PAYMENT_STATUSES: Record<PaymentStatus, { label: string; bg: string; border: string; color: string }> = {
+  COMPLETED: {
+    label: 'Completed',
+    bg: 'rgba(39,174,96,0.12)',
+    border: 'rgba(39,174,96,0.25)',
+    color: 'hsl(152,60%,50%)',
+  },
+  PENDING: { label: 'Pending', bg: 'rgba(251,146,60,0.12)', border: 'rgba(251,146,60,0.25)', color: 'hsl(25,97%,53%)' },
+  FAILED: { label: 'Failed', bg: 'rgba(231,76,60,0.12)', border: 'rgba(231,76,60,0.25)', color: 'hsl(0,62%,60%)' },
 }
 
 const CHANNELS: Record<string, string> = {
@@ -145,10 +156,10 @@ function TransactionRow({ tx, idx, total }: { tx: CreditTransaction; idx: number
       <p style={{ fontSize: 11, color: 'hsl(215,15%,55%)' }}>{new Date(tx.createdAt).toLocaleDateString()}</p>
 
       <div>
-        {tx.paymentStatus ? (
+        {tx.status && PAYMENT_STATUSES[tx.status as PaymentStatus] ? (
           <Badge
-            label={tx.paymentStatus}
-            colors={{ bg: 'rgba(39,174,96,0.12)', border: 'rgba(39,174,96,0.25)', color: 'hsl(152,60%,50%)' }}
+            label={PAYMENT_STATUSES[tx.status as PaymentStatus].label}
+            colors={PAYMENT_STATUSES[tx.status as PaymentStatus]}
           />
         ) : (
           <span style={{ color: 'hsl(215,15%,45%)', fontSize: 11 }}>—</span>
@@ -191,16 +202,18 @@ function TransactionRow({ tx, idx, total }: { tx: CreditTransaction; idx: number
 export default function CreditTransactions() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const limit = 20
 
   useEffect(() => {
     setPage(1)
-  }, [search, typeFilter])
+  }, [search, typeFilter, statusFilter])
 
   const params = {
     search: search || undefined,
     type: typeFilter !== 'all' ? (typeFilter as TransactionType) : undefined,
+    status: statusFilter !== 'all' ? (statusFilter as PaymentStatus) : undefined,
     page,
     limit,
   }
@@ -321,6 +334,27 @@ export default function CreditTransactions() {
           <option value="deduction">Deduction</option>
           <option value="bonus">Bonus</option>
           <option value="refund">Refund</option>
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{
+            background: 'hsl(224,14%,10%)',
+            border: '1px solid hsl(224,14%,16%)',
+            borderRadius: 8,
+            padding: '8px 12px',
+            fontSize: 13,
+            color: 'hsl(210,20%,85%)',
+            fontFamily: 'Manrope, sans-serif',
+            outline: 'none',
+            cursor: 'pointer',
+            minWidth: 140,
+          }}
+        >
+          <option value="all">All Statuses</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="PENDING">Pending</option>
+          <option value="FAILED">Failed</option>
         </select>
       </div>
 
