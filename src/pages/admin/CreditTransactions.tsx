@@ -3,7 +3,16 @@ import Icon from '../../components/Icon'
 import { C } from '../../design'
 import { useCreditTransactions } from '../../hooks'
 import { SkeletonClientRow, skeletonStyles } from '../../components/SkeletonLoader'
-import type { TransactionType, CreditTransaction, PaymentStatus } from '../../types/credit-transaction.types'
+import { getUser } from '../../lib/auth'
+import type {
+  TransactionType,
+  CreditTransaction,
+  PaymentStatus,
+  PaymentInitType,
+  PaymentMethod,
+  InitializePaymentRequest,
+} from '../../types/credit-transaction.types'
+import { creditTransactionService } from '../../services/credit-transaction.service'
 
 const TRANSACTION_TYPES: Record<TransactionType, { label: string; bg: string; border: string; color: string }> = {
   topup: { label: 'Top-up', bg: 'rgba(39,174,96,0.12)', border: 'rgba(39,174,96,0.25)', color: 'hsl(152,60%,50%)' },
@@ -33,6 +42,625 @@ const CHANNELS: Record<string, string> = {
   SMS: 'sms',
   PUSH: 'bell',
   IN_APP: 'layers',
+}
+
+interface PaymentForm {
+  targetAccountId: string
+  type: PaymentInitType
+  amount: string
+  currency: string
+  method: PaymentMethod
+  planId: string
+  templateId: string
+  appId: string
+  customerName: string
+  email: string
+  phoneNumber: string
+}
+
+function PaymentInitModal({ open, onClose, onSuccess }: { open: boolean; onClose: () => void; onSuccess: () => void }) {
+  const [form, setForm] = useState<PaymentForm>({
+    targetAccountId: '',
+    type: 'payg_topup',
+    amount: '',
+    currency: 'USD',
+    method: 'card',
+    planId: '',
+    templateId: '',
+    appId: '',
+    customerName: '',
+    email: '',
+    phoneNumber: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!form.targetAccountId || !form.amount) {
+      setError('Account ID and amount are required')
+      return
+    }
+
+    if (form.type === 'subscription' && !form.planId) {
+      setError('Plan ID is required for subscriptions')
+      return
+    }
+
+    if (form.type === 'template_purchase' && (!form.templateId || !form.appId)) {
+      setError('Template ID and App ID are required for template purchases')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const payload: InitializePaymentRequest = {
+        targetAccountId: form.targetAccountId,
+        type: form.type,
+        amount: Number.parseFloat(form.amount),
+        currency: form.currency,
+        method: form.method,
+        ...(form.type === 'subscription' && { planId: form.planId }),
+        ...(form.type === 'template_purchase' && {
+          templateId: form.templateId,
+          appId: form.appId,
+        }),
+        ...(form.customerName && { customerName: form.customerName }),
+        ...(form.email && { email: form.email }),
+        ...(form.phoneNumber && { phoneNumber: form.phoneNumber }),
+      }
+
+      const adminUser = getUser()
+      if (!adminUser?.id) {
+        throw new Error('Admin account ID not found')
+      }
+
+      await creditTransactionService.initializePayment(payload, adminUser.id)
+      setSuccess(true)
+      setTimeout(() => {
+        onSuccess()
+        onClose()
+        setForm({
+          targetAccountId: '',
+          type: 'payg_topup',
+          amount: '',
+          currency: 'USD',
+          method: 'card',
+          planId: '',
+          templateId: '',
+          appId: '',
+          customerName: '',
+          email: '',
+          phoneNumber: '',
+        })
+        setSuccess(false)
+      }, 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to initialize payment')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!open) return null
+
+  return (
+    <>
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 50,
+        }}
+        onClick={onClose}
+      />
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'hsl(224,18%,8%)',
+          border: '1px solid hsl(224,14%,14%)',
+          borderRadius: 12,
+          width: 'min(500px, calc(100vw - 32px))',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          zIndex: 51,
+          boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+        }}
+      >
+        <div
+          style={{
+            padding: '24px',
+            borderBottom: '1px solid hsl(224,14%,12%)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            position: 'sticky',
+            top: 0,
+            background: 'hsl(224,18%,8%)',
+          }}
+        >
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'hsl(210,20%,95%)', margin: 0 }}>Initialize Payment</h2>
+          <button
+            onClick={onClose}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Icon name="x" size={18} color="hsl(215,15%,55%)" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+          {success && (
+            <div
+              style={{
+                padding: '12px 16px',
+                background: 'rgba(39,174,96,0.12)',
+                border: '1px solid rgba(39,174,96,0.25)',
+                borderRadius: 8,
+                marginBottom: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <Icon name="check" size={16} color="hsl(152,60%,50%)" />
+              <span style={{ color: 'hsl(152,60%,50%)', fontSize: 13, fontWeight: 500 }}>
+                Payment initialized successfully!
+              </span>
+            </div>
+          )}
+
+          {error && (
+            <div
+              style={{
+                padding: '12px 16px',
+                background: 'rgba(231,76,60,0.12)',
+                border: '1px solid rgba(231,76,60,0.25)',
+                borderRadius: 8,
+                marginBottom: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <Icon name="x" size={16} color="hsl(0,62%,60%)" />
+              <span style={{ color: 'hsl(0,62%,60%)', fontSize: 13, fontWeight: 500 }}>{error}</span>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label
+                style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 6 }}
+              >
+                Target Account ID *
+              </label>
+              <input
+                type="text"
+                value={form.targetAccountId}
+                onChange={(e) => setForm({ ...form, targetAccountId: e.target.value })}
+                placeholder="Enter account ID"
+                style={{
+                  width: '100%',
+                  background: 'hsl(224,14%,10%)',
+                  border: '1px solid hsl(224,14%,16%)',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  color: 'hsl(210,20%,85%)',
+                  fontFamily: 'Manrope, sans-serif',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 6 }}
+              >
+                Payment Type *
+              </label>
+              <select
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value as PaymentInitType })}
+                style={{
+                  width: '100%',
+                  background: 'hsl(224,14%,10%)',
+                  border: '1px solid hsl(224,14%,16%)',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  color: 'hsl(210,20%,85%)',
+                  fontFamily: 'Manrope, sans-serif',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="payg_topup">Pay-As-You-Go Top-up</option>
+                <option value="subscription">Subscription</option>
+                <option value="template_purchase">Template Purchase</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'hsl(210,20%,85%)',
+                    marginBottom: 6,
+                  }}
+                >
+                  Amount *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  placeholder="0.00"
+                  style={{
+                    width: '100%',
+                    background: 'hsl(224,14%,10%)',
+                    border: '1px solid hsl(224,14%,16%)',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    color: 'hsl(210,20%,85%)',
+                    fontFamily: 'Manrope, sans-serif',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                />
+              </div>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'hsl(210,20%,85%)',
+                    marginBottom: 6,
+                  }}
+                >
+                  Currency
+                </label>
+                <input
+                  type="text"
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                  placeholder="USD"
+                  maxLength={3}
+                  style={{
+                    width: '100%',
+                    background: 'hsl(224,14%,10%)',
+                    border: '1px solid hsl(224,14%,16%)',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    color: 'hsl(210,20%,85%)',
+                    fontFamily: 'Manrope, sans-serif',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    textTransform: 'uppercase',
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 6 }}
+              >
+                Payment Method *
+              </label>
+              <select
+                value={form.method}
+                onChange={(e) => setForm({ ...form, method: e.target.value as PaymentMethod })}
+                style={{
+                  width: '100%',
+                  background: 'hsl(224,14%,10%)',
+                  border: '1px solid hsl(224,14%,16%)',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  color: 'hsl(210,20%,85%)',
+                  fontFamily: 'Manrope, sans-serif',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="card">Credit/Debit Card</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="wallet">Wallet</option>
+              </select>
+            </div>
+
+            {form.type === 'subscription' && (
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'hsl(210,20%,85%)',
+                    marginBottom: 6,
+                  }}
+                >
+                  Plan ID *
+                </label>
+                <input
+                  type="text"
+                  value={form.planId}
+                  onChange={(e) => setForm({ ...form, planId: e.target.value })}
+                  placeholder="e.g., plan-pro-monthly"
+                  style={{
+                    width: '100%',
+                    background: 'hsl(224,14%,10%)',
+                    border: '1px solid hsl(224,14%,16%)',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    color: 'hsl(210,20%,85%)',
+                    fontFamily: 'Manrope, sans-serif',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                />
+              </div>
+            )}
+
+            {form.type === 'template_purchase' && (
+              <>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'hsl(210,20%,85%)',
+                      marginBottom: 6,
+                    }}
+                  >
+                    Template ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={form.templateId}
+                    onChange={(e) => setForm({ ...form, templateId: e.target.value })}
+                    placeholder="e.g., tpl-welcome-email"
+                    style={{
+                      width: '100%',
+                      background: 'hsl(224,14%,10%)',
+                      border: '1px solid hsl(224,14%,16%)',
+                      borderRadius: 8,
+                      padding: '10px 12px',
+                      fontSize: 13,
+                      color: 'hsl(210,20%,85%)',
+                      fontFamily: 'Manrope, sans-serif',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'hsl(210,20%,85%)',
+                      marginBottom: 6,
+                    }}
+                  >
+                    App ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={form.appId}
+                    onChange={(e) => setForm({ ...form, appId: e.target.value })}
+                    placeholder="e.g., app-123"
+                    style={{
+                      width: '100%',
+                      background: 'hsl(224,14%,10%)',
+                      border: '1px solid hsl(224,14%,16%)',
+                      borderRadius: 8,
+                      padding: '10px 12px',
+                      fontSize: 13,
+                      color: 'hsl(210,20%,85%)',
+                      fontFamily: 'Manrope, sans-serif',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                  />
+                </div>
+              </>
+            )}
+
+            <div style={{ borderTop: '1px solid hsl(224,14%,12%)', paddingTop: 16 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(215,15%,55%)', marginBottom: 12 }}>
+                Optional Details
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: 'hsl(210,20%,85%)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    Customer Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.customerName}
+                    onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+                    placeholder="John Doe"
+                    style={{
+                      width: '100%',
+                      background: 'hsl(224,14%,10%)',
+                      border: '1px solid hsl(224,14%,16%)',
+                      borderRadius: 8,
+                      padding: '8px 12px',
+                      fontSize: 13,
+                      color: 'hsl(210,20%,85%)',
+                      fontFamily: 'Manrope, sans-serif',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: 'hsl(210,20%,85%)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="john@example.com"
+                    style={{
+                      width: '100%',
+                      background: 'hsl(224,14%,10%)',
+                      border: '1px solid hsl(224,14%,16%)',
+                      borderRadius: 8,
+                      padding: '8px 12px',
+                      fontSize: 13,
+                      color: 'hsl(210,20%,85%)',
+                      fontFamily: 'Manrope, sans-serif',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: 'hsl(210,20%,85%)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={form.phoneNumber}
+                    onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                    placeholder="+1234567890"
+                    style={{
+                      width: '100%',
+                      background: 'hsl(224,14%,10%)',
+                      border: '1px solid hsl(224,14%,16%)',
+                      borderRadius: 8,
+                      padding: '8px 12px',
+                      fontSize: 13,
+                      color: 'hsl(210,20%,85%)',
+                      fontFamily: 'Manrope, sans-serif',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(2,147,228,0.4)')}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = 'hsl(224,14%,16%)')}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                borderRadius: 8,
+                background: 'hsl(224,14%,10%)',
+                border: '1px solid hsl(224,14%,16%)',
+                color: 'hsl(210,20%,85%)',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.5 : 1,
+                transition: 'all 0.15s',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                borderRadius: 8,
+                background: C.primary,
+                border: 'none',
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+                transition: 'all 0.15s',
+              }}
+            >
+              {loading ? 'Processing...' : 'Initialize Payment'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
+  )
 }
 
 function Badge({ label, colors }: { label: string; colors: { bg: string; border: string; color: string } }) {
@@ -204,6 +832,7 @@ export default function CreditTransactions() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const limit = 20
 
   useEffect(() => {
@@ -218,7 +847,7 @@ export default function CreditTransactions() {
     limit,
   }
 
-  const { data: response, isLoading, isError, error, isFetching } = useCreditTransactions(params)
+  const { data: response, isLoading, isError, error, isFetching, refetch } = useCreditTransactions(params)
 
   const transactions = response?.data || []
   const summary = response?.summary || {
@@ -242,6 +871,12 @@ export default function CreditTransactions() {
     <div>
       <style>{skeletonStyles}</style>
 
+      <PaymentInitModal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        onSuccess={() => refetch()}
+      />
+
       <div className="responsive-header" style={{ marginBottom: 28 }}>
         <div>
           <h1
@@ -252,27 +887,53 @@ export default function CreditTransactions() {
           </h1>
           <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>Track and audit all credit transactions</p>
         </div>
-        <button
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '9px 18px',
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: 600,
-            background: C.primary,
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 2px 10px rgba(2,147,228,0.3)',
-            transition: 'all 0.15s',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <Icon name="download" size={15} color="#fff" />
-          Export
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => setPaymentModalOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '9px 18px',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              background: 'hsl(152,60%,50%)',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(39,174,96,0.3)',
+              transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            <Icon name="send" size={15} color="#fff" />
+            Initialize Payment
+          </button>
+          <button
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '9px 18px',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              background: C.primary,
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(2,147,228,0.3)',
+              transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <Icon name="download" size={15} color="#fff" />
+            Export
+          </button>
+        </div>
       </div>
 
       {!isLoading && (
@@ -280,7 +941,7 @@ export default function CreditTransactions() {
           <SummaryCard
             title="Total Volume"
             value={`$${summary.totalAmount.toFixed(2)}`}
-            icon="trending-up"
+            icon="activity"
             color="#36A9EA"
           />
           <SummaryCard title="Top-ups" value={summary.countByType.topup} icon="arrow-up" color="hsl(152,60%,50%)" />

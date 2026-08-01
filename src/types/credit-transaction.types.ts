@@ -71,3 +71,33 @@ export interface GetCreditTransactionsParams {
   page?: number
   limit?: number
 }
+
+export type PaymentInitType = 'payg_topup' | 'subscription' | 'template_purchase'
+export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet'
+
+export interface InitializePaymentRequest {
+  targetAccountId: string
+  type: PaymentInitType
+  amount: number
+  currency?: string
+  method: PaymentMethod
+  planId?: string
+  templateId?: string
+  appId?: string
+  email?: string
+  phoneNumber?: string
+  customerName?: string
+}
+
+export interface InitializePaymentResponse {
+  success: boolean
+  resp_msg: string
+  resp_code: number
+  data: {
+    paymentId: string
+    status: string
+    amount: number
+    currency: string
+    checkoutUrl?: string
+  }
+}
