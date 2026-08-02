@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { to: '/templates', icon: 'layers', label: 'Templates' },
   { to: '/analytics', icon: 'chart', label: 'Analytics' },
   { to: '/credit-transactions', icon: 'zap', label: 'Credits' },
+  { to: '/security', icon: 'shield', label: 'Security' },
   { to: '/support', icon: 'help', label: 'Support' },
 ]
 

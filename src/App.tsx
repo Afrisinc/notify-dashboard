@@ -10,6 +10,7 @@ import Analytics from './pages/admin/Analytics'
 import Settings from './pages/admin/Settings'
 import Support from './pages/admin/Support'
 import CreditTransactions from './pages/admin/CreditTransactions'
+import Security from './pages/admin/Security'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="templates" element={<Templates />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="credit-transactions" element={<CreditTransactions />} />
+          <Route path="security" element={<Security />} />
           <Route path="settings" element={<Settings />} />
           <Route path="support" element={<Support />} />
         </Route>
