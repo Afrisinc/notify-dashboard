@@ -97,7 +97,7 @@ function ClientRow({
         style={{
           display: 'grid',
           gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-          gap: 16,
+          gap: 20,
           padding: '16px 20px',
           alignItems: 'center',
           cursor: 'pointer',
@@ -107,7 +107,7 @@ function ClientRow({
         onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(224,14%,13%)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = expanded ? 'hsl(224,14%,12%)' : 'transparent')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ transition: 'transform 0.2s' }}>
             <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={16} color="hsl(215,15%,55%)" />
           </div>
@@ -115,7 +115,7 @@ function ClientRow({
             style={{
               width: 36,
               height: 36,
-              borderRadius: 8,
+              borderRadius: '50%',
               background: `hsl(${(client.id.charCodeAt(0) * 47) % 360},40%,18%)`,
               border: `1px solid hsl(${(client.id.charCodeAt(0) * 47) % 360},30%,25%)`,
               display: 'flex',
