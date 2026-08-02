@@ -97,7 +97,7 @@ function ClientRow({
         style={{
           display: 'grid',
           gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-          gap: 20,
+          gap: 32,
           padding: '16px 20px',
           alignItems: 'center',
           cursor: 'pointer',
@@ -218,7 +218,7 @@ function ClientRow({
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-                  gap: 16,
+                  gap: 32,
                   padding: '12px 20px 12px 70px',
                   borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
                   alignItems: 'center',
@@ -384,7 +384,7 @@ export default function Clients() {
             style={{
               display: 'grid',
               gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-              gap: 16,
+              gap: 32,
               padding: '12px 20px',
               borderBottom: '1px solid hsl(224,14%,12%)',
               background: 'hsl(224,14%,10%)',
