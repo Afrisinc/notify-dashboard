@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import Icon from '../../components/Icon'
+import RelativeTime from '../../components/RelativeTime'
 import type { LoginEvent, SecurityOverviewParams, LoginEventsParams } from '../../types/security.types'
 import { securityService } from '../../services/security.service'
 
@@ -481,14 +482,9 @@ function EventRow({ event }: EventRowProps) {
       >
         {event.phone || '—'}
       </p>
-      <p style={{ fontSize: 11, color: 'hsl(215,15%,55%)', whiteSpace: 'nowrap' }}>
-        {new Date(event.createdAt).toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
-      </p>
+      <div style={{ whiteSpace: 'nowrap' }}>
+        <RelativeTime timestamp={event.createdAt} />
+      </div>
       <p
         style={{
           fontSize: 11,

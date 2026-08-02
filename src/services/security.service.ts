@@ -10,9 +10,12 @@ import type {
 
 export const securityService = {
   getOverview: async (params?: SecurityOverviewParams): Promise<SecurityOverviewResponse> => {
-    const response = await apiClient.get<ApiWrapper<SecurityOverviewResponse>>('/admin/internal/platform/security/overview', {
-      params,
-    })
+    const response = await apiClient.get<ApiWrapper<SecurityOverviewResponse>>(
+      '/admin/internal/platform/security/overview',
+      {
+        params,
+      }
+    )
     return response.data.data
   },
 
