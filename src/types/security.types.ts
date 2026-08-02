@@ -43,9 +43,21 @@ export interface LoginEventsPagination {
   pages: number
 }
 
+export interface LoginEventsData {
+  data: LoginEvent[]
+  pagination: LoginEventsPagination
+}
+
 export interface LoginEventsResponse {
   data: LoginEvent[]
   pagination: LoginEventsPagination
+}
+
+export interface ApiWrapper<T> {
+  success: boolean
+  resp_msg: string
+  resp_code: number
+  data: T
 }
 
 export interface SecurityOverviewParams {
