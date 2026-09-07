@@ -4,6 +4,8 @@ export type OrganizationRole = 'owner' | 'member' | 'admin'
 
 export interface Organization {
   id: number
+  accountId: string
+  organizationId: string | null
   name: string
   plan: ClientPlan
   role: OrganizationRole

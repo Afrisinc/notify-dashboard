@@ -11,6 +11,8 @@ import Settings from './pages/admin/Settings'
 import Support from './pages/admin/Support'
 import CreditTransactions from './pages/admin/CreditTransactions'
 import Security from './pages/admin/Security'
+import OrgApps from './pages/admin/OrgApps'
+import AppEmailIdentities from './pages/admin/AppEmailIdentities'
 
 export default function App() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
           <Route path="security" element={<Security />} />
           <Route path="settings" element={<Settings />} />
           <Route path="support" element={<Support />} />
+          <Route path="organizations/:orgId/apps" element={<OrgApps />} />
+          <Route path="apps/:appId/email" element={<AppEmailIdentities />} />
         </Route>
       </Routes>
     </BrowserRouter>

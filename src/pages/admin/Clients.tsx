@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
 import { useClients } from '../../hooks'
@@ -75,6 +76,7 @@ function ClientRow({
   onToggle: () => void
   isFetching: boolean
 }) {
+  const navigate = useNavigate()
   const initials = client.name
     .split(' ')
     .map((n) => n[0])
@@ -212,45 +214,66 @@ function ClientRow({
               No organizations
             </div>
           ) : (
-            client.organizations.map((org, idx) => (
-              <div
-                key={org.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-                  gap: 32,
-                  padding: '12px 20px 12px 70px',
-                  borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
-                  alignItems: 'center',
-                  fontSize: 12,
-                  minWidth: 700,
-                }}
-              >
-                <div style={{ color: 'hsl(215,15%,55%)' }}>
-                  <Icon name="layers" size={14} color="hsl(215,15%,55%)" />
+            client.organizations.map((org, idx) => {
+              const canViewApps = !!org.organizationId
+              return (
+                <div
+                  key={org.id}
+                  onClick={() => {
+                    if (canViewApps) {
+                      navigate(`/organizations/${org.organizationId}/apps?orgName=${encodeURIComponent(org.name)}`)
+                    }
+                  }}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
+                    gap: 32,
+                    padding: '12px 20px 12px 70px',
+                    borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
+                    alignItems: 'center',
+                    fontSize: 12,
+                    minWidth: 700,
+                    cursor: canViewApps ? 'pointer' : 'default',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => canViewApps && (e.currentTarget.style.background = 'hsl(224,14%,13%)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <div style={{ color: 'hsl(215,15%,55%)' }}>
+                    <Icon name="layers" size={14} color="hsl(215,15%,55%)" />
+                  </div>
+
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
+                      {org.name}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)' }}>Role: {org.role}</p>
+                  </div>
+
+                  <Badge label={getPlanDisplayName(org.plan)} colors={PLAN_COLORS[org.plan] || PLAN_COLORS.default} />
+
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.sent}</p>
+
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.templates}</p>
+
+                  <Badge
+                    label={getStatusDisplayName(org.status)}
+                    colors={STATUS_COLORS[org.status] || STATUS_COLORS.default}
+                  />
+
+                  {canViewApps ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                      <span style={{ fontSize: 11, color: '#36A9EA', fontWeight: 600 }}>Apps</span>
+                      <span style={{ display: 'inline-flex', transform: 'rotate(-90deg)' }}>
+                        <Icon name="chevronDown" size={12} color="#36A9EA" />
+                      </span>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', textAlign: 'right' }}>{org.joined}</p>
+                  )}
                 </div>
-
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
-                    {org.name}
-                  </p>
-                  <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)' }}>Role: {org.role}</p>
-                </div>
-
-                <Badge label={getPlanDisplayName(org.plan)} colors={PLAN_COLORS[org.plan] || PLAN_COLORS.default} />
-
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.sent}</p>
-
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.templates}</p>
-
-                <Badge
-                  label={getStatusDisplayName(org.status)}
-                  colors={STATUS_COLORS[org.status] || STATUS_COLORS.default}
-                />
-
-                <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', textAlign: 'right' }}>{org.joined}</p>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       )}

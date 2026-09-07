@@ -1,2 +1,5 @@
 export * from './api.types'
 export * from './client.types'
+export * from './app.types'
+export * from './email-identity.types'
+export * from './platform-settings.types'

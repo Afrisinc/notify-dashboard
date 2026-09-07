@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
+import { usePlatformEmailSettings, useUpdatePlatformEmailSettings } from '../../hooks'
 
 function Section({ title, subtitle, children }) {
   return (
@@ -111,6 +112,84 @@ function Input({
   )
 }
 
+function PlatformEmailSettingsTab() {
+  const { data, isLoading } = usePlatformEmailSettings()
+  const updateSettings = useUpdatePlatformEmailSettings()
+
+  const [fromName, setFromName] = useState('')
+  const [fromEmail, setFromEmail] = useState('')
+  const [supportEmail, setSupportEmail] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (data) {
+      setFromName(data.fromName)
+      setFromEmail(data.fromEmail)
+      setSupportEmail(data.supportEmail || '')
+    }
+  }, [data])
+
+  const handleSave = () => {
+    setSaved(false)
+    updateSettings.mutate(
+      { fromName, fromEmail, supportEmail: supportEmail || undefined },
+      { onSuccess: () => setSaved(true) }
+    )
+  }
+
+  return (
+    <>
+      <Section
+        title="Platform default sender"
+        subtitle="Used for any app that hasn't configured its own custom sender, and for system emails (password resets, alerts, etc.)"
+      >
+        {isLoading ? (
+          <p style={{ fontSize: 13, color: 'hsl(215,15%,55%)' }}>Loading…</p>
+        ) : (
+          <>
+            <Field label="From name" hint="Displayed as the sender name on outgoing emails">
+              <Input value={fromName} onChange={setFromName} placeholder="Afrisinc" />
+            </Field>
+            <Field label="From email" hint="Used as the sender address when an app has no custom email set up">
+              <Input value={fromEmail} onChange={setFromEmail} placeholder="noreply@afrisinc.com" />
+            </Field>
+            <Field label="Support email" hint="Shown to recipients as a contact address in system emails">
+              <Input value={supportEmail} onChange={setSupportEmail} placeholder="support@afrisinc.com" />
+            </Field>
+          </>
+        )}
+      </Section>
+
+      {updateSettings.isError && (
+        <p style={{ fontSize: 13, color: 'hsl(0,62%,60%)', marginBottom: 12 }}>
+          {updateSettings.error instanceof Error ? updateSettings.error.message : 'Failed to save settings'}
+        </p>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+        {saved && <span style={{ fontSize: 13, color: 'hsl(152,60%,50%)' }}>Saved</span>}
+        <button
+          onClick={handleSave}
+          disabled={!fromName.trim() || !fromEmail.trim() || updateSettings.isPending}
+          style={{
+            padding: '10px 24px',
+            borderRadius: 8,
+            background: updateSettings.isPending ? 'hsl(224,14%,18%)' : C.primary,
+            border: 'none',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: updateSettings.isPending ? 'not-allowed' : 'pointer',
+            boxShadow: updateSettings.isPending ? 'none' : '0 2px 10px rgba(2,147,228,0.3)',
+          }}
+        >
+          {updateSettings.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+    </>
+  )
+}
+
 const KEYS = [
   {
     name: 'Production',
@@ -139,6 +218,7 @@ export default function Settings() {
 
   const tabs = [
     { id: 'general', label: 'General', icon: 'settings' },
+    { id: 'email', label: 'Email', icon: 'mail' },
     { id: 'api', label: 'API Keys', icon: 'key' },
     { id: 'webhooks', label: 'Webhooks', icon: 'webhook' },
     { id: 'notifications', label: 'Alerts', icon: 'bell' },
@@ -209,9 +289,6 @@ export default function Settings() {
             <Field label="Admin email" hint="Receives system alerts and billing notifications">
               <Input value={email} onChange={setEmail} placeholder="admin@example.com" />
             </Field>
-            <Field label="Default sender name" hint="Used as the From name for email notifications">
-              <Input value="Notify Platform" onChange={() => {}} placeholder="Sender name" />
-            </Field>
           </Section>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             <button
@@ -246,6 +323,8 @@ export default function Settings() {
           </div>
         </>
       )}
+
+      {activeTab === 'email' && <PlatformEmailSettingsTab />}
 
       {activeTab === 'api' && (
         <Section title="API Keys" subtitle="Manage authentication keys for the Notify API">

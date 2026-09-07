@@ -1,3 +1,6 @@
 export * from './useClients'
 export * from './useDashboard'
 export * from './useCreditTransactions'
+export * from './useApps'
+export * from './useEmailIdentity'
+export * from './usePlatformSettings'
