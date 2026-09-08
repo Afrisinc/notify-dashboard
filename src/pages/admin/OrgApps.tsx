@@ -146,7 +146,15 @@ export default function OrgApps() {
       </button>
 
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'hsl(210,20%,95%)', letterSpacing: '-0.02em', marginBottom: 4 }}>
+        <h1
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'hsl(210,20%,95%)',
+            letterSpacing: '-0.02em',
+            marginBottom: 4,
+          }}
+        >
           {orgName ? `${orgName} — Apps` : 'Apps'}
         </h1>
         <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>
@@ -208,7 +216,10 @@ export default function OrgApps() {
               }}
             >
               {['App', 'Environment', 'Status', 'Templates', 'Sent', 'Actions'].map((label) => (
-                <div key={label} style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}>
+                <div
+                  key={label}
+                  style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase' }}
+                >
                   {label}
                 </div>
               ))}

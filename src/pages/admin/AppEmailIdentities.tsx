@@ -15,7 +15,17 @@ import {
 } from '../../hooks'
 import type { EmailDomain, EmailDomainStatus } from '../../types'
 
-function Section({ title, subtitle, children, actions }: { title: string; subtitle?: string; children: React.ReactNode; actions?: React.ReactNode }) {
+function Section({
+  title,
+  subtitle,
+  children,
+  actions,
+}: {
+  title: string
+  subtitle?: string
+  children: React.ReactNode
+  actions?: React.ReactNode
+}) {
   return (
     <div
       style={{
@@ -216,7 +226,15 @@ function CopyRow({ label, name, value }: { label: string; name: string; value: s
 
   return (
     <div style={{ padding: '10px 0', borderBottom: '1px solid hsl(224,14%,12%)' }}>
-      <p style={{ fontSize: 11, fontWeight: 600, color: 'hsl(215,15%,50%)', textTransform: 'uppercase', marginBottom: 4 }}>
+      <p
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: 'hsl(215,15%,50%)',
+          textTransform: 'uppercase',
+          marginBottom: 4,
+        }}
+      >
         {label} — {name}
       </p>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -294,7 +312,15 @@ function AddDomainForm({ appId, onDone }: { appId: string; onDone: () => void })
   }
 
   return (
-    <div style={{ background: 'hsl(224,14%,10%)', border: '1px solid hsl(224,14%,15%)', borderRadius: 10, padding: 18, marginBottom: 16 }}>
+    <div
+      style={{
+        background: 'hsl(224,14%,10%)',
+        border: '1px solid hsl(224,14%,15%)',
+        borderRadius: 10,
+        padding: 18,
+        marginBottom: 16,
+      }}
+    >
       <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,88%)', marginBottom: 12 }}>Add a sending domain</p>
 
       <div style={{ marginBottom: 10 }}>
@@ -303,12 +329,40 @@ function AddDomainForm({ appId, onDone }: { appId: string; onDone: () => void })
       </div>
 
       <div style={{ display: 'flex', gap: 16, marginBottom: 14 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'hsl(210,20%,80%)', cursor: 'pointer' }}>
-          <input type="radio" checked={!useCloudflare} onChange={() => setUseCloudflare(false)} style={{ accentColor: C.primary }} />
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 13,
+            color: 'hsl(210,20%,80%)',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            type="radio"
+            checked={!useCloudflare}
+            onChange={() => setUseCloudflare(false)}
+            style={{ accentColor: C.primary }}
+          />
           I'll add DNS records myself
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'hsl(210,20%,80%)', cursor: 'pointer' }}>
-          <input type="radio" checked={useCloudflare} onChange={() => setUseCloudflare(true)} style={{ accentColor: C.primary }} />
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 13,
+            color: 'hsl(210,20%,80%)',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            type="radio"
+            checked={useCloudflare}
+            onChange={() => setUseCloudflare(true)}
+            style={{ accentColor: C.primary }}
+          />
           My domain is on Cloudflare — set it up for me
         </label>
       </div>
@@ -318,13 +372,27 @@ function AddDomainForm({ appId, onDone }: { appId: string; onDone: () => void })
           <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 6 }}>
             Cloudflare API token (with DNS edit permission for this zone)
           </p>
-          <Input value={cloudflareApiToken} onChange={setCloudflareApiToken} placeholder="Paste your Cloudflare API token" mono />
+          <Input
+            value={cloudflareApiToken}
+            onChange={setCloudflareApiToken}
+            placeholder="Paste your Cloudflare API token"
+            mono
+          />
         </div>
       )}
 
       <button
         onClick={() => setShowAdvanced((s) => !s)}
-        style={{ background: 'none', border: 'none', color: '#36A9EA', fontSize: 12, fontWeight: 500, cursor: 'pointer', padding: 0, marginBottom: showAdvanced ? 10 : 14 }}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#36A9EA',
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: 'pointer',
+          padding: 0,
+          marginBottom: showAdvanced ? 10 : 14,
+        }}
       >
         {showAdvanced ? 'Hide' : 'Show'} advanced options
       </button>
@@ -337,15 +405,32 @@ function AddDomainForm({ appId, onDone }: { appId: string; onDone: () => void })
       )}
 
       {result?.cloudflareError && (
-        <div style={{ padding: '10px 12px', background: 'rgba(231,76,60,0.08)', border: '1px solid rgba(231,76,60,0.2)', borderRadius: 8, marginBottom: 14 }}>
+        <div
+          style={{
+            padding: '10px 12px',
+            background: 'rgba(231,76,60,0.08)',
+            border: '1px solid rgba(231,76,60,0.2)',
+            borderRadius: 8,
+            marginBottom: 14,
+          }}
+        >
           <p style={{ fontSize: 12, color: 'hsl(0,62%,65%)' }}>
-            Cloudflare auto-configuration failed: {result.cloudflareError}. The domain was still added — use the manual DNS records below instead.
+            Cloudflare auto-configuration failed: {result.cloudflareError}. The domain was still added — use the manual
+            DNS records below instead.
           </p>
         </div>
       )}
 
       {addDomain.isError && (
-        <div style={{ padding: '10px 12px', background: 'rgba(231,76,60,0.08)', border: '1px solid rgba(231,76,60,0.2)', borderRadius: 8, marginBottom: 14 }}>
+        <div
+          style={{
+            padding: '10px 12px',
+            background: 'rgba(231,76,60,0.08)',
+            border: '1px solid rgba(231,76,60,0.2)',
+            borderRadius: 8,
+            marginBottom: 14,
+          }}
+        >
           <p style={{ fontSize: 12, color: 'hsl(0,62%,65%)' }}>
             {addDomain.error instanceof Error ? addDomain.error.message : 'Failed to add domain'}
           </p>
@@ -449,7 +534,16 @@ function DomainCard({ appId, domain }: { appId: string; domain: EmailDomain }) {
         <div style={{ marginBottom: 16 }}>
           <button
             onClick={() => setShowRecords((s) => !s)}
-            style={{ background: 'none', border: 'none', color: '#36A9EA', fontSize: 12, fontWeight: 500, cursor: 'pointer', padding: 0, marginBottom: 8 }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#36A9EA',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+              padding: 0,
+              marginBottom: 8,
+            }}
           >
             {showRecords ? 'Hide' : 'Show'} DNS records to add manually
           </button>
@@ -463,7 +557,8 @@ function DomainCard({ appId, domain }: { appId: string; domain: EmailDomain }) {
                   <CopyRow label="DKIM (TXT)" name={records.data.dkim.name} value={records.data.dkim.value} />
                   <CopyRow label="DMARC (TXT)" name={records.data.dmarc.name} value={records.data.dmarc.value} />
                   <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', marginTop: 8 }}>
-                    Add these records at your DNS provider, then click "Verify now" above — DNS changes can take a few minutes to propagate.
+                    Add these records at your DNS provider, then click "Verify now" above — DNS changes can take a few
+                    minutes to propagate.
                   </p>
                 </>
               )}
@@ -598,7 +693,15 @@ export default function AppEmailIdentities() {
       </button>
 
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'hsl(210,20%,95%)', letterSpacing: '-0.02em', marginBottom: 4 }}>
+        <h1
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'hsl(210,20%,95%)',
+            letterSpacing: '-0.02em',
+            marginBottom: 4,
+          }}
+        >
           {appName ? `${appName} — Email` : 'Email Identities'}
         </h1>
         <p style={{ fontSize: 14, color: 'hsl(215,15%,55%)' }}>
