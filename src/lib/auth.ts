@@ -65,10 +65,6 @@ export function logout(): void {
   globalThis.location.reload()
 }
 
-export function isAuthenticated(): boolean {
-  return Boolean(getToken())
-}
-
 /** Decode JWT payload without a library. Returns null if malformed. */
 export function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
@@ -78,6 +74,18 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
   } catch {
     return null
   }
+}
+
+export function isTokenExpired(token: string): boolean {
+  const payload = decodeJwtPayload(token)
+  if (!payload) return true
+  if (typeof payload.exp !== 'number') return false
+  return Date.now() >= payload.exp * 1000
+}
+
+export function isAuthenticated(): boolean {
+  const token = getToken()
+  return Boolean(token) && !isTokenExpired(token!)
 }
 
 /** Build a NotifyAdminUser from a decoded JWT payload. */

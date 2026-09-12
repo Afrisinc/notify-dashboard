@@ -1,5 +1,13 @@
 import { useEffect } from 'react'
-import { isAuthenticated, getUser, isPlatformAdmin, redirectToLogin, logout, displayName } from '@/lib/auth'
+import {
+  isAuthenticated,
+  getUser,
+  isPlatformAdmin,
+  redirectToLogin,
+  logout,
+  displayName,
+  clearSession,
+} from '@/lib/auth'
 import { C } from '../design'
 
 function CenteredMessage({ children }: { children: React.ReactNode }) {
@@ -70,6 +78,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!authenticated) {
+      clearSession()
       redirectToLogin()
     }
   }, [authenticated])
