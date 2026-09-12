@@ -324,6 +324,24 @@ function Sidebar({ collapsed, setCollapsed, isMobile, onClose }: SidebarProps) {
               >
                 {user?.email ?? 'admin@notify.io'}
               </p>
+              {user?.role && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 4,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: 0.4,
+                    color: '#36A9EA',
+                    background: 'rgba(2,147,228,0.12)',
+                    border: '1px solid rgba(2,147,228,0.25)',
+                    borderRadius: 4,
+                    padding: '1px 6px',
+                  }}
+                >
+                  {user.role.toUpperCase()}
+                </span>
+              )}
             </div>
           )}
         </div>

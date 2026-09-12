@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { clientsService } from '../services'
-import type { GetClientsParams } from '../types'
+import type { GetClientsParams, GetClientsStatsParams } from '../types'
 
 export const useClients = (params?: GetClientsParams) => {
   return useQuery({
@@ -19,5 +19,18 @@ export const useClient = (id: number) => {
     queryKey: ['clients', id],
     queryFn: () => clientsService.getById(id),
     enabled: !!id,
+  })
+}
+
+export const useClientStats = (params?: GetClientsStatsParams, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['clients', 'stats', params],
+    queryFn: async () => {
+      const response = await clientsService.getStats(params)
+      return response.data
+    },
+    enabled,
+    staleTime: 30 * 1000, // 30 seconds - matches the server-side cache TTL
+    retry: 1,
   })
 }

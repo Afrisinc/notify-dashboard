@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
+import { getUser, isSuperAdmin } from '../../lib/auth'
 import {
   usePlatformEmailSettings,
   useUpdatePlatformEmailSettings,
@@ -539,13 +540,14 @@ export default function Settings() {
     ipAllowlist: false,
   })
   const [activeTab, setActiveTab] = useState('general')
+  const canManageMailAliases = isSuperAdmin(getUser())
 
   const toggle = (key) => setToggles((t) => ({ ...t, [key]: !t[key] }))
 
   const tabs = [
     { id: 'general', label: 'General', icon: 'settings' },
     { id: 'email', label: 'Email', icon: 'mail' },
-    { id: 'mail-aliases', label: 'Mail Aliases', icon: 'tag' },
+    ...(canManageMailAliases ? [{ id: 'mail-aliases', label: 'Mail Aliases', icon: 'tag' }] : []),
     { id: 'api', label: 'API Keys', icon: 'key' },
     { id: 'webhooks', label: 'Webhooks', icon: 'webhook' },
     { id: 'notifications', label: 'Alerts', icon: 'bell' },
@@ -653,7 +655,7 @@ export default function Settings() {
 
       {activeTab === 'email' && <PlatformEmailSettingsTab />}
 
-      {activeTab === 'mail-aliases' && <MailAliasesTab />}
+      {activeTab === 'mail-aliases' && canManageMailAliases && <MailAliasesTab />}
 
       {activeTab === 'api' && (
         <Section title="API Keys" subtitle="Manage authentication keys for the Notify API">

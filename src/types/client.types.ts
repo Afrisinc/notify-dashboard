@@ -1,3 +1,5 @@
+import type { AnalyticsPeriod } from './analytics.types'
+
 export type ClientPlan = 'FREE' | 'PAYG' | 'STARTER' | 'SCALE' | 'ENTERPRISE' | 'PRO'
 export type ClientStatus = 'active' | 'suspended' | 'trial'
 export type OrganizationRole = 'owner' | 'member' | 'admin'
@@ -52,4 +54,32 @@ export interface GetClientsParams {
   search?: string
   status?: ClientStatus
   plan?: ClientPlan
+}
+
+export interface ClientsKpi {
+  value: string
+  delta: string
+  deltaUp: boolean
+}
+
+export interface ClientsStatsData {
+  activeClients: number
+  newClients: ClientsKpi
+  totalSent: ClientsKpi
+  avgDeliveryRate: ClientsKpi
+  rangeStart: string
+  rangeEnd: string
+}
+
+export interface ClientsStatsResponse {
+  success: boolean
+  resp_msg: string
+  resp_code: number
+  data: ClientsStatsData
+}
+
+export interface GetClientsStatsParams {
+  period?: AnalyticsPeriod
+  dateFrom?: string
+  dateTo?: string
 }
