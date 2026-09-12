@@ -1,2 +1,6 @@
 export { apiClient } from './api.service'
 export { clientsService } from './clients.service'
+export { appsService } from './apps.service'
+export { emailIdentityService } from './email-identity.service'
+export { platformSettingsService } from './platform-settings.service'
+export { mailAliasService } from './mail-alias.service'

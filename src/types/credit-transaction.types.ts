@@ -1,6 +1,7 @@
 export type TransactionType = 'topup' | 'deduction' | 'bonus' | 'refund'
 export type Channel = 'EMAIL' | 'SMS' | 'PUSH' | 'IN_APP'
 export type AccountType = 'INDIVIDUAL' | 'ORGANIZATION'
+export type PaymentStatus = 'COMPLETED' | 'PENDING' | 'FAILED'
 
 export interface CreditTransaction {
   transactionId: string
@@ -20,8 +21,10 @@ export interface CreditTransaction {
   notificationId?: string
   paymentRef?: string
   bonusPercent?: number
-  paymentStatus?: string
+  status?: PaymentStatus
   isCompleted: boolean
+  isPending: boolean
+  isFailed: boolean
   createdAt: string
 }
 
@@ -56,6 +59,7 @@ export interface CreditTransactionsResponse {
 export interface GetCreditTransactionsParams {
   search?: string
   type?: TransactionType | string
+  status?: PaymentStatus | string
   channel?: Channel
   accountId?: string
   minAmount?: number
@@ -66,4 +70,34 @@ export interface GetCreditTransactionsParams {
   sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
+}
+
+export type PaymentInitType = 'payg_topup' | 'subscription' | 'template_purchase'
+export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet'
+
+export interface InitializePaymentRequest {
+  targetAccountId: string
+  type: PaymentInitType
+  amount: number
+  currency?: string
+  method: PaymentMethod
+  planId?: string
+  templateId?: string
+  appId?: string
+  email?: string
+  phoneNumber?: string
+  customerName?: string
+}
+
+export interface InitializePaymentResponse {
+  success: boolean
+  resp_msg: string
+  resp_code: number
+  data: {
+    paymentId: string
+    status: string
+    amount: number
+    currency: string
+    checkoutUrl?: string
+  }
 }

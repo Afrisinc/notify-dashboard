@@ -106,6 +106,97 @@ export function SkeletonClientRow({ showOrganizations = true }: SkeletonClientRo
   )
 }
 
+export function SkeletonNotificationRow() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1.2fr 1.5fr 80px 1fr 90px 70px',
+        padding: '13px 20px',
+        borderBottom: '1px solid hsl(224,14%,11%)',
+        alignItems: 'center',
+        animation: 'skeleton-pulse 2s ease-in-out infinite',
+      }}
+    >
+      <SkeletonLine width={60} height={12} />
+      <SkeletonLine width={100} height={12} />
+      <div>
+        <SkeletonLine width={140} height={12} marginBottom={6} />
+        <SkeletonLine width={80} height={10} />
+      </div>
+      <SkeletonLine width={50} height={12} />
+      <SkeletonLine width={70} height={18} borderRadius={9999} />
+      <SkeletonLine width={40} height={12} />
+      <SkeletonLine width={60} height={12} />
+    </div>
+  )
+}
+
+export function SkeletonTemplateCard() {
+  return (
+    <div
+      style={{
+        background: 'hsl(224,18%,8%)',
+        border: '1px solid hsl(224,14%,14%)',
+        borderRadius: 12,
+        padding: '20px',
+        animation: 'skeleton-pulse 2s ease-in-out infinite',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ width: 38, height: 38, borderRadius: 9, background: 'hsl(224,14%,16%)' }} />
+        <SkeletonLine width={50} height={18} borderRadius={9999} />
+      </div>
+      <SkeletonLine width={120} height={14} marginBottom={8} />
+      <SkeletonLine width={80} height={12} marginBottom={14} />
+      <SkeletonLine width={70} height={18} borderRadius={9999} marginBottom={14} />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          paddingTop: 12,
+          borderTop: '1px solid hsl(224,14%,13%)',
+        }}
+      >
+        <SkeletonLine width={60} height={12} />
+        <SkeletonLine width={80} height={12} />
+      </div>
+    </div>
+  )
+}
+
+export function ChartSkeleton({ height }: { height: number }) {
+  return (
+    <div style={{ height, display: 'flex', alignItems: 'flex-end', gap: 12, padding: '0 4px' }}>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <SkeletonLine key={i} width="100%" height={Math.random() * (height - 40) + 40} />
+      ))}
+    </div>
+  )
+}
+
+export function SkeletonStatCard() {
+  return (
+    <div
+      className="card-padding"
+      style={{
+        background: 'hsl(224,18%,8%)',
+        border: '1px solid hsl(224,14%,14%)',
+        borderRadius: 12,
+        animation: 'skeleton-pulse 2s ease-in-out infinite',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ width: 38, height: 38, borderRadius: 9, background: 'hsl(224,14%,16%)' }} />
+        <SkeletonLine width={50} height={20} borderRadius={9999} />
+      </div>
+      <SkeletonLine width={70} height={26} marginBottom={8} />
+      <SkeletonLine width={110} height={13} marginBottom={6} />
+      <SkeletonLine width={90} height={12} />
+    </div>
+  )
+}
+
 export function SkeletonTableHeader() {
   return (
     <div

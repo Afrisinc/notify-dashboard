@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
-import { useClients } from '../../hooks'
-import { SkeletonClientRow, skeletonStyles } from '../../components/SkeletonLoader'
-import type { Client } from '../../types'
+import { useClients, useClientStats } from '../../hooks'
+import { SkeletonClientRow, SkeletonLine, skeletonStyles } from '../../components/SkeletonLoader'
+import { todayISODate, daysAgoISODate, formatRangeLabel } from '../../lib/date-range'
+import type { Client, AnalyticsPeriod } from '../../types'
+
+const PERIOD_OPTIONS: { value: AnalyticsPeriod; label: string }[] = [
+  { value: 'today', label: 'Today' },
+  { value: '7d', label: 'This Week' },
+  { value: '30d', label: 'This Month' },
+  { value: '90d', label: 'Last 3 Months' },
+  { value: '6m', label: 'Last 6 Months' },
+  { value: 'custom', label: 'Custom Range' },
+]
 
 const getPlanDisplayName = (plan: string) => {
   const planMap: Record<string, string> = {
@@ -75,6 +86,7 @@ function ClientRow({
   onToggle: () => void
   isFetching: boolean
 }) {
+  const navigate = useNavigate()
   const initials = client.name
     .split(' ')
     .map((n) => n[0])
@@ -97,7 +109,7 @@ function ClientRow({
         style={{
           display: 'grid',
           gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-          gap: 16,
+          gap: 32,
           padding: '16px 20px',
           alignItems: 'center',
           cursor: 'pointer',
@@ -107,7 +119,7 @@ function ClientRow({
         onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(224,14%,13%)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = expanded ? 'hsl(224,14%,12%)' : 'transparent')}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ transition: 'transform 0.2s' }}>
             <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={16} color="hsl(215,15%,55%)" />
           </div>
@@ -115,7 +127,7 @@ function ClientRow({
             style={{
               width: 36,
               height: 36,
-              borderRadius: 8,
+              borderRadius: '50%',
               background: `hsl(${(client.id.charCodeAt(0) * 47) % 360},40%,18%)`,
               border: `1px solid hsl(${(client.id.charCodeAt(0) * 47) % 360},30%,25%)`,
               display: 'flex',
@@ -212,45 +224,66 @@ function ClientRow({
               No organizations
             </div>
           ) : (
-            client.organizations.map((org, idx) => (
-              <div
-                key={org.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-                  gap: 16,
-                  padding: '12px 20px 12px 70px',
-                  borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
-                  alignItems: 'center',
-                  fontSize: 12,
-                  minWidth: 700,
-                }}
-              >
-                <div style={{ color: 'hsl(215,15%,55%)' }}>
-                  <Icon name="layers" size={14} color="hsl(215,15%,55%)" />
+            client.organizations.map((org, idx) => {
+              const canViewApps = !!org.organizationId
+              return (
+                <div
+                  key={org.id}
+                  onClick={() => {
+                    if (canViewApps) {
+                      navigate(`/organizations/${org.organizationId}/apps?orgName=${encodeURIComponent(org.name)}`)
+                    }
+                  }}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
+                    gap: 32,
+                    padding: '12px 20px 12px 70px',
+                    borderTop: idx === 0 ? '1px solid hsl(224,14%,15%)' : 'none',
+                    alignItems: 'center',
+                    fontSize: 12,
+                    minWidth: 700,
+                    cursor: canViewApps ? 'pointer' : 'default',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => canViewApps && (e.currentTarget.style.background = 'hsl(224,14%,13%)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <div style={{ color: 'hsl(215,15%,55%)' }}>
+                    <Icon name="layers" size={14} color="hsl(215,15%,55%)" />
+                  </div>
+
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
+                      {org.name}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)' }}>Role: {org.role}</p>
+                  </div>
+
+                  <Badge label={getPlanDisplayName(org.plan)} colors={PLAN_COLORS[org.plan] || PLAN_COLORS.default} />
+
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.sent}</p>
+
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.templates}</p>
+
+                  <Badge
+                    label={getStatusDisplayName(org.status)}
+                    colors={STATUS_COLORS[org.status] || STATUS_COLORS.default}
+                  />
+
+                  {canViewApps ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                      <span style={{ fontSize: 11, color: '#36A9EA', fontWeight: 600 }}>Apps</span>
+                      <span style={{ display: 'inline-flex', transform: 'rotate(-90deg)' }}>
+                        <Icon name="chevronDown" size={12} color="#36A9EA" />
+                      </span>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', textAlign: 'right' }}>{org.joined}</p>
+                  )}
                 </div>
-
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)', marginBottom: 2 }}>
-                    {org.name}
-                  </p>
-                  <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)' }}>Role: {org.role}</p>
-                </div>
-
-                <Badge label={getPlanDisplayName(org.plan)} colors={PLAN_COLORS[org.plan] || PLAN_COLORS.default} />
-
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.sent}</p>
-
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'hsl(210,20%,85%)' }}>{org.templates}</p>
-
-                <Badge
-                  label={getStatusDisplayName(org.status)}
-                  colors={STATUS_COLORS[org.status] || STATUS_COLORS.default}
-                />
-
-                <p style={{ fontSize: 11, color: 'hsl(215,15%,50%)', textAlign: 'right' }}>{org.joined}</p>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       )}
@@ -263,9 +296,26 @@ export default function Clients() {
   const [currentPage, setCurrentPage] = useState(1)
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
 
+  // Defaults to the same range as the Analytics page
+  const [period, setPeriod] = useState<AnalyticsPeriod>('90d')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+
   useEffect(() => {
     setCurrentPage(1)
   }, [search])
+
+  const handlePeriodChange = (next: AnalyticsPeriod) => {
+    if (next === 'custom' && !customFrom && !customTo) {
+      setCustomFrom(daysAgoISODate(90))
+      setCustomTo(todayISODate())
+    }
+    setPeriod(next)
+  }
+
+  const isCustomRangeValid = period !== 'custom' || (!!customFrom && !!customTo && customFrom <= customTo)
+
+  const statsParams = period === 'custom' ? { period, dateFrom: customFrom, dateTo: customTo } : { period }
 
   const limit = 10
   const offset = (currentPage - 1) * limit
@@ -282,9 +332,12 @@ export default function Clients() {
     search: search || undefined,
   })
 
+  const { data: stats, isLoading: statsLoading } = useClientStats(statsParams, isCustomRangeValid)
+
   const clients = response?.data || []
   const meta = response?.meta || { total: 0, limit: 10, offset: 0 }
   const totalPages = Math.ceil(meta.total / limit)
+  const rangeLabel = formatRangeLabel(stats?.rangeStart, stats?.rangeEnd)
 
   const toggleClient = (clientId: string) => {
     const newExpanded = new Set(expandedClients)
@@ -343,6 +396,129 @@ export default function Clients() {
         </button>
       </div>
 
+      {/* Date range - governs the analytics cards below */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'hsl(215,15%,55%)', whiteSpace: 'nowrap' }}>
+          Date Range
+        </span>
+        <select
+          value={period}
+          onChange={(e) => handlePeriodChange(e.target.value as AnalyticsPeriod)}
+          style={{
+            background: 'hsl(224,14%,10%)',
+            border: `1px solid hsl(224,14%,16%)`,
+            borderRadius: 8,
+            padding: '8px 12px',
+            fontSize: 13,
+            color: 'hsl(210,20%,85%)',
+            fontFamily: 'Manrope, sans-serif',
+            outline: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          {PERIOD_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
+        {period === 'custom' && (
+          <>
+            <input
+              type="date"
+              value={customFrom}
+              max={customTo || undefined}
+              onChange={(e) => setCustomFrom(e.target.value)}
+              style={{
+                background: 'hsl(224,14%,10%)',
+                border: `1px solid ${isCustomRangeValid ? 'hsl(224,14%,16%)' : 'rgba(231,76,60,0.5)'}`,
+                borderRadius: 8,
+                padding: '7px 10px',
+                fontSize: 13,
+                color: 'hsl(210,20%,85%)',
+                fontFamily: 'Manrope, sans-serif',
+                outline: 'none',
+                colorScheme: 'dark',
+              }}
+            />
+            <span style={{ fontSize: 12, color: 'hsl(215,15%,50%)' }}>to</span>
+            <input
+              type="date"
+              value={customTo}
+              min={customFrom || undefined}
+              onChange={(e) => setCustomTo(e.target.value)}
+              style={{
+                background: 'hsl(224,14%,10%)',
+                border: `1px solid ${isCustomRangeValid ? 'hsl(224,14%,16%)' : 'rgba(231,76,60,0.5)'}`,
+                borderRadius: 8,
+                padding: '7px 10px',
+                fontSize: 13,
+                color: 'hsl(210,20%,85%)',
+                fontFamily: 'Manrope, sans-serif',
+                outline: 'none',
+                colorScheme: 'dark',
+              }}
+            />
+          </>
+        )}
+
+        {period === 'custom' && !isCustomRangeValid && (
+          <span style={{ fontSize: 12, color: 'hsl(0,62%,60%)' }}>Select a valid start and end date</span>
+        )}
+
+        {isCustomRangeValid && rangeLabel && (
+          <span style={{ fontSize: 12, color: 'hsl(215,15%,45%)' }}>{rangeLabel}</span>
+        )}
+      </div>
+
+      {/* Analytics cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
+        {[
+          { label: 'Active Clients', value: stats?.activeClients?.toString(), kpi: undefined },
+          { label: 'New Clients', value: stats?.newClients.value, kpi: stats?.newClients },
+          { label: 'Total Sent', value: stats?.totalSent.value, kpi: stats?.totalSent },
+          { label: 'Avg Delivery Rate', value: stats?.avgDeliveryRate.value, kpi: stats?.avgDeliveryRate },
+        ].map((s) => (
+          <div
+            key={s.label}
+            style={{
+              background: 'hsl(224,18%,8%)',
+              border: `1px solid hsl(224,14%,14%)`,
+              borderRadius: 12,
+              padding: '18px 20px',
+            }}
+          >
+            {statsLoading || !stats ? (
+              <>
+                <SkeletonLine width={70} height={24} marginBottom={6} />
+                <SkeletonLine width={100} height={13} />
+              </>
+            ) : (
+              <>
+                <p
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'hsl(210,20%,92%)',
+                    letterSpacing: '-0.02em',
+                    marginBottom: 4,
+                  }}
+                >
+                  {s.value}
+                </p>
+                <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: s.kpi ? 6 : 0 }}>{s.label}</p>
+                {s.kpi && (
+                  <p style={{ fontSize: 11, color: s.kpi.deltaUp ? C.success : C.destructive, fontWeight: 600 }}>
+                    {s.kpi.delta}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
       <div className="responsive-filters" style={{ marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <div style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}>
@@ -384,7 +560,7 @@ export default function Clients() {
             style={{
               display: 'grid',
               gridTemplateColumns: '50px 1.5fr 1fr 0.8fr 0.8fr 0.8fr 80px',
-              gap: 16,
+              gap: 32,
               padding: '12px 20px',
               borderBottom: '1px solid hsl(224,14%,12%)',
               background: 'hsl(224,14%,10%)',

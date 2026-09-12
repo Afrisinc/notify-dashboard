@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import Icon from '../../components/Icon'
 import { C } from '../../design'
 import { useDashboard } from '../../hooks'
+import { SkeletonLine, ChartSkeleton, SkeletonStatCard, skeletonStyles } from '../../components/SkeletonLoader'
 
 function StatCard({
   icon,
@@ -149,25 +150,167 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   )
 }
 
-function LoadingSkeleton() {
+function SkeletonCard({ children, style }: { children: any; style?: any }) {
   return (
-    <div style={{ opacity: 0.5 }}>
-      <div className="responsive-grid-4" style={{ marginBottom: 24 }}>
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            style={{
-              background: 'hsl(224,18%,8%)',
-              border: `1px solid hsl(224,14%,14%)`,
-              borderRadius: 12,
-              padding: '22px 24px',
-              height: 140,
-              animation: 'pulse 2s infinite',
-            }}
-          />
-        ))}
+    <div
+      className="card-padding"
+      style={{
+        background: 'hsl(224,18%,8%)',
+        border: '1px solid hsl(224,14%,14%)',
+        borderRadius: 12,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function SkeletonChannelRow() {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <SkeletonLine width={60} height={13} />
+        <SkeletonLine width={35} height={13} />
+      </div>
+      <SkeletonLine width="100%" height={6} borderRadius={3} />
+    </div>
+  )
+}
+
+function SkeletonRecentSendRow({ last }: { last?: boolean }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '11px 0',
+        borderBottom: last ? 'none' : `1px solid hsl(224,14%,12%)`,
+      }}
+    >
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: 'hsl(224,14%,16%)', flexShrink: 0 }} />
+      <div style={{ flex: 1, minWidth: 100 }}>
+        <SkeletonLine width={110} height={13} marginBottom={6} />
+        <SkeletonLine width={70} height={12} />
+      </div>
+      <div>
+        <SkeletonLine width={40} height={13} marginBottom={6} />
+        <SkeletonLine width={60} height={16} borderRadius={9999} />
       </div>
     </div>
+  )
+}
+
+function SkeletonHealthRow() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '8px 12px',
+        background: 'hsl(224,14%,10%)',
+        borderRadius: 7,
+        border: `1px solid hsl(224,14%,14%)`,
+      }}
+    >
+      <SkeletonLine width={90} height={13} />
+      <SkeletonLine width={70} height={12} />
+    </div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <>
+      <div className="responsive-grid-4" style={{ marginBottom: 24 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <SkeletonStatCard key={i} />
+        ))}
+      </div>
+
+      <div className="responsive-grid-2-1" style={{ marginBottom: 24 }}>
+        <SkeletonCard>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: 20,
+              flexWrap: 'wrap',
+              gap: 12,
+            }}
+          >
+            <div>
+              <SkeletonLine width={160} height={15} marginBottom={6} />
+              <SkeletonLine width={200} height={12} />
+            </div>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <SkeletonLine width={50} height={12} />
+              <SkeletonLine width={40} height={12} />
+              <SkeletonLine width={45} height={12} />
+            </div>
+          </div>
+          <ChartSkeleton height={200} />
+        </SkeletonCard>
+
+        <SkeletonCard>
+          <SkeletonLine width={100} height={15} marginBottom={6} />
+          <SkeletonLine width={160} height={12} marginBottom={20} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonChannelRow key={i} />
+            ))}
+          </div>
+          <div
+            style={{
+              padding: '14px 16px',
+              background: 'hsl(224,14%,10%)',
+              borderRadius: 8,
+              border: `1px solid hsl(224,14%,14%)`,
+            }}
+          >
+            <SkeletonLine width={80} height={12} marginBottom={8} />
+            <SkeletonLine width={140} height={16} />
+          </div>
+        </SkeletonCard>
+      </div>
+
+      <div className="responsive-grid-2">
+        <SkeletonCard>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <SkeletonLine width={110} height={15} />
+            <SkeletonLine width={50} height={12} />
+          </div>
+          <div>
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonRecentSendRow key={i} last={i === 4} />
+            ))}
+          </div>
+        </SkeletonCard>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SkeletonCard>
+            <SkeletonLine width={110} height={15} marginBottom={14} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+              {[1, 2, 3, 4].map((i) => (
+                <SkeletonLine key={i} width="100%" height={38} borderRadius={8} />
+              ))}
+            </div>
+          </SkeletonCard>
+
+          <SkeletonCard style={{ flex: 1 }}>
+            <SkeletonLine width={110} height={15} marginBottom={14} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <SkeletonHealthRow key={i} />
+              ))}
+            </div>
+          </SkeletonCard>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -591,12 +734,7 @@ export default function Dashboard() {
         </>
       ) : null}
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.3; }
-        }
-      `}</style>
+      <style>{skeletonStyles}</style>
     </div>
   )
 }

@@ -1,101 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
+import { useTemplates, useTemplateStats } from '../../hooks'
+import { SkeletonLine, SkeletonTemplateCard, skeletonStyles } from '../../components/SkeletonLoader'
+import type { TemplateChannel, TemplateStatus } from '../../types'
 
-const TEMPLATES = [
-  {
-    id: 1,
-    name: 'welcome-v2',
-    channel: 'email',
-    client: 'Global',
-    uses: 8420,
-    status: 'active',
-    updated: '2 days ago',
-    tags: ['onboarding'],
-  },
-  {
-    id: 2,
-    name: 'otp-code',
-    channel: 'sms',
-    client: 'Global',
-    uses: 31200,
-    status: 'active',
-    updated: '5 days ago',
-    tags: ['auth'],
-  },
-  {
-    id: 3,
-    name: 'invoice-paid',
-    channel: 'email',
-    client: 'Acme Corp',
-    uses: 1840,
-    status: 'active',
-    updated: '1 week ago',
-    tags: ['billing'],
-  },
-  {
-    id: 4,
-    name: 'password-reset',
-    channel: 'email',
-    client: 'Global',
-    uses: 5620,
-    status: 'active',
-    updated: '3 days ago',
-    tags: ['auth'],
-  },
-  {
-    id: 5,
-    name: 'activity-digest',
-    channel: 'push',
-    client: 'Stackr',
-    uses: 22100,
-    status: 'active',
-    updated: 'Today',
-    tags: ['digest'],
-  },
-  {
-    id: 6,
-    name: 'usage-alert',
-    channel: 'email',
-    client: 'Cloudnova',
-    uses: 340,
-    status: 'draft',
-    updated: 'Yesterday',
-    tags: ['alerts'],
-  },
-  {
-    id: 7,
-    name: 'trial-ending',
-    channel: 'email',
-    client: 'Global',
-    uses: 920,
-    status: 'active',
-    updated: '4 days ago',
-    tags: ['billing'],
-  },
-  {
-    id: 8,
-    name: 'new-message',
-    channel: 'push',
-    client: 'PingApp',
-    uses: 18400,
-    status: 'active',
-    updated: 'Today',
-    tags: ['engagement'],
-  },
-  {
-    id: 9,
-    name: 'weekly-report',
-    channel: 'email',
-    client: 'Flowbase',
-    uses: 620,
-    status: 'draft',
-    updated: 'Yesterday',
-    tags: ['digest'],
-  },
-]
-
-const CHANNEL_COLORS = {
+const CHANNEL_COLORS: Record<string, { bg: string; border: string; color: string; icon: string }> = {
   email: {
     bg: 'rgba(2,147,228,0.1)',
     border: 'rgba(2,147,228,0.2)',
@@ -114,20 +24,87 @@ const CHANNEL_COLORS = {
     color: 'hsl(260,60%,65%)',
     icon: 'bell',
   },
+  'in-app': {
+    bg: 'rgba(139,92,246,0.1)',
+    border: 'rgba(139,92,246,0.2)',
+    color: 'hsl(260,60%,65%)',
+    icon: 'layers',
+  },
+  whatsapp: {
+    bg: 'rgba(39,174,96,0.1)',
+    border: 'rgba(39,174,96,0.2)',
+    color: 'hsl(152,60%,50%)',
+    icon: 'sms',
+  },
 }
+
+const CHANNEL_TABS: { value: TemplateChannel | 'all'; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'email', label: 'EMAIL' },
+  { value: 'sms', label: 'SMS' },
+  { value: 'push', label: 'PUSH' },
+]
 
 export default function Templates() {
   const [search, setSearch] = useState('')
-  const [channelF, setChannelF] = useState('all')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [channel, setChannel] = useState<TemplateChannel | 'all'>('all')
+  const [page, setPage] = useState(1)
 
-  const filtered = TEMPLATES.filter(
-    (t) =>
-      (channelF === 'all' || t.channel === channelF) &&
-      (t.name.includes(search.toLowerCase()) || t.client.toLowerCase().includes(search.toLowerCase()))
-  )
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    setPage(1)
+  }, [channel])
+
+  const limit = 12
+  const offset = (page - 1) * limit
+
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+  } = useTemplates({
+    limit,
+    offset,
+    search: debouncedSearch || undefined,
+    channel: channel === 'all' ? undefined : channel,
+  })
+
+  const { data: stats, isLoading: statsLoading } = useTemplateStats()
+
+  const templates = response?.data || []
+  const meta = response?.meta || { total: 0, limit, offset: 0 }
+  const totalPages = Math.max(1, Math.ceil(meta.total / limit))
+
+  const statCards: { label: string; value: number | undefined; icon: string }[] = [
+    { label: 'Total Templates', value: stats?.total, icon: 'layers' },
+    { label: 'Active', value: stats?.active, icon: 'check' },
+    { label: 'Drafts', value: stats?.drafts, icon: 'edit' },
+  ]
+
+  if (isError) {
+    return (
+      <div style={{ padding: '48px', textAlign: 'center' }}>
+        <p style={{ color: 'hsl(0,62%,60%)', fontSize: 14 }}>
+          Error loading templates: {error instanceof Error ? error.message : 'Unknown error'}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div>
+      <style>{skeletonStyles}</style>
+
       <div
         style={{
           display: 'flex',
@@ -173,19 +150,7 @@ export default function Templates() {
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24 }}>
-        {[
-          { label: 'Total Templates', value: TEMPLATES.length, icon: 'layers' },
-          {
-            label: 'Active',
-            value: TEMPLATES.filter((t) => t.status === 'active').length,
-            icon: 'check',
-          },
-          {
-            label: 'Drafts',
-            value: TEMPLATES.filter((t) => t.status === 'draft').length,
-            icon: 'edit',
-          },
-        ].map((s) => (
+        {statCards.map((s) => (
           <div
             key={s.label}
             style={{
@@ -208,21 +173,26 @@ export default function Templates() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
               <Icon name={s.icon} size={16} color="#36A9EA" />
             </div>
             <div>
-              <p
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: 'hsl(210,20%,92%)',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {s.value}
-              </p>
+              {statsLoading ? (
+                <SkeletonLine width={40} height={22} marginBottom={4} />
+              ) : (
+                <p
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'hsl(210,20%,92%)',
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {s.value ?? 0}
+                </p>
+              )}
               <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>{s.label}</p>
             </div>
           </div>
@@ -230,8 +200,8 @@ export default function Templates() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <div style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}>
             <Icon name="search" size={14} color="hsl(215,15%,50%)" />
           </div>
@@ -252,135 +222,211 @@ export default function Templates() {
             }}
           />
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {['all', 'email', 'sms', 'push'].map((ch) => (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {CHANNEL_TABS.map((tab) => (
             <button
-              key={ch}
-              onClick={() => setChannelF(ch)}
+              key={tab.value}
+              onClick={() => setChannel(tab.value)}
               style={{
                 padding: '8px 14px',
                 borderRadius: 8,
                 fontSize: 13,
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: channelF === ch ? 'rgba(2,147,228,0.15)' : 'hsl(224,14%,10%)',
-                border: `1px solid ${channelF === ch ? 'rgba(2,147,228,0.3)' : 'hsl(224,14%,16%)'}`,
-                color: channelF === ch ? '#36A9EA' : 'hsl(215,15%,55%)',
+                background: channel === tab.value ? 'rgba(2,147,228,0.15)' : 'hsl(224,14%,10%)',
+                border: `1px solid ${channel === tab.value ? 'rgba(2,147,228,0.3)' : 'hsl(224,14%,16%)'}`,
+                color: channel === tab.value ? '#36A9EA' : 'hsl(215,15%,55%)',
                 transition: 'all 0.15s',
-                textTransform: ch === 'all' ? 'none' : 'capitalize',
               }}
             >
-              {ch === 'all' ? 'All' : ch.toUpperCase()}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Template grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-        {filtered.map((t) => {
-          const ch = CHANNEL_COLORS[t.channel]
-          return (
-            <div
-              key={t.id}
-              style={{
-                background: 'hsl(224,18%,8%)',
-                border: `1px solid hsl(224,14%,14%)`,
-                borderRadius: 12,
-                padding: '20px',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'hsl(224,18%,10%)'
-                e.currentTarget.style.borderColor = 'rgba(2,147,228,0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'hsl(224,18%,8%)'
-                e.currentTarget.style.borderColor = 'hsl(224,14%,14%)'
-              }}
-            >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3,1fr)',
+          gap: 16,
+          opacity: isFetching && !isLoading ? 0.7 : 1,
+          transition: 'opacity 0.15s',
+        }}
+      >
+        {isLoading && Array.from({ length: limit }).map((_, i) => <SkeletonTemplateCard key={i} />)}
+
+        {!isLoading &&
+          templates.map((t) => {
+            const ch = CHANNEL_COLORS[t.channel] || CHANNEL_COLORS.email
+            return (
               <div
+                key={t.id}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: 14,
+                  background: 'hsl(224,18%,8%)',
+                  border: `1px solid hsl(224,14%,14%)`,
+                  borderRadius: 12,
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'hsl(224,18%,10%)'
+                  e.currentTarget.style.borderColor = 'rgba(2,147,228,0.2)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'hsl(224,18%,8%)'
+                  e.currentTarget.style.borderColor = 'hsl(224,14%,14%)'
                 }}
               >
                 <div
                   style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 9,
-                    background: ch.bg,
-                    border: `1px solid ${ch.border}`,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: 14,
                   }}
                 >
-                  <Icon name={ch.icon} size={17} color={ch.color} />
-                </div>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: '3px 8px',
-                    borderRadius: 9999,
-                    background: t.status === 'active' ? 'rgba(39,174,96,0.12)' : 'rgba(100,116,139,0.12)',
-                    border: `1px solid ${t.status === 'active' ? 'rgba(39,174,96,0.2)' : 'rgba(100,116,139,0.2)'}`,
-                    color: t.status === 'active' ? 'hsl(152,60%,50%)' : 'hsl(215,15%,55%)',
-                  }}
-                >
-                  {t.status}
-                </span>
-              </div>
-              <p
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'hsl(210,20%,90%)',
-                  marginBottom: 4,
-                  fontFamily: 'JetBrains Mono',
-                }}
-              >
-                {t.name}
-              </p>
-              <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 14 }}>{t.client}</p>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-                {t.tags.map((tag) => (
-                  <span
-                    key={tag}
+                  <div
                     style={{
-                      fontSize: 11,
-                      padding: '2px 8px',
-                      borderRadius: 9999,
-                      background: 'hsl(224,14%,12%)',
-                      border: `1px solid hsl(224,14%,18%)`,
-                      color: 'hsl(215,15%,60%)',
+                      width: 38,
+                      height: 38,
+                      borderRadius: 9,
+                      background: ch.bg,
+                      border: `1px solid ${ch.border}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    {tag}
+                    <Icon name={ch.icon} size={17} color={ch.color} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: '3px 8px',
+                      borderRadius: 9999,
+                      background: t.status === 'active' ? 'rgba(39,174,96,0.12)' : 'rgba(100,116,139,0.12)',
+                      border: `1px solid ${t.status === 'active' ? 'rgba(39,174,96,0.2)' : 'rgba(100,116,139,0.2)'}`,
+                      color: t.status === 'active' ? 'hsl(152,60%,50%)' : 'hsl(215,15%,55%)',
+                    }}
+                  >
+                    {t.status}
                   </span>
-                ))}
+                </div>
+                <p
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: 'hsl(210,20%,90%)',
+                    marginBottom: 4,
+                    fontFamily: 'JetBrains Mono',
+                  }}
+                >
+                  {t.name}
+                </p>
+                <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 14 }}>{t.client}</p>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, minHeight: 22 }}>
+                  {t.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontSize: 11,
+                        padding: '2px 8px',
+                        borderRadius: 9999,
+                        background: 'hsl(224,14%,12%)',
+                        border: `1px solid hsl(224,14%,18%)`,
+                        color: 'hsl(215,15%,60%)',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: 12,
+                    borderTop: `1px solid hsl(224,14%,13%)`,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'hsl(215,15%,50%)' }}>{t.uses.toLocaleString()} uses</span>
+                  <span style={{ fontSize: 12, color: 'hsl(215,15%,45%)' }}>Updated {t.updated}</span>
+                </div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingTop: 12,
-                  borderTop: `1px solid hsl(224,14%,13%)`,
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'hsl(215,15%,50%)' }}>{t.uses.toLocaleString()} uses</span>
-                <span style={{ fontSize: 12, color: 'hsl(215,15%,45%)' }}>Updated {t.updated}</span>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
+
+      {!isLoading && templates.length === 0 && (
+        <div
+          style={{
+            background: 'hsl(224,18%,8%)',
+            border: `1px solid hsl(224,14%,14%)`,
+            borderRadius: 12,
+            padding: 48,
+            textAlign: 'center',
+          }}
+        >
+          <Icon name="search" size={32} color="hsl(215,15%,35%)" />
+          <p style={{ color: 'hsl(215,15%,50%)', marginTop: 12, fontSize: 14 }}>
+            {search ? 'No templates match your search' : 'No templates found'}
+          </p>
+        </div>
+      )}
+
+      {!isLoading && templates.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 20,
+            flexWrap: 'wrap',
+            gap: 12,
+          }}
+        >
+          <p style={{ fontSize: 13, color: 'hsl(215,15%,50%)' }}>
+            Showing {Math.min(meta.offset + templates.length, meta.total)} of {meta.total} templates
+          </p>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              const pageNum = Math.max(1, page - 2) + i
+              return pageNum <= totalPages ? pageNum : null
+            })
+              .filter((p): p is number => p !== null)
+              .map((p) => (
+                <button
+                  key={p}
+                  disabled={isFetching}
+                  onClick={() => {
+                    setPage(p)
+                    window.scrollTo(0, 0)
+                  }}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 7,
+                    background: p === page ? 'rgba(2,147,228,0.15)' : 'hsl(224,14%,10%)',
+                    border: `1px solid ${p === page ? 'rgba(2,147,228,0.3)' : 'hsl(224,14%,16%)'}`,
+                    color: p === page ? '#36A9EA' : 'hsl(215,15%,55%)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: isFetching ? 'not-allowed' : 'pointer',
+                    opacity: isFetching ? 0.5 : 1,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

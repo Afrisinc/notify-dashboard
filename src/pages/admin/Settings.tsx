@@ -1,6 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Icon from '../../components/Icon'
 import { C } from '../../design'
+import { getUser, isSuperAdmin } from '../../lib/auth'
+import {
+  usePlatformEmailSettings,
+  useUpdatePlatformEmailSettings,
+  useMailAliases,
+  useAddMailAlias,
+  useUpdateMailAlias,
+  useDeleteMailAlias,
+} from '../../hooks'
+import type { MailAlias } from '../../types'
 
 function Section({ title, subtitle, children }) {
   return (
@@ -111,6 +121,402 @@ function Input({
   )
 }
 
+function PlatformEmailSettingsTab() {
+  const { data, isLoading } = usePlatformEmailSettings()
+  const updateSettings = useUpdatePlatformEmailSettings()
+
+  const [fromName, setFromName] = useState('')
+  const [fromEmail, setFromEmail] = useState('')
+  const [supportEmail, setSupportEmail] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (data) {
+      setFromName(data.fromName)
+      setFromEmail(data.fromEmail)
+      setSupportEmail(data.supportEmail || '')
+    }
+  }, [data])
+
+  const handleSave = () => {
+    setSaved(false)
+    updateSettings.mutate(
+      { fromName, fromEmail, supportEmail: supportEmail || undefined },
+      { onSuccess: () => setSaved(true) }
+    )
+  }
+
+  return (
+    <>
+      <Section
+        title="Platform default sender"
+        subtitle="Used for any app that hasn't configured its own custom sender, and for system emails (password resets, alerts, etc.)"
+      >
+        {isLoading ? (
+          <p style={{ fontSize: 13, color: 'hsl(215,15%,55%)' }}>Loading…</p>
+        ) : (
+          <>
+            <Field label="From name" hint="Displayed as the sender name on outgoing emails">
+              <Input value={fromName} onChange={setFromName} placeholder="Afrisinc" />
+            </Field>
+            <Field label="From email" hint="Used as the sender address when an app has no custom email set up">
+              <Input value={fromEmail} onChange={setFromEmail} placeholder="noreply@afrisinc.com" />
+            </Field>
+            <Field label="Support email" hint="Shown to recipients as a contact address in system emails">
+              <Input value={supportEmail} onChange={setSupportEmail} placeholder="support@afrisinc.com" />
+            </Field>
+          </>
+        )}
+      </Section>
+
+      {updateSettings.isError && (
+        <p style={{ fontSize: 13, color: 'hsl(0,62%,60%)', marginBottom: 12 }}>
+          {updateSettings.error instanceof Error ? updateSettings.error.message : 'Failed to save settings'}
+        </p>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+        {saved && <span style={{ fontSize: 13, color: 'hsl(152,60%,50%)' }}>Saved</span>}
+        <button
+          onClick={handleSave}
+          disabled={!fromName.trim() || !fromEmail.trim() || updateSettings.isPending}
+          style={{
+            padding: '10px 24px',
+            borderRadius: 8,
+            background: updateSettings.isPending ? 'hsl(224,14%,18%)' : C.primary,
+            border: 'none',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: updateSettings.isPending ? 'not-allowed' : 'pointer',
+            boxShadow: updateSettings.isPending ? 'none' : '0 2px 10px rgba(2,147,228,0.3)',
+          }}
+        >
+          {updateSettings.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+    </>
+  )
+}
+
+function SmallButton({
+  children,
+  onClick,
+  disabled,
+  variant = 'ghost',
+}: {
+  children: React.ReactNode
+  onClick?: () => void
+  disabled?: boolean
+  variant?: 'primary' | 'ghost' | 'danger'
+}) {
+  const styles = {
+    primary: { background: C.primary, border: 'none', color: '#fff' },
+    ghost: { background: 'hsl(224,14%,14%)', border: `1px solid hsl(224,14%,20%)`, color: 'hsl(215,15%,70%)' },
+    danger: { background: 'rgba(231,76,60,0.1)', border: `1px solid rgba(231,76,60,0.25)`, color: 'hsl(0,62%,60%)' },
+  }[disabled ? 'ghost' : variant]
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '7px 13px',
+        borderRadius: 7,
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        whiteSpace: 'nowrap',
+        ...styles,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function AliasRow({ alias }: { alias: MailAlias }) {
+  const [editing, setEditing] = useState(false)
+  const [destinations, setDestinations] = useState(alias.destinations.join(', '))
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [rowError, setRowError] = useState<string | null>(null)
+
+  const updateAlias = useUpdateMailAlias()
+  const deleteAlias = useDeleteMailAlias()
+
+  useEffect(() => {
+    if (confirmingDelete) {
+      const t = setTimeout(() => setConfirmingDelete(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [confirmingDelete])
+
+  const startEdit = () => {
+    setRowError(null)
+    setDestinations(alias.destinations.join(', '))
+    setEditing(true)
+  }
+
+  const save = () => {
+    const parsed = destinations
+      .split(',')
+      .map((d) => d.trim())
+      .filter(Boolean)
+
+    if (parsed.length === 0) {
+      setRowError('At least one destination is required')
+      return
+    }
+
+    setRowError(null)
+    updateAlias.mutate(
+      { localPart: alias.localPart, payload: { destinations: parsed } },
+      {
+        onSuccess: () => setEditing(false),
+        onError: (err) => setRowError(err instanceof Error ? err.message : 'Failed to update alias'),
+      }
+    )
+  }
+
+  const remove = () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true)
+      return
+    }
+    setRowError(null)
+    deleteAlias.mutate(alias.localPart, {
+      onError: (err) => {
+        setConfirmingDelete(false)
+        setRowError(err instanceof Error ? err.message : 'Failed to delete alias')
+      },
+    })
+  }
+
+  return (
+    <div
+      style={{
+        padding: '14px 16px',
+        background: 'hsl(224,14%,10%)',
+        borderRadius: 9,
+        border: `1px solid hsl(224,14%,15%)`,
+        marginBottom: 8,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: 'rgba(2,147,228,0.1)',
+            border: '1px solid rgba(2,147,228,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Icon name="mail" size={14} color="#36A9EA" />
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              fontFamily: 'JetBrains Mono, monospace',
+              color: 'hsl(210,20%,90%)',
+              marginBottom: 3,
+            }}
+          >
+            {alias.address}
+          </p>
+          {editing ? (
+            <Input
+              value={destinations}
+              onChange={setDestinations}
+              placeholder="team@gmail.com, backup@gmail.com"
+              mono
+            />
+          ) : (
+            <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)' }}>
+              forwards to{' '}
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'hsl(215,15%,65%)' }}>
+                {alias.destinations.join(', ')}
+              </span>
+            </p>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          {editing ? (
+            <>
+              <SmallButton variant="primary" onClick={save} disabled={updateAlias.isPending}>
+                {updateAlias.isPending ? 'Saving…' : 'Save'}
+              </SmallButton>
+              <SmallButton onClick={() => setEditing(false)} disabled={updateAlias.isPending}>
+                Cancel
+              </SmallButton>
+            </>
+          ) : (
+            <>
+              <SmallButton onClick={startEdit}>
+                <Icon name="edit" size={12} color="hsl(215,15%,70%)" />
+                Edit
+              </SmallButton>
+              <SmallButton variant="danger" onClick={remove} disabled={deleteAlias.isPending}>
+                <Icon name="trash" size={12} color="hsl(0,62%,60%)" />
+                {confirmingDelete ? 'Confirm delete?' : deleteAlias.isPending ? 'Deleting…' : 'Delete'}
+              </SmallButton>
+            </>
+          )}
+        </div>
+      </div>
+
+      {rowError && <p style={{ fontSize: 12, color: 'hsl(0,62%,65%)', marginTop: 10 }}>{rowError}</p>}
+    </div>
+  )
+}
+
+function AddAliasForm({ onDone }: { onDone: () => void }) {
+  const [localPart, setLocalPart] = useState('')
+  const [destinations, setDestinations] = useState('')
+  const addAlias = useAddMailAlias()
+
+  const submit = () => {
+    const parsedDestinations = destinations
+      .split(',')
+      .map((d) => d.trim())
+      .filter(Boolean)
+
+    if (!localPart.trim() || parsedDestinations.length === 0) return
+
+    addAlias.mutate({ localPart: localPart.trim(), destinations: parsedDestinations }, { onSuccess: onDone })
+  }
+
+  return (
+    <div
+      style={{ background: 'hsl(224,14%,10%)', border: '1px solid hsl(224,14%,15%)', borderRadius: 10, padding: 18 }}
+    >
+      <p style={{ fontSize: 13, fontWeight: 600, color: 'hsl(210,20%,88%)', marginBottom: 12 }}>
+        Add a forwarding alias
+      </p>
+
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 6 }}>Address</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Input value={localPart} onChange={setLocalPart} placeholder="sales" mono />
+            <span
+              style={{
+                fontSize: 13,
+                fontFamily: 'JetBrains Mono, monospace',
+                color: 'hsl(215,15%,50%)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              @afrisinc.com
+            </span>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 12, color: 'hsl(215,15%,55%)', marginBottom: 6 }}>Forwards to</p>
+          <Input value={destinations} onChange={setDestinations} placeholder="team@gmail.com, backup@gmail.com" mono />
+        </div>
+      </div>
+
+      {addAlias.isError && (
+        <div
+          style={{
+            padding: '10px 12px',
+            background: 'rgba(231,76,60,0.08)',
+            border: '1px solid rgba(231,76,60,0.2)',
+            borderRadius: 8,
+            marginBottom: 14,
+          }}
+        >
+          <p style={{ fontSize: 12, color: 'hsl(0,62%,65%)' }}>
+            {addAlias.error instanceof Error ? addAlias.error.message : 'Failed to add alias'}
+          </p>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <SmallButton
+          variant="primary"
+          onClick={submit}
+          disabled={!localPart.trim() || !destinations.trim() || addAlias.isPending}
+        >
+          {addAlias.isPending ? 'Adding…' : 'Add alias'}
+        </SmallButton>
+        <SmallButton onClick={onDone}>Cancel</SmallButton>
+      </div>
+    </div>
+  )
+}
+
+function MailAliasesTab() {
+  const { data: aliases, isLoading, isError, error } = useMailAliases()
+  const [adding, setAdding] = useState(false)
+
+  return (
+    <Section
+      title="Mail forwarding aliases"
+      subtitle="Custom @afrisinc.com addresses that forward to real inboxes (support, sales, etc.). Changes apply directly on the mail server."
+    >
+      {isLoading && <p style={{ fontSize: 13, color: 'hsl(215,15%,55%)' }}>Loading…</p>}
+
+      {isError && (
+        <p style={{ fontSize: 13, color: 'hsl(0,62%,60%)', marginBottom: 16 }}>
+          {error instanceof Error ? error.message : 'Failed to load mail aliases'}
+        </p>
+      )}
+
+      {!isLoading && !isError && (
+        <>
+          {(aliases || []).length === 0 && !adding && (
+            <p style={{ fontSize: 13, color: 'hsl(215,15%,50%)', marginBottom: 16 }}>No aliases yet — add one below.</p>
+          )}
+
+          <div style={{ marginBottom: 16 }}>
+            {(aliases || []).map((alias) => (
+              <AliasRow key={alias.address} alias={alias} />
+            ))}
+          </div>
+
+          {adding ? (
+            <AddAliasForm onDone={() => setAdding(false)} />
+          ) : (
+            <button
+              onClick={() => setAdding(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 18px',
+                borderRadius: 8,
+                background: 'rgba(2,147,228,0.1)',
+                border: `1px solid rgba(2,147,228,0.2)`,
+                color: '#36A9EA',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Icon name="plus" size={15} color="#36A9EA" />
+              Add alias
+            </button>
+          )}
+        </>
+      )}
+    </Section>
+  )
+}
+
 const KEYS = [
   {
     name: 'Production',
@@ -134,11 +540,14 @@ export default function Settings() {
     ipAllowlist: false,
   })
   const [activeTab, setActiveTab] = useState('general')
+  const canManageMailAliases = isSuperAdmin(getUser())
 
   const toggle = (key) => setToggles((t) => ({ ...t, [key]: !t[key] }))
 
   const tabs = [
     { id: 'general', label: 'General', icon: 'settings' },
+    { id: 'email', label: 'Email', icon: 'mail' },
+    ...(canManageMailAliases ? [{ id: 'mail-aliases', label: 'Mail Aliases', icon: 'tag' }] : []),
     { id: 'api', label: 'API Keys', icon: 'key' },
     { id: 'webhooks', label: 'Webhooks', icon: 'webhook' },
     { id: 'notifications', label: 'Alerts', icon: 'bell' },
@@ -209,9 +618,6 @@ export default function Settings() {
             <Field label="Admin email" hint="Receives system alerts and billing notifications">
               <Input value={email} onChange={setEmail} placeholder="admin@example.com" />
             </Field>
-            <Field label="Default sender name" hint="Used as the From name for email notifications">
-              <Input value="Notify Platform" onChange={() => {}} placeholder="Sender name" />
-            </Field>
           </Section>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             <button
@@ -246,6 +652,10 @@ export default function Settings() {
           </div>
         </>
       )}
+
+      {activeTab === 'email' && <PlatformEmailSettingsTab />}
+
+      {activeTab === 'mail-aliases' && canManageMailAliases && <MailAliasesTab />}
 
       {activeTab === 'api' && (
         <Section title="API Keys" subtitle="Manage authentication keys for the Notify API">

@@ -9,6 +9,26 @@ export interface NotifyAdminUser {
   email: string
   firstName?: string
   lastName?: string
+  role?: string
+}
+
+/** Roles allowed into the Notify admin console - mirrors the gateway's and
+ *  notify-service's own platform-admin restriction on these endpoints.
+ *  These are platform-staff roles (see platform-frontend's `ControlRole` /
+ *  `PLATFORM_WIDE_ROLES`), not per-account roles like the account-owner
+ *  "OWNER" - this console is for Afrisinc staff managing notify service-wide,
+ *  not for a customer administering their own notify account. */
+export const PLATFORM_ADMIN_ROLES = ['SUPER_ADMIN', 'OPS_MANAGER']
+
+export function isPlatformAdmin(user: NotifyAdminUser | null): boolean {
+  return Boolean(user?.role && PLATFORM_ADMIN_ROLES.includes(user.role.toUpperCase()))
+}
+
+/** Stricter than `isPlatformAdmin` - excludes OPS_MANAGER. Use for features
+ *  that reach shared infrastructure directly (e.g. mail server aliases),
+ *  mirroring the notify-service's own `requireSuperAdmin` on those routes. */
+export function isSuperAdmin(user: NotifyAdminUser | null): boolean {
+  return user?.role?.toUpperCase() === 'SUPER_ADMIN'
 }
 
 export function storeSession(token: string, user: NotifyAdminUser): void {
@@ -41,7 +61,8 @@ export function redirectToLogin(): void {
 
 export function logout(): void {
   clearSession()
-  redirectToLogin()
+  // Redirect disabled - reload page to show auth required screen
+  globalThis.location.reload()
 }
 
 export function isAuthenticated(): boolean {
@@ -69,6 +90,7 @@ export function userFromPayload(payload: Record<string, unknown>): NotifyAdminUs
     email,
     firstName: payload.firstName ? String(payload.firstName) : undefined,
     lastName: payload.lastName ? String(payload.lastName) : undefined,
+    role: payload.role ? String(payload.role) : undefined,
   }
 }
 
